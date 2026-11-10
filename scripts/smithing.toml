@@ -1,0 +1,151 @@
+# Smithing conversion normalization config (design-v2 §4.4, §7.4).
+# Run:  python3 scripts/normalize_conversion.py scripts/smithing.toml
+#
+# ALL NUMBERS ARE PLACEHOLDERS except the structure decided in the design:
+#   - reference path = jewelry + 3 categories (equal) + steel + orcish + glass, each 0 -> 75;
+#   - jewelry 0 -> 75 gives main Smithing 15 -> 35;
+#   - the whole path gives main Smithing 15 -> 100;
+#   - one k for all material sub-skills, another k for all category sub-skills.
+
+# Main skill XP curve. Vanilla-style; verify Lorerim's Smithing AVIF values (R-1/R-2).
+[main]
+improve_mult   = 0.25
+improve_offset = 300
+exponent       = 1.95
+start_level    = 15
+target_level   = 100
+
+# Default sub-skill XP curve (0..200 scale). Per sub-skill override: curve = { improve_mult = … }
+[sub_curve]
+improve_mult   = 0.25
+improve_offset = 300
+exponent       = 1.95
+
+# Group budgets: absolute main-level range, or a share of what is left of N.
+[budget]
+jewelry  = { main_from = 15, main_to = 35 }
+category = { share = 0.5 }   # categories vs materials split of the remainder: open question Q-SMI-6
+material = { share = 0.5 }
+
+[reference_path]
+level   = 75
+members = ["jewelry",
+           "one-handed-smithing", "heavy-armor-smithing", "light-armor-smithing",
+           "steel", "orcish", "glass"]
+
+# Optional crafting pace estimate (raw XP before zone multipliers / DR / bucket falloff).
+[crafting]
+xp_per_unit_material = 60     # raw XP to the material sub-skill per unit of main material
+xp_per_unit_category = 20     # × tier, raw XP to the category sub-skill per unit
+daily_bucket_raw_xp  = 4000   # Smithing daily bucket (active game time)
+material_group = "material"
+category_group = "category"
+
+# ---- sub-skills ------------------------------------------------------------------------------
+# T = level where conversion has fallen to ~half; w = width of the falloff.
+# tier = category-XP weight of the material (design §7.4 table; to be filled by the user).
+
+[[subskill]]
+name = "jewelry"
+group = "jewelry"
+T = 15
+w = 6
+
+# categories: equal among themselves
+[[subskill]]
+name = "one-handed-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "two-handed-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "heavy-armor-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "light-armor-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "clothing-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "bow-smithing"
+group = "category"
+T = 90
+w = 15
+[[subskill]]
+name = "crossbow-smithing"
+group = "category"
+T = 90
+w = 15
+
+# materials: T grows with difficulty of the material
+[[subskill]]
+name = "iron"
+group = "material"
+tier = 1
+T = 25
+w = 12
+[[subskill]]
+name = "steel"
+group = "material"
+tier = 1.5
+T = 35
+w = 12
+[[subskill]]
+name = "leather"
+group = "material"
+tier = 1
+T = 25
+w = 12
+[[subskill]]
+name = "elven"
+group = "material"
+tier = 3
+T = 50
+w = 12
+[[subskill]]
+name = "orcish"
+group = "material"
+tier = 3
+T = 50
+w = 12
+[[subskill]]
+name = "dwarven"
+group = "material"
+tier = 3
+T = 50
+w = 12
+[[subskill]]
+name = "glass"
+group = "material"
+tier = 5
+T = 65
+w = 12
+[[subskill]]
+name = "ebony"
+group = "material"
+tier = 6
+T = 75
+w = 12
+[[subskill]]
+name = "daedric"
+group = "material"
+tier = 8
+T = 90
+w = 12
+[[subskill]]
+name = "dragon"
+group = "material"
+tier = 10
+T = 90
+w = 12
