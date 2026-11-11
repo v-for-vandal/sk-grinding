@@ -6,6 +6,10 @@
 included: they are daedra), `conjure-spirit` (spectral/ghost summons, familiars), `conjure-bound`,
 `soul-magic` (Soul Trap, Banish, Command Daedra, Expel), `conjure-other` (decided, Q-CON-1).
 
+- **Summon spells of other schools** (decided, Q-MAG-1: there is no `summon` form): the spell
+  gives XP as usual to its own school's sub-skills (sub-direction, archetype); the share that
+  would go to the **form** sub-skill goes to the matching Conjuration sub-skill instead
+  (`conjure-daedra`, `conjure-spirit`, …), and to `conjure-other` when the match is unclear.
 - Bound weapons: attacks with a bound weapon give XP to **both** the weapon's sub-skill and
   `conjure-bound` (decided, Q-WPN-6).
 

@@ -657,7 +657,7 @@ references can still be found here:
 | §7.2 | Armor (Heavy Armor, Light Armor) | [`skills/armor/design.md`](skills/armor/design.md) | [heavy-armor](skills/armor/heavy-armor.perks.md), [light-armor](skills/armor/light-armor.perks.md) |
 | §7.3 | Block (shields, parry, bash) | [`skills/block/design.md`](skills/block/design.md) | [block](skills/block/perks.md) |
 | §7.4 | Smithing | [`skills/smithing/design.md`](skills/smithing/design.md) | [smithing](skills/smithing/perks.md) |
-| §8.1 | Magic: general structure (all schools) | [`skills/magic/design.md`](skills/magic/design.md) | [destruction](skills/destruction/perks.md), [illusion](skills/illusion/perks.md), [restoration](skills/restoration/perks.md) |
+| §8.1 | Magic: general structure (all schools) | [`skills/magic/design.md`](skills/magic/design.md); [destruction](skills/destruction/design.md), [illusion](skills/illusion/design.md), [restoration](skills/restoration/design.md) | [destruction](skills/destruction/perks.md), [illusion](skills/illusion/perks.md), [restoration](skills/restoration/perks.md) |
 | §8.2 | Alteration | [`skills/alteration/design.md`](skills/alteration/design.md) | [alteration](skills/alteration/perks.md) |
 | §8.3 | Conjuration | [`skills/conjuration/design.md`](skills/conjuration/design.md) | [conjuration](skills/conjuration/perks.md) |
 | §8.4 | Enchanting | [`skills/enchanting/design.md`](skills/enchanting/design.md) | [enchanting](skills/enchanting/perks.md) |
@@ -767,7 +767,8 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 
 - **Q-AG-3.** Category list. Proposal: `offense-melee`, `offense-ranged`, `offense-magic`,
   `offense-poison`, `offense-summon`, `defense-physical` (armor + block + parry),
-  `defense-magic` (wards, resistances), `pickpocket`, `speech`. Merge or split any? For example,
+  `defense-magic` (wards, resistances), `support-heal` (healing others, decided in
+  [restoration](skills/restoration/design.md)), `pickpocket`, `speech`. Merge or split any? For example,
   should armor and block share one defense budget, or have separate ones?
   - **A:**
 - **Q-AG-4.** Offense damage budget `kOff`. Proposal: 1.75 × target max health, per category.
@@ -894,7 +895,7 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   events, shout use.
 - Sub-skill perks, keywords and globals in an ESL-flagged ESP.
 - Only the player is affected.
-- Aim perturbation (accepted: archery Q-WPN-7; missiles, lobbers and beams Q-MAG-5; glancing
+- Aim perturbation (accepted: archery Q-WPN-7; spell missiles (incl. lobbers) and beams Q-MAG-5; glancing
   melee hits Q-WPN-8): hook `RE::Projectile::Launch` (filtered
   to the player) for missiles, arrows and lobbers; a per-frame aim sway for beams (and the
   visible bow sway); a miss or glancing chance in the melee hit pipeline. Details:
@@ -1046,8 +1047,9 @@ Researching Lorerim content does not require the game to run, only its **data fi
 - **Q-CAT-1.** Forms are shared across schools, but each sub-skill has exactly one parent main
   skill (§3). Either a form sub-skill exists per school (`destruction/missile`,
   `restoration/missile`, … — many more sub-skills) or form sub-skills have **no fixed parent**
-  and route main XP to the school of the spell being cast. Which one? (Same question for
-  archetypes.)
+  and count towards the school of the spell being cast. The main level is computed from
+  sub-skill levels (§4.4.1), so a shared form would need a per-school part of its level (e.g. its
+  XP tracked per school). Which one? (Same question for archetypes.)
   - **A:**
 
 ## 17. Other important questions

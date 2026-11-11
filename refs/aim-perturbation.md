@@ -9,7 +9,7 @@ against the Lorerim runtime. Function names and the class hierarchy must be conf
 Windows machine (CommonLibSSE-NG headers + Address Library IDs). Items marked *(verify)* are the
 least certain.
 
-Chosen for spells (beam: A, missile / lobber: B): [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md).
+Chosen for spells (beam: A, missile incl. lobbers: B): [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md).
 
 ## 1. Options at a glance
 
@@ -64,7 +64,7 @@ Chosen for spells (beam: A, missile / lobber: B): [`impl/spell-aim-inaccuracy.md
 ### 3.3 Which sub-skill drives the noise
 
 - Archery: the weapon's `archery-*` sub-skill (accepted, Q-WPN-7, with a visible aim sway).
-- Spells: only the form sub-skill, and only `missile`, `lobber`, `beam` (decided, Q-MAG-5; see
+- Spells: only the form sub-skill, and only `missile` (lobber projectiles included, Q-MAG-1) and `beam` (decided, Q-MAG-5; see
   [`skills/magic/design.md`](../skills/magic/design.md)). `flame`, `direct`, touch and runes are
   not perturbed. Beams get a cumulative sway that grows while the beam is held.
 - Melee: glancing hits, no misses (decided, Q-WPN-8).

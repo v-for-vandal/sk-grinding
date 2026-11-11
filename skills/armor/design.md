@@ -9,7 +9,8 @@
 | Heavy Armor | `heavy-armor`, one per heavy material (`iron-armor`, `steel-armor`, `dwarven-armor`, `orcish-armor`, `ebony-armor`, `daedric-armor`, `dragonplate-armor`, + Anniversary Edition and modded materials, + `heavy-other`) |
 | Light Armor | `light-armor`, `clothing`, one per light material (`leather-armor`, `hide-armor`, `elven-armor`, `glass-armor`, `scaled-armor`, `dragonscale-armor`, + AE and modded, + `light-other`) |
 
-- Clothing XP goes into the Light Armor main skill (as Lorerim does).
+- `clothing` is a sub-skill of Light Armor, so it counts towards the Light Armor level (as LoreRim
+  gives clothing XP to Light Armor).
 - Material is determined by `ArmorMaterial*` keywords; for modded armor, research which keywords
   are used (R-5); fallback to `heavy-other`/`light-other`.
 - Base XP per hit taken is the vanilla (Lorerim) amount, subject to anti-grind rules (§11).
@@ -35,8 +36,9 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
 `heavy-armor` +7, `ebony-armor` +7, `light-armor` +2, `leather-armor` +2, `clothing` +1 (empty feet
 and hands).
 
-- **Main XP:** both the type and the material sub-skill convert their own XP into the main skill
-  (Q-XP-1, option (a), decided), normalized per main skill (§4.4.5). This answers Q-ARM-2.
+- **Main skill:** both the type and the material sub-skill count in the main skill formula, each
+  with its own curve `M_i` (§4.4.1; Q-XP-1, option (a), decided), normalized per main skill
+  (§4.4.5). This answers Q-ARM-2.
 
 **Questions:**
 

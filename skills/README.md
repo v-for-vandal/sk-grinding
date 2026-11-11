@@ -33,9 +33,9 @@ the general sections it refers to (bare `§N` in these files means a section of 
 | Smithing | [`smithing/design.md`](smithing/design.md) | [`smithing/`](smithing/perks.md) |
 | Alteration | [`alteration/design.md`](alteration/design.md), [`magic/design.md`](magic/design.md) | [`alteration/`](alteration/perks.md) |
 | Conjuration | [`conjuration/design.md`](conjuration/design.md), [`magic/design.md`](magic/design.md) | [`conjuration/`](conjuration/perks.md) |
-| Destruction | [`magic/design.md`](magic/design.md) | [`destruction/`](destruction/perks.md) |
-| Illusion | [`magic/design.md`](magic/design.md) | [`illusion/`](illusion/perks.md) |
-| Restoration | [`magic/design.md`](magic/design.md) | [`restoration/`](restoration/perks.md) |
+| Destruction | [`destruction/design.md`](destruction/design.md), [`magic/design.md`](magic/design.md) | [`destruction/`](destruction/perks.md) |
+| Illusion | [`illusion/design.md`](illusion/design.md), [`magic/design.md`](magic/design.md) | [`illusion/`](illusion/perks.md) |
+| Restoration | [`restoration/design.md`](restoration/design.md), [`magic/design.md`](magic/design.md) | [`restoration/`](restoration/perks.md) |
 | Enchanting (incl. wands and staves) | [`enchanting/design.md`](enchanting/design.md) | [`enchanting/`](enchanting/perks.md) |
 | Speech | [`speech/design.md`](speech/design.md) | [`speech/`](speech/perks.md) |
 | Alchemy | [`alchemy/design.md`](alchemy/design.md) | [`alchemy/`](alchemy/perks.md) |

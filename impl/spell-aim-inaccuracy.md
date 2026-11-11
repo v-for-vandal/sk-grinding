@@ -1,7 +1,7 @@
 # Spell inaccuracy: aim sway and projectile direction noise
 
-- **Status:** chosen per form: **beam → variant A** (aim sway), **missile, lobber → variant B**
-  (direction noise at launch); details to confirm in R-26.
+- **Status:** chosen per form: **beam → variant A** (aim sway), **missile → variant B**
+  (direction noise at launch; `missile` includes lobber projectiles, Q-MAG-1); details to confirm in R-26.
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md), *Accuracy* (Q-MAG-5);
   background: [`refs/aim-perturbation.md`](../refs/aim-perturbation.md) (options A and B there).
 - **Depends on:** *subskill-state*, *spell-form-classifier*, *projectile-launch-hook* (planned,
@@ -14,10 +14,11 @@
 ## What it does
 
 Player only. A spell is less accurate at a low level of its **form** sub-skill (`missile`,
-`lobber`, `beam`). Not affected: `flame`, `direct`, touch, runes and the other forms; NPCs.
+`beam`; `explosion` is open, Q-MAG-7). `missile` covers both straight and arcing (lobber)
+projectiles (Q-MAG-1). Not affected: `flame`, `direct`, touch, runes and the other forms; NPCs.
 
 `L` is the form's `current` level after context penalties (§5.7), read when the spell is
-launched (missile, lobber) or every frame while it is held (beam).
+launched (missile) or every frame while it is held (beam).
 
 ## Variants
 
@@ -44,7 +45,7 @@ and the spell goes where the crosshair is. The player sees the problem and can p
 At launch, rotate the projectile's direction by a random angle `δ ~ N(0, σ(L))` (independent in
 yaw and pitch, or a random direction with angle `|δ|`). The crosshair does not move.
 
-- Missile and lobber: in the *projectile-launch-hook* (`RE::Projectile::Launch`, shooter = player,
+- Missile: in the *projectile-launch-hook* (`RE::Projectile::Launch`, shooter = player,
   projectile type missile / lobber), change the launch angles before calling the original.
 - `σ(L) = σ_max × max(0, 1 − L / L_0)`.
 - For a beam the direction is recomputed every frame, so B would need a per-frame
@@ -59,7 +60,7 @@ yaw and pitch, or a random direction with angle `|δ|`). The crosshair does not 
 | Form | Variant | Why |
 |---|---|---|
 | `beam` | **A** | held for seconds, cumulative sway reads naturally; B needs a per-frame beam hook anyway |
-| `missile`, `lobber` | **B** | one-shot projectiles; noise at launch is enough and simplest |
+| `missile` (incl. lobbers) | **B** | one-shot projectiles; noise at launch is enough and simplest |
 
 Fallbacks: if A is not possible for beams (R-26 check 4 or 6 fails), use B per frame on the beam
 with the same cumulative amplitude. If B is undone by TDM homing, apply the noise after TDM or
@@ -69,7 +70,7 @@ disable its aim support for player spells (R-26 check 2).
 
 ## Config
 
-- per form (`missile`, `lobber`, `beam`): `L_0`;
+- per form (`missile`, `beam`): `L_0`;
 - B: `σ_max` (degrees);
 - A: `A_max` (degrees), `t_full` (seconds), noise speed;
 - values are placeholders, not decided.
@@ -77,7 +78,7 @@ disable its aim support for player spells (R-26 check 2).
 ## Test
 
 - Fire 20 Firebolts (missile) at a wall at form level 0 and at `L_0`; the spread of impact points
-  follows `σ`; none at `L_0`. Same with a lobber spell.
+  follows `σ`; none at `L_0`. Same with an arcing (lobber) missile spell.
 - Hold a Lightning Bolt (beam) at level 0: the crosshair wanders more the longer it is held and
   stops when the cast ends; at `L_0` it does not move.
 - An NPC casting the same spells is not affected; `flame` spells are not affected.

@@ -2,7 +2,7 @@
 
 - **Status:** new (headers, LoreRim plugins, test DLL in game).
 - **For:** [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md), variants A (beam) and
-  B (missile, lobber); the same checks cover archery (Q-WPN-7).
+  B (missile form: missile and lobber projectiles); the same checks cover archery (Q-WPN-7).
 
 ## Checks
 

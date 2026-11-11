@@ -1,7 +1,7 @@
 # Sub-skill requirements on existing perks
 
 Reference note for [`design-v2.md`](../design-v2.md) §5.6 (Q-DYN-10…Q-DYN-13) and the per-skill
-"perk changes" questions (Q-WPN-9, Q-ARM-4, Q-BLK-3, Q-SMI-4, Q-MAG-6, Q-ALT-2, Q-CON-5, Q-ENC-3,
+"perk changes" questions (Q-WPN-9, Q-ARM-4, Q-BLK-3, Q-SMI-4, Q-DES-3, Q-ILL-4, Q-RES-4, Q-ALT-2, Q-CON-5, Q-ENC-3,
 Q-SPE-5, Q-ALC-5, Q-THF-2).
 
 **Question:** can an existing (Lorerim / Requiem) perk get an extra requirement on one of our
