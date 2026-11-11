@@ -38,17 +38,17 @@ described; check during research.
 | G-V7 | Heavy / Light Armor | Get hit in a brawl, by a follower or by a summon. | Partial — cut-off helps only if damage is low | TW |
 | G-V8 | Block | Block a weak enemy's hits for a long time. | No | TW + PB (same as armor) |
 | G-V9 | Block | Bash spam on a weak or helpless target. | No | TW + PB |
-| G-V10 | Smithing | Mass-craft cheap items (iron daggers, leather bracers), temper them. | Solved — XP by material units, not value; daily Smithing bucket (active time); DR by item type; temper XP only when quality rises (design §7.4, §11.1) | — |
+| G-V10 | Smithing | Mass-craft cheap items (iron daggers, leather bracers), temper them. | Solved — XP by material units, not value; daily Smithing bucket (active time); DR by item type; temper XP only when quality rises (skills/smithing/design.md, §11.1) | — |
 | G-V11 | Destruction | Cast cheap spells at a follower, a summon or an unkillable target. | No | TW + PB |
 | G-V12 | Restoration | Heal yourself while standing in a weak damage source; ward a weak caster's spells. | No | ME (XP by HP actually restored) + TW for the damage source |
 | G-V13 | Alteration | Spam self-buffs out of combat (Oakflesh, Candlelight, Detect Life, Transmute). | No | ME (buffs count only in combat / with hostiles near) + DR |
 | G-V14 | Illusion | Spam Muffle/Invisibility; Calm/Fear the same weak target repeatedly. | No | ME + DR + TW |
-| G-V15 | Conjuration | Summon/dismiss spam; recast bound weapons; Soul Trap on any target. | Partial — with upkeep mechanic ON, summon XP only in combat (design §8.3); bound weapons and soul magic not covered | ME + DR |
+| G-V15 | Conjuration | Summon/dismiss spam; recast bound weapons; Soul Trap on any target. | Partial — with upkeep mechanic ON, summon XP only in combat (skills/conjuration/design.md); bound weapons and soul magic not covered | ME + DR |
 | G-V16 | Enchanting | Enchant/disenchant cheap items in bulk. | No | DR; XP by enchantment strength instead of item value |
 | G-V17 | (staves) | Cast staves at nothing; recharge with cheap soul gems. | No | ME (staff spell must affect a valid target) |
-| G-V18 | Speech | Sell an expensive item and buy it back, repeat. | Partial — XP by saved gold vs reference (design §9.1), but a loop still saves gold both ways | Net buy/sell of the same item within a time window; DR |
+| G-V18 | Speech | Sell an expensive item and buy it back, repeat. | Partial — XP by saved gold vs reference (skills/speech/design.md), but a loop still saves gold both ways | Net buy/sell of the same item within a time window; DR |
 | G-V19 | Speech | Repeated persuade/intimidate checks. Mostly one-shot in vanilla, low risk. | Partial (low risk) | per-topic once flag |
-| G-V20 | Alchemy | Mass-craft cheap potions. | Partial — crafting XP is no longer the main source (design §9.2), but see G-N18 | DR |
+| G-V20 | Alchemy | Mass-craft cheap potions. | Partial — crafting XP is no longer the main source (skills/alchemy/design.md), but see G-N18 | DR |
 | G-V21 | Alchemy + Enchanting | Fortify Restoration / Fortify Enchanting feedback loop (power exploit rather than grind). *(verify: likely patched by Requiem)* | No | out of scope unless Lorerim still allows it |
 | G-V22 | Lockpicking | Repeatedly pick easy locks in respawning containers; XP for broken picks. *(verify)* | No | DR per lock; XP by lock level relative to sub-skill |
 | G-V23 | Pickpocket | Steal from a follower and put it back, repeat. | No | TW-like (exclude followers/teammates) + DR per NPC/item |
@@ -72,7 +72,7 @@ described; check during research.
 | G-N10 | Trainers + bonus | Stack training bonuses indefinitely. | Solved — capped at +30% | — |
 | G-N11 | Books + potential | Read the same book many times / multiple copies. | Solved if "once per book" (Q-BT-1); vanilla flag is per base book | — |
 | G-N12 | Speech-trading | With strong Speech perks, every purchase and sale "saves" gold relative to the Speech-15 reference, so a buy/sell loop of an expensive item yields XP both ways. | Partial — same as G-V18 | net loops; DR |
-| G-N13 | Speech-trading | **Splitting transactions:** with a per-transaction `log(1 + saved)` (proposal in §9.1), selling 2000 items saving 1 gold each gives far more XP than one sale saving 2000 (log is concave). | Open — Q-SPE-4 | apply the formula to cumulative saved gold per merchant per day, not per transaction |
+| G-N13 | Speech-trading | **Splitting transactions:** with a per-transaction `log(1 + saved)` (proposal in skills/speech/design.md), selling 2000 items saving 1 gold each gives far more XP than one sale saving 2000 (log is concave). | Open — Q-SPE-4 | apply the formula to cumulative saved gold per merchant per day, not per transaction |
 | G-N14 | Alchemy consumption | Brew cheap long-duration potions (resists, waterbreathing): `magnitude × duration` is high for them, so drinking cheap potions gives big XP. | No | normalize strength per effect type, or use potion value |
 | G-N15 | Alchemy consumption | Drink potions that do nothing (Restore Health at full health). | No | ME (Q-ALC-2) |
 | G-N16 | Alchemy poisons | Own poisons ×2 on weak or harmless targets (skeevers, a follower). | Partial — on-hit rule prevents "apply and wipe", target not checked | TW |
@@ -88,7 +88,7 @@ described; check during research.
 | G-N26 | Catch-up ×3 | Raise effective floors cheaply via G-N1, then get ×3 XP in the linked sub-skill. Only matters for main XP if main XP is computed after the zone multiplier. | Solved — catch-up below peak only restores the main skill up to `F(peak)`, never beyond (design §4.4) | — |
 | G-N27 | Per-target budget | Rotate weapons, spells or armor pieces on one durable target (essential NPC, brawl, regenerating troll, endless summons) so that every sub-skill gets a fresh budget. | Solved — budget key is (target, category), not (target, sub-skill) (design §11.2, [`refs/per-target-budget.md`](refs/per-target-budget.md)) | — |
 
-## 3. Smithing conversion model (design §4.4, §7.4)
+## 3. Smithing conversion model (design-v2 §4.4, skills/smithing/design.md)
 
 | ID | Method | Status | Fix |
 |---|---|---|---|
@@ -106,7 +106,7 @@ described; check during research.
   (G-V12, G-V13, G-V14, G-V17) and **repetition** (G-V10, G-V16, G-V18, G-V20, G-V22). Hence the
   proposal of a generic toolkit (TW/PB/ME/DR) instead of per-skill rules.
 - **New methods:** the most dangerous ones are structural and decided by single answers:
-  G-N3 (Q-XP-1, decided for Smithing), G-N9 (Q-BT-4), G-N13 (Q-SPE-4).
+  G-N3 (Q-XP-1, decided: (a) for all skills), G-N9 (Q-BT-4), G-N13 (Q-SPE-4).
   G-N2/G-N26 are solved by the level model (design §4.4), G-N6 by the decay idle meter (design §5.5).
 - Window rules (G-N5, G-N7, G-N8) are cheap to fix: require the complementary event to be
   "real" (landed hit / blocked hit / hostile spell affecting an enemy).

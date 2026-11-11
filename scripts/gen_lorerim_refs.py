@@ -3,14 +3,20 @@
 
     python3 -I scripts/gen_lorerim_refs.py ~/tmp/research refs/lorerim [--force] [--chain ~/tmp/research2]
 
+--ordinator points at a dump of the ORIGINAL Ordinator 9.31 esp (ordinator_perks.tsv,
+ordinator_perk_trees.tsv). Its versions are added to the Alternatives, and every skill gets a
+section with Ordinator tree perks that are not in the LoreRim tree.
+
 --chain points at the R-22 dump (tables/perk-override-chain.tsv, tables/avif-perktree-chain.tsv).
 With it, every perk entry gets an "Alternatives" subsection (all other plugin versions of the
 same record), and every skill gets a list of perks that some tree version had but the final tree
 does not.
 
-Writes perks.md, materials.md and weapons-data.md (the data part of weapons.md) into the output
-directory. The worksheets are meant to be filled in by hand afterwards, so existing files are NOT
-overwritten without --force.
+Writes materials.md and weapons-data.md (the data part of weapons.md) into the output
+directory, and the perk worksheets into --skills (default: skills/ next to the output's parent):
+perks-guide.md (how to read, background) and, per skill, <slug>/perks.md (LoreRim tree perks),
+<slug>/perks-removed.md, <slug>/perks-ordinator.md. The worksheets are meant to be filled in by
+hand afterwards, so existing files are NOT overwritten without --force.
 
 Everything under "Records" and "Proposal (auto)" is derived mechanically from the records. It is
 a reading aid, not a verified description of the game's behaviour.
@@ -28,6 +34,21 @@ from pathlib import Path
 csv.field_size_limit(10**9)
 
 BASE_PLUGINS = {"Skyrim.esm", "Update.esm", "Dawnguard.esm", "HearthFires.esm", "Dragonborn.esm"}
+
+GROUPS = {  # skills whose perk files live in a shared group folder as <slug>.perks*.md
+    "AVOneHanded": "weapons", "AVTwoHanded": "weapons", "AVMarksman": "weapons",
+    "AVHeavyArmor": "armor", "AVLightArmor": "armor",
+}
+
+SLUGS = {  # skill folder under skills/ (or file prefix inside its GROUPS folder)
+    "AVOneHanded": "one-handed", "AVTwoHanded": "two-handed", "AVMarksman": "archery",
+    "AVBlock": "block", "AVHeavyArmor": "heavy-armor", "AVLightArmor": "light-armor",
+    "AVSmithing": "smithing", "AVAlchemy": "alchemy", "AVEnchanting": "enchanting",
+    "AVAlteration": "alteration", "AVConjuration": "conjuration", "AVDestruction": "destruction",
+    "AVMysticism": "illusion", "AVRestoration": "restoration", "AVLockpicking": "lockpicking",
+    "AVPickpocket": "pickpocket", "AVSneak": "sneak", "AVSpeechcraft": "speech",
+    "AVHealRatePowerMod": "werebeast", "AVMagickaRateMod": "vampire-lord",
+}
 
 SKILLS = [  # (AVIF editorID, title, short prefix)
     ("AVOneHanded", "One-Handed", "1H"), ("AVTwoHanded", "Two-Handed", "2H"),
@@ -204,6 +225,10 @@ class Ctx:
         self.tree_versions: dict[str, dict[str, set[str]]] = {}  # AVIF -> perk FK -> plugins
         self.tree_final: dict[str, set[str]] = {}
         self.tree_labels: dict[str, str] = {}
+        self.ord: dict[str, "Version"] = {}
+        self.ord_tree: dict[str, dict] = {}
+        self.ord_handles: dict[str, str] = {}
+        self.label_override: dict[str, str] = {}
 
     def load_chain(self, research2: Path):
         t = research2 / "tables"
@@ -231,9 +256,31 @@ class Ctx:
 
     def perk_label(self, link) -> str:
         ed, fk = link_parts(link)
+        if fk in self.label_override:
+            return self.label_override[fk]
         if fk in self.handles:
             return f"{self.perk_by_fk[fk]['name']} ({self.handles[fk]})"
+        if fk in self.ord_handles:
+            return f"{self.ord[fk].sig['name']} ({self.ord_handles[fk]})"
         return ed or fk
+
+    def load_ordinator(self, d: Path):
+        for r in read_tsv(d / "ordinator_perks.tsv", quote_none=True):
+            r = dict(r, loadOrderIndex="1000000000", isWinner="False")
+            v = Version(r)
+            v.plugin = "Ordinator 9.31 (original esp, not loaded)"
+            v.row["winner"] = v.plugin
+            self.ord[v.formKey] = v
+        nodes = collections.defaultdict(dict)  # AVIF -> node index -> (fk, x, y, children)
+        for r in read_tsv(d / "ordinator_perk_trees.tsv", quote_none=True):
+            fk = link_fk(r["perk"])
+            kids = json.loads(r["connections"]) if r["connections"].strip() else []
+            nodes[r["skill"]][int(r["nodeIndex"])] = (fk if fk != "Null" else "", r["perkGridX"], r["perkGridY"], kids)
+        self.ord_tree = dict(nodes)
+        # Ordinator's version becomes one more alternative of every record already versioned
+        for fk, v in self.ord.items():
+            if fk in self.versions:
+                self.versions[fk].append(v)
 
     # ---- conditions --------------------------------------------------------------------------
     def cond(self, c: dict) -> str | None:
@@ -365,13 +412,13 @@ class Ctx:
             if t == "PerkEntryPointModifyValue":
                 ep = EP_WORDS.get(e["EntryPoint"], camel_words(e["EntryPoint"]))
                 m, v = e["Modification"], e.get("Value", 0)
-                val = pct(v) if m == "Multiply" else (f"+{v:g}" if m == "Add" else f"set to {v:g}")
+                val = pct(v) if m == "Multiply" else ((f"+{v:g}" if v >= 0 else f"−{-v:g}") if m == "Add" else f"set to {v:g}")
                 out.append(f"{ep} {val}{cs}")
             elif t == "PerkEntryPointModifyActorValue":
                 ep = EP_WORDS.get(e["EntryPoint"], camel_words(e["EntryPoint"]))
                 m, v, av = e["Modification"], e.get("Value", 0), e.get("ActorValue")
                 if m == "MultiplyOnePlusAVMult":
-                    val = f"+{v * 100:.4g}% per point of {av}"
+                    val = f"{'+' if v >= 0 else '−'}{abs(v) * 100:.4g}% per point of {av}"
                 elif m == "MultiplyAVMult":
                     val = f"× ({av} × {v:g})"
                 else:
@@ -573,7 +620,21 @@ def render_alternatives(ctx: Ctx, fk: str, L: list[str], h: str = "#####"):
         L.append("")
 
 
-def gen_perks(ctx: Ctx, out: Path):
+def shift(lines: list[str], title: str) -> list[str]:
+    """One skill file: the first heading becomes `title`, every other heading goes one level up."""
+    out, first = [title], True
+    for x in "\n".join(lines).split("\n"):
+        if x.startswith("###"):
+            if first:
+                first = False
+                continue
+            x = x[1:]
+        if x or (out and out[-1]):  # no runs of blank lines
+            out.append(x)
+    return out
+
+
+def gen_perks(ctx: Ctx, skills: Path) -> list[Path]:
     by_skill = collections.defaultdict(list)
     for r in ctx.perks:
         by_skill[r["skill"]].append(r)
@@ -583,11 +644,17 @@ def gen_perks(ctx: Ctx, out: Path):
         rows.sort(key=lambda r: (r["formKey"].split(":")[1] not in BASE_PLUGINS, purchase_level(r, av), r["name"]))
         for i, r in enumerate(rows, 1):
             ctx.handles[r["formKey"]] = f"{pre}-{i:02d}"
+    assign_ord_handles(ctx)
     L = []
-    L.append("# LoreRim perk worksheet\n")
+    L.append("# LoreRim perk worksheets: how to read\n")
     L.append("Generated by `scripts/gen_lorerim_refs.py` from the LoreRim research dump of 2026-11-11 "
              "(profile *Default*, `research-report.md`). Only perks that are nodes of a skill tree are "
              "listed (454 of 2 744 PERK records).\n")
+    L.append("Every skill has its own files in `skills/<skill>/`: `perks.md` (the LoreRim tree), "
+             "`perks-removed.md` (removed from the tree), `perks-ordinator.md` (Ordinator 9.31 perks "
+             "not in LoreRim). Skills with a shared design keep them in the group folder with the skill "
+             "as prefix: `weapons/one-handed.perks.md`, `armor/heavy-armor.perks-removed.md`, … "
+             "Index: [`README.md`](README.md).\n")
     L.append("""**How to read an entry**
 
 - **Handle** (e.g. `1H-03`) — short name for notes; the real identifier is the **FormKey**
@@ -609,6 +676,14 @@ def gen_perks(ctx: Ctx, out: Path):
   potential, see design Q-DYN-10) should be required to buy the perk; or "automatic perk of
   sub-skill X at level N" if it should leave the tree.
 """)
+    if ctx.ord:
+        L.append("""- **Ordinator 9.31 (not in LoreRim)** (per skill; from a dump of the *original*
+  `Ordinator - Perks of Skyrim.esp`) — perks of Ordinator's own trees that are not nodes of the
+  LoreRim tree. Handles `ORD-<skill>-NN`. *Type A* = Ordinator's own record, *type B* =
+  Ordinator's version of a vanilla slot whose LoreRim winner is another mod (see the background
+  section). The same original-esp versions also appear in the *Alternatives* of LoreRim entries
+  as "Ordinator 9.31 (original esp, not loaded)". File: `perks-ordinator.md`.
+""")
     if ctx.versions:
         L.append("""- **Alternatives** (from the R-22 dump, `perk-override-chain.tsv`) — every other plugin's
   version of the same PERK record, in load order, from the master to the last loser. Versions
@@ -620,15 +695,26 @@ def gen_perks(ctx: Ctx, out: Path):
   current 30).
 - **Removed from the tree** (per skill) — perks that are nodes in some earlier version of the
   skill's AVIF tree but not in the final one, with the winning PERK version and its alternatives.
+  File: `perks-removed.md`.
 """)
     notes = Path(__file__).with_name("perks-notes.md")
     if notes.exists():  # hand-written background section, kept in a separate file
         L.append("\n" + notes.read_text(encoding="utf-8"))
+    skills.mkdir(parents=True, exist_ok=True)
+    written = [skills / "perks-guide.md"]
+    written[0].write_text("\n".join(L) + "\n", encoding="utf-8")
     for av, title, pre in SKILLS:
         rows = by_skill.get(av, [])
         if not rows:
             continue
-        L.append(f"\n## {title}\n")
+        L = []
+        name = title.split(' (')[0].split(' —')[0]
+        head = (f"Generated by `scripts/gen_lorerim_refs.py`. How to read: "
+                f"[`perks-guide.md`](../perks-guide.md).")
+        if title != name:
+            head += f" {title[len(name):].strip(' ()—')}."
+        L.append(f"### {name}\n")
+        L.append(head + "\n")
         groups = [("Base-game records (vanilla slots, reworked)", [r for r in rows if r["formKey"].split(":")[1] in BASE_PLUGINS]),
                   ("Mod perks", [r for r in rows if r["formKey"].split(":")[1] not in BASE_PLUGINS])]
         for gname, grows in groups:
@@ -645,8 +731,107 @@ def gen_perks(ctx: Ctx, out: Path):
                 L.append(f"- **Proposal (auto):** {p or '—'}")
                 L.append("- **Sub-skill requirements:**\n")
                 render_alternatives(ctx, r["formKey"], L)
-        render_removed(ctx, av, title, L)
-    (out / "perks.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+        grp = GROUPS.get(av)
+        d = skills / (grp or SLUGS[av])
+        d.mkdir(exist_ok=True)
+        pfx = SLUGS[av] + "." if grp else ""
+        parts = [("perks.md", f"# {name} — LoreRim tree perks", L)]
+        Lr, Lo = [], []
+        render_removed(ctx, av, title, Lr)
+        render_ordinator(ctx, av, title, pre, Lo)
+        parts += [("perks-removed.md", f"# {name} — Removed from the tree", Lr),
+                  ("perks-ordinator.md", f"# {name} — Ordinator 9.31 (not in LoreRim)", Lo)]
+        for fn, t, lines in parts:
+            if not lines:
+                continue
+            if fn != "perks.md":
+                lines.insert(1, head + "\n")
+            f = d / (pfx + fn)
+            f.write_text("\n".join(shift(lines, t)).strip("\n") + "\n", encoding="utf-8")
+            written.append(f)
+    return written
+
+
+def ord_rank_chain(ctx: Ctx, fk: str) -> list:
+    out, seen = [], {fk}
+    v = ctx.ord.get(fk)
+    while v and v.nextPerk and v.nextPerk not in ("Null", "") and v.nextPerk not in seen:
+        seen.add(v.nextPerk)
+        v = ctx.ord.get(v.nextPerk)
+        if v:
+            out.append(v)
+    return out
+
+
+def ord_missing(ctx: Ctx, av: str) -> list[str]:
+    tree = ctx.ord_tree.get(av, {})
+    in_lorerim = set().union(*ctx.tree_final.values()) if ctx.tree_final else set(ctx.perk_by_fk)
+    in_lorerim |= set(ctx.perk_by_fk)
+    removed_here = {fk for fk in ctx.tree_versions.get(av, {}) if fk not in ctx.tree_final.get(av, set())}
+    return [n[0] for _, n in sorted(tree.items()) if n[0] and n[0] in ctx.ord
+            and n[0] not in in_lorerim and n[0] not in removed_here]
+
+
+def assign_ord_handles(ctx: Ctx):
+    for av, _, pre in SKILLS:
+        fks = ord_missing(ctx, av)
+        fks.sort(key=lambda fk: (purchase_level(ctx.ord[fk].row, av), ctx.ord[fk].sig["name"]))
+        for i, fk in enumerate(fks, 1):
+            ctx.ord_handles[fk] = f"ORD-{pre}-{i:02d}"
+
+
+def render_ordinator(ctx: Ctx, av: str, title: str, pre: str, L: list[str]):
+    tree = ctx.ord_tree.get(av)
+    if not tree:
+        return
+    fks = sorted(ord_missing(ctx, av), key=lambda fk: ctx.ord_handles[fk])
+    shared = [n[0] for _, n in sorted(tree.items()) if n[0] and n[0] not in fks]
+    parents = collections.defaultdict(list)
+    for idx, (fk, _, _, kids) in tree.items():
+        for k in kids:
+            parents[k].append(fk)
+    pos = {n[0]: (idx, n) for idx, n in tree.items() if n[0]}
+    # inside this section, Ordinator perks are named as in Ordinator
+    ctx.label_override = {}
+    for fk, v in ctx.ord.items():
+        if fk in ctx.ord_handles:
+            ctx.label_override[fk] = f"{v.sig['name']} ({ctx.ord_handles[fk]})"
+        elif fk in ctx.handles:
+            ctx.label_override[fk] = f"{v.sig['name']} (in LoreRim: {ctx.handles[fk]})"
+    L.append(f"\n### {title.split(' (')[0].split(' —')[0]} — Ordinator 9.31 (not in LoreRim)\n")
+    L.append(f"Ordinator's original tree has {len([n for n in tree.values() if n[0]])} perks; "
+             f"{len(fks)} of them are not in the LoreRim tree and are listed here. Records are from the "
+             "original esp; whether LoreRim's rebuilt `Ordinator - Perks of Skyrim.esp` still carries a "
+             "type A record unchanged was not checked (abilities are rendered from LoreRim's spell records).")
+    if shared:
+        lbl = [ctx.perk_label("[" + fk + "]") for fk in shared]
+        L.append("Also in Ordinator's tree, already listed in the skill's `perks.md` / `perks-removed.md` (as LoreRim tree perks or "
+                 "removed perks): " + ", ".join(lbl) + ".")
+    L.append("")
+    for fk in fks:
+        v = ctx.ord[fk]
+        owner = fk.split(":")[1]
+        if owner == "Ordinator - Perks of Skyrim.esp":
+            typ = "A (Ordinator's own record)"
+        else:
+            lv = ctx.versions.get(fk)
+            win = next((x for x in lv if x.winner), None) if lv else None
+            wtxt = f"`{win.editorID}`" + (f" *{win.sig['name']}*" if win.sig['name'] else '') + f" from {win.plugin}" if win else "not exported"
+            typ = f"B (Ordinator's version of vanilla slot `{fk}`; LoreRim winner: {wtxt})"
+        L.append(f"#### {ctx.ord_handles[fk]} · {v.sig['name']}\n")
+        L.append(f"- **ID:** `{fk}` · `{v.editorID}` · type: {typ}")
+        idx, n = pos[fk]
+        par = [ctx.perk_label("[" + p + "]") for p in parents.get(idx, []) if p]
+        L.append(f"- **Ordinator tree:** after {', '.join(par) if par else 'root'} · grid {n[1]},{n[2]}")
+        effs = render_body(ctx, v.row, L)
+        ranks = ord_rank_chain(ctx, fk)
+        for i, rv in enumerate(ranks, 2):
+            L.append(f"\n##### Rank {i} · {rv.sig['name']} · `{rv.formKey}`\n")
+            effs += render_body(ctx, rv.row, L)
+        p = propose(av, v.row, " ".join(effs))
+        L.append(f"- **Proposal (auto):** {p or '—'}")
+        L.append("- **Sub-skill requirements:**\n")
+    ctx.label_override = {}
 
 
 def render_removed(ctx: Ctx, av: str, title: str, L: list[str]):
@@ -731,7 +916,7 @@ def gen_materials(research: Path, out: Path):
     L = ["# LoreRim materials worksheet\n",
          "Generated by `scripts/gen_lorerim_refs.py` from the research dump of 2026-11-11. One row per "
          "material / armor-set keyword actually used on ARMO or WEAP records. Columns *Proposal* are my "
-         "guesses; fill in **Smithing sub-skill** and **tier** (category-XP weight, design §7.4).\n",
+         "guesses; fill in **Smithing sub-skill** and **tier** (category-XP weight, skills/smithing/design.md).\n",
          """**Notes**
 
 - Reference keywords by **FormKey** (`localID:Plugin`), not EditorID: Requiem renamed most vanilla
@@ -829,19 +1014,25 @@ def main() -> int:
     ap.add_argument("research", type=Path)
     ap.add_argument("out", type=Path)
     ap.add_argument("--force", action="store_true", help="overwrite existing worksheets")
+    ap.add_argument("--skills", type=Path, help="skills directory for perk worksheets (default: <out>/../../skills)")
+    ap.add_argument("--ordinator", type=Path, help="dump of the original Ordinator esp (ordinator_perks.tsv)")
     ap.add_argument("--chain", type=Path, help="R-22 dump with perk-override-chain.tsv (adds Alternatives)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
-    targets = ["perks.md", "materials.md", "weapons-data.md"]
-    if not a.force and any((a.out / n).exists() for n in targets):
+    targets = ["materials.md", "weapons-data.md"]
+    skills = a.skills or a.out.resolve().parent.parent / "skills"
+    if not a.force and (any((a.out / n).exists() for n in targets)
+                        or any(skills.glob("*/*perks*.md"))):
         sys.exit(f"refusing to overwrite worksheets in {a.out} (use --force)")
     ctx = Ctx(a.research)
     if a.chain:
         ctx.load_chain(a.chain)
-    gen_perks(ctx, a.out)
+    if a.ordinator:
+        ctx.load_ordinator(a.ordinator)
+    written = gen_perks(ctx, skills)
     gen_materials(a.research, a.out)
     gen_weapons(a.research, a.out)
-    print("written:", ", ".join(str(a.out / n) for n in targets))
+    print("written:", ", ".join(str(a.out / n) for n in targets), f"+ {len(written)} perk files in {skills}")
     return 0
 
 

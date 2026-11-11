@@ -61,9 +61,11 @@ least certain.
 
 ### 3.3 Which sub-skill drives the noise
 
-- Archery: `light-bow`, `heavy-bow`, `light-crossbow`, `heavy-crossbow`.
-- Spells: form sub-skills (`missile`, `beam`, `flame`, …), the school sub-direction, or both
-  (an open question, Q-MAG-5).
+- Archery: the weapon's `archery-*` sub-skill (accepted, Q-WPN-7, with a visible aim sway).
+- Spells: only the form sub-skill, and only `missile`, `lobber`, `beam` (decided, Q-MAG-5; see
+  [`skills/magic/design.md`](../skills/magic/design.md)). `flame`, `direct`, touch and runes are
+  not perturbed. Beams get a cumulative sway that grows while the beam is held.
+- Melee: glancing hits, no misses (decided, Q-WPN-8).
 
 ### 3.4 Pitfalls
 

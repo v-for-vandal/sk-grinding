@@ -23,7 +23,7 @@
 
 - Mods change existing records by **overriding** them: they ship their own version of the record
   with the same FormKey. The engine loads only the version from the **last** plugin in load order
-  (the *winner* column in this file).
+  (*winner* in the perk entries).
 - Mods reuse vanilla perk FormIDs on purpose. Hundreds of other records point at them (recipes
   with `HasPerk SteelSmithing`, NPC perk lists, quests, scripts, other mods' conditions), and
   reworking a perk "in place" keeps all those links working.
@@ -56,12 +56,18 @@ To bring it back:
 3. Adjust the purchase conditions, which were written for Ordinator's own tree, and optionally add
    sub-skill requirements.
 
-> **R-22 finding.** In LoreRim, `Ordinator - Perks of Skyrim.esp` overrides **no** vanilla (or other
-> mods') PERK record: all 38 Ordinator versions in the override chains are Ordinator's own
-> records, and only three of them are overridden later (*Lion's Arrow*, *Lockdown*, *Hotwire*).
-> Its AVIF overrides carry the LoreRim/Requiem trees. So type B below does not occur in this
-> install; every Ordinator perk is type A. Type B stays relevant for other mods' versions shown in
-> the *Alternatives* sections (e.g. Requiem's version of a slot that Weaponmaster won).
+> **The Ordinator plugin in LoreRim is rebuilt.** The `Ordinator - Perks of Skyrim.esp` that LoreRim
+> loads is not the file from the Ordinator 9.31 archive. Its masters include Requiem.esp,
+> Requiem - Special Feats, NewArmoury.esp and Fury, it overrides **no** vanilla PERK record (all
+> 38 Ordinator versions in the R-22 override chains are Ordinator's own records), and its AVIF
+> overrides carry the LoreRim/Requiem trees. Which MO2 mod provides that file was not checked.
+>
+> The **original** esp (dumped separately) overrides 240 vanilla PERK records and has its own
+> trees (19–39 perks per skill, of which only 4–13 are in the LoreRim trees). So type B exists, but
+> only in the original file: those versions are not loaded at all. They are shown as
+> "Ordinator 9.31 (original esp, not loaded)" in the *Alternatives* of LoreRim entries, and the
+> Ordinator perks missing from LoreRim are in each skill's *Ordinator 9.31 (not in LoreRim)*
+> section. A type B perk is brought back by copying it from the **original** esp.
 
 **Type B: Ordinator's version of a vanilla slot** (Ordinator overrode `01234:Skyrim.esm`, a later
 mod such as Weaponmaster overrode it again and won). Ordinator's version **does not exist at

@@ -1,4 +1,4 @@
-# Smithing conversion normalization config (design-v2 §4.4, §7.4).
+# Smithing conversion normalization config (design-v2 §4.4, skills/smithing/design.md).
 # Run:  python3 scripts/normalize_conversion.py scripts/smithing.toml
 #
 # ALL NUMBERS ARE PLACEHOLDERS except the structure decided in the design:
@@ -49,7 +49,7 @@ category_group = "category"
 # T = level where conversion has fallen to ~half; w = width of the falloff.
 # T1 (optional) overrides [conversion] rise_T1. Open question Q-ML-10: low-T sub-skills (jewelry,
 # iron, leather, steel) have T close to T1, so their conversion peak is well below k.
-# tier = category-XP weight of the material (design §7.4 table; to be filled by the user).
+# tier = category-XP weight of the material (skills/smithing/design.md table; to be filled by the user).
 
 [[subskill]]
 name = "jewelry"
