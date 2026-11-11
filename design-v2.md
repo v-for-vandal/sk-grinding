@@ -10,6 +10,8 @@
 > [`frameworks.md`](refs/frameworks.md) (KID, OCF, AVG, CommonLibSSE-NG),
 > [`vanilla-skill-xp.md`](refs/vanilla-skill-xp.md) (vanilla XP formulas and per-action values).
 > **Per-skill design and perk worksheets: [`skills/`](skills/README.md)** (one folder per skill).
+> **Implementation blocks: [`impl/`](impl/README.md)** (what to build, variants, dependencies);
+> research entries with details: [`research/`](research/).
 > LoreRim data worksheets: [`refs/lorerim/`](refs/lorerim/): [`materials.md`](refs/lorerim/materials.md),
 > [`weapons.md`](refs/lorerim/weapons.md).
 > Tools: [`scripts/normalize_conversion.py`](scripts/normalize_conversion.py) (conversion
@@ -669,6 +671,10 @@ references can still be found here:
 Perk worksheet format and background (FormKey, overrides, bringing back Ordinator perks):
 [`skills/perks-guide.md`](skills/perks-guide.md).
 
+Tracking:
+first pass is done by Artem for:
+* blocking
+
 ## 10. Skill books and trainers
 
 ### 10.1 Skill books
@@ -944,6 +950,10 @@ target pacing as "× of Lorerim baseline".
 
 ### 15.2 Research tasks
 
+Research tasks with more than a line of detail have their own file in [`research/`](research/)
+(`R-<n>-<topic>.md`), linked from the table below and from the [`impl/`](impl/README.md) blocks
+that need them.
+
 Static research of the installed profile was done on 2026-11-11 (Mutagen dump; report
 `research-report.md` + TSV tables, kept outside the repo in `~/tmp/research`). Worksheets
 derived from it: perk worksheets in [`skills/`](skills/README.md),
@@ -974,6 +984,7 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-20 | **New:** exact OCF version in LoreRim, and whether a keyword patch (e.g. "Keyword Patch Collection") covers Animated Armoury |
 | R-21 | **New:** read CommonLibSSE-NG `EXCEPTIONS.md` (Q-TECH-2) |
 | R-22 | Done (static): vanilla AVIF values confirmed (Smithing `UseMult`: 160 in Skyrim.esm, 1 in Update.esm), LoreRim GMST overrides, Experience / SSL / jail / Legendary settings, perk override chains: [`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md). Left: 6 engine-default GMSTs to read in game (§5 there); the `P_skill` / `P_sub` estimate itself (Q-ML-7, Q-DYN-15) |
+| R-23 | **New (runtime):** block stamina cost: formula, whether the GMST can be swapped per hit, where the drain happens, threads, Parrying RPG / Dual Wield Parrying / MCO Block Recovery. Details: [`research/R-23-block-stamina.md`](research/R-23-block-stamina.md) |
 
 Original task list:
 

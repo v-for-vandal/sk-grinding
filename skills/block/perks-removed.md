@@ -31,3 +31,7 @@ Perks that are nodes in some earlier version of this AVIF tree, but not in the f
 - **Records:**
   - on weapon swing, apply *Quick Reflexes*: Slow Time Effect (magnitude 0.05) — when is blocking AND is Player; item/spell: not is Player AND is power attacking
   - magic slowdown set to 1 — when item/spell: spell PerkQuickReflexesKeyword
+  **Resolution** restore this perk as separate perk entity.
+  **Requirements** 
+     Requires BLK-07 and oneOf(heavy-shield, light-shield) >= 65
+     drop Block>= 40 requirement
