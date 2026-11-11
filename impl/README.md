@@ -30,6 +30,8 @@ A block is small enough to be one task for the executor agent (stage 2 plan).
 | Block | Status | Depends on | Research |
 |---|---|---|---|
 | [`block-stamina-cost.md`](block-stamina-cost.md): block stamina cost scaled by the shield / parry sub-skill | proposed | *player-hit-hook*, *subskill-state*, *effect-curve* | [R-23](../research/R-23-block-stamina.md) |
+| [`perk-requirements.md`](perk-requirements.md): sub-skill requirements on existing perks (purchase and effects), value edits | chosen | *subskill-state* | [R-25](../research/R-25-perk-condition-injection.md) |
+| [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md): inaccuracy of `missile` / `lobber` (launch noise) and `beam` (aim sway) spells | chosen | *subskill-state*, *spell-form-classifier*, *projectile-launch-hook* | [R-26](../research/R-26-spell-aim.md) |
 
 ## Planned blocks (not written yet)
 
@@ -46,3 +48,7 @@ settled.
   ([`skills/weapons/design.md`](../skills/weapons/design.md)), `bash` damage on bash hits instead
   of them ([`skills/block/design.md`](../skills/block/design.md)). Built on *player-hit-hook*.
 - *effect-curve* — the shared curve of design-v2 §5.7, evaluated from config parameters.
+- *spell-form-classifier* — the form sub-skill of a spell (`missile`, `lobber`, `beam`, …) from its
+  delivery and projectile type ([`skills/magic/design.md`](../skills/magic/design.md), Q-MAG-1).
+- *projectile-launch-hook* — one hook on `RE::Projectile::Launch` filtered to the player; used by
+  spell launch noise and archery accuracy (Q-WPN-7). Must coexist with True Directional Movement.

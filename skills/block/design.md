@@ -10,6 +10,9 @@
 - **Bash (decided, Q-BLK-1):** a shield bash gives full XP to `bash` and
   `XP × bashShieldFactor` (0.5, config) to the shield's sub-skill (`heavy-shield` /
   `light-shield`). A weapon bash gives XP to `bash` only.
+- **Torch bash** (decided): a bash or power bash with a torch (Torch Combat, BLK-12) is treated
+  as a weapon bash: XP to `bash` only, damage scaled by the `bash` effect below. Whether the
+  engine reports a torch bash as a bash hit (and gives Block XP) is part of R-6.
 
 **Continuous effects** (curve of §5.7):
 

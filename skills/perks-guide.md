@@ -21,8 +21,8 @@ Every skill has its own files in `skills/<skill>/`: `perks.md` (the LoreRim tree
   cannot be explained from records; they are marked *scripted*.
 - **Proposal (auto)** — sub-skill this perk seems to belong to, guessed from keywords and text.
   Treat as a hint.
-- **Sub-skill requirements** — for you to fill in: which sub-skill and level (current / floor /
-  potential, see design Q-DYN-10) should be required to buy the perk; or "automatic perk of
+- **Sub-skill requirements** — for you to fill in: which sub-skill and level (`current` is checked,
+  design Q-DYN-10) should be required to buy the perk and keep it working (Q-DYN-11); or "automatic perk of
   sub-skill X at level N" if it should leave the tree.
 
 - **Ordinator 9.31 (not in LoreRim)** (per skill; from a dump of the *original*

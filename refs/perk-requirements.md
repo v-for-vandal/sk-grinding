@@ -39,9 +39,9 @@ Lorerim setup. Items marked *(verify)* need confirmation on the Windows machine.
 - Write the global whenever the sub-skill value changes.
 - Also write it **when the skills menu opens** (menu-open event), and on game load. Decay is applied
   lazily, so without this the global may hold a stale value.
-- If several values matter (current / floor / potential, see Q-DYN-10), use one global per
-  (sub-skill, value kind) that is actually referenced. Create only the globals that some condition
-  needs.
+- Decided later (Q-DYN-10, Q-DYN-13): `current` is checked, and there is one global **per perk
+  requirement** (the DLL evaluates the whole formula), not per sub-skill. See
+  [`impl/perk-requirements.md`](../impl/perk-requirements.md).
 
 ## 3. Attaching the condition
 

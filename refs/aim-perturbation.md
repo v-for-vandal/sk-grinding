@@ -9,6 +9,8 @@ against the Lorerim runtime. Function names and the class hierarchy must be conf
 Windows machine (CommonLibSSE-NG headers + Address Library IDs). Items marked *(verify)* are the
 least certain.
 
+Chosen for spells (beam: A, missile / lobber: B): [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md).
+
 ## 1. Options at a glance
 
 | Option | What changes | Difficulty | Recommendation |

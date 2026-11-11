@@ -36,9 +36,12 @@ No cross-links between magic sub-skills, except the Alteration rule ([alteration
 - Only the **form** sub-skill drives inaccuracy (not the school sub-direction or archetype).
 - Only `missile`, `lobber` and `beam` are affected. `flame`, `direct` and every short-range
   form (`touch`, `rune`, …) are not.
-- Missiles and lobbers: direction noise at launch, `σ` decreasing with the form's level.
+- Missiles and lobbers: direction noise at launch, `σ` decreasing with the form's level (the
+  crosshair does not move, the projectile flies off it).
 - Beams: an aim sway like archery's low-stamina sway, **cumulative**: it grows the longer the
-  beam is held.
+  beam is held (the crosshair moves, the beam follows it).
+- Implementation: [`impl/spell-aim-inaccuracy.md`](../../impl/spell-aim-inaccuracy.md) (both
+  variants; beam = aim sway, missile / lobber = launch noise).
 
 - **Q-MAG-1.** Which of the proposed forms to add, rename or merge? Is `direct` a good name?
   - **A:**

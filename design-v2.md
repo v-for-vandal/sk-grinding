@@ -541,31 +541,29 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
   Decided either way: all
   continuous formulas must saturate or clamp their level argument at 200 (§5.1).
   - **A:**
-- **Q-DYN-10.** Sub-skill requirements on purchasable perks (e.g. perk P requires
-  `smithing-dwarven ≥ 70`): which value is checked? (a) `current` — fluctuates with decay, the
-  player may lose access to a perk they had "earned"; (b) own / effective floor — stable, but
-  capped at `floorCap` 75, so thresholds above 75 are impossible, and effective floor can be
-  raised via cross-links; (c) `potential` — never decays, reflects the peak reached, but is also
-  raised by books/trainers (Q-BT-4). Proposal: (c), or allow choosing per requirement in config.
-  - **A:**
-- **Q-DYN-11.** Perk conditions gate only the purchase. If the sub-skill later drops below the
-  requirement, should the bought perk: (a) keep working; (b) stop working until the sub-skill
-  recovers (with hysteresis), which means also injecting the condition into the perk's entry
-  points/effects? Per perk or global setting?
-  - **A:**
+- **Sub-skill requirements check `current`** (decided, Q-DYN-10), with the hysteresis of this
+  section: a perk requirement is met while `current ≥ threshold` and stops being met below
+  `threshold − hysteresis`. So access follows the actual skill and can be lost by decay; floor
+  (capped at 75) and `potential` (raised by books / trainers) are not used.
+- **A bought perk stops working while its requirement is not met** (decided, Q-DYN-11), and
+  works again when it is met (same hysteresis). Global default on; config can exempt a perk.
+  Implementation: the requirement is also injected into the perk's entry points and the effects
+  of its abilities ([`impl/perk-requirements.md`](impl/perk-requirements.md)).
 - **Q-DYN-12.** How to show sub-skill requirements to the player? The vanilla skills menu
   probably does not render custom conditions. Options: (a) append the text to the perk
   description (at runtime from the DLL, or via ESP override); (b) show it in the PrismaUI panel;
   (c) both. Proposal: (c) if runtime description edit is feasible, otherwise (b).
   - **A:**
-- **Q-DYN-13.** Implementation. **Proposal:** each referenced sub-skill value is mirrored into a
-  `GlobalVariable` in our ESL. On `kDataLoaded` the DLL appends `GetGlobalValue … >= N`
-  conditions to existing perks from a config table, so Lorerim `PERK` records are not
-  overridden. Alternative: ESP overrides of Lorerim perks (conflicts, breaks on Lorerim
-  updates). Details in [`refs/perk-requirements.md`](refs/perk-requirements.md). Alternative
-  if R-18 succeeds: AVG extra values instead of globals, read with `GetActorValue` conditions
-  ([`refs/frameworks.md`](refs/frameworks.md) §3.5).
-  - **A:**
+- **Sub-skill requirements on existing perks: implementation (decided, Q-DYN-13).** One
+  `GlobalVariable` per perk requirement in our ESL (1 when met, computed by the DLL with
+  hysteresis and any formula, e.g. k-of-n). On `kDataLoaded` the DLL injects conditions from a
+  config table into the perk's own conditions (purchase), and, per perk, into its entry points and
+  the effects of its abilities (so a bought perk stops working, Q-DYN-11), with an exception for
+  NPCs. It can also replace / remove `Block >= N` items and change magnitudes. No overrides of
+  LoreRim `PERK` records; structural changes (new entry points) would go to an ESL generated at
+  build time. Implementation: [`impl/perk-requirements.md`](impl/perk-requirements.md);
+  background: [`refs/perk-requirements.md`](refs/perk-requirements.md). If R-18 succeeds, AVG
+  extra values remain an alternative to globals ([`refs/frameworks.md`](refs/frameworks.md) §3.5).
 
 ### 5.7 Effect curve (shared)
 
@@ -898,16 +896,16 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 - Only the player is affected.
 - Aim perturbation (accepted: archery Q-WPN-7; missiles, lobbers and beams Q-MAG-5; glancing
   melee hits Q-WPN-8): hook `RE::Projectile::Launch` (filtered
-  to the player) for missiles, arrows and lobbers; per-frame update hooks for beam and flame
-  projectiles; a miss or glancing chance in the melee hit pipeline. Details:
-  [`refs/aim-perturbation.md`](refs/aim-perturbation.md).
+  to the player) for missiles, arrows and lobbers; a per-frame aim sway for beams (and the
+  visible bow sway); a miss or glancing chance in the melee hit pipeline. Details:
+  [`refs/aim-perturbation.md`](refs/aim-perturbation.md); spells:
+  [`impl/spell-aim-inaccuracy.md`](impl/spell-aim-inaccuracy.md).
 - Continuous numeric bonuses from sub-skills (if accepted, Q-DYN-9): hook entry-point evaluation
   (`RE::BGSEntryPoint::HandleEntryPoint`) or the damage calculation. Details:
   [`refs/dynamic-skill-effects.md`](refs/dynamic-skill-effects.md).
-- Sub-skill requirements on existing perks (if accepted, Q-DYN-13): one `GlobalVariable` per
-  referenced sub-skill value, plus conditions injected into `BGSPerk::perkConditions` at
-  `kDataLoaded` from a config table. Details:
-  [`refs/perk-requirements.md`](refs/perk-requirements.md).
+- Sub-skill requirements on existing perks (decided, Q-DYN-13): one `GlobalVariable` per perk
+  requirement, conditions injected at `kDataLoaded` into perk conditions, entry points and
+  ability effects from a config table: [`impl/perk-requirements.md`](impl/perk-requirements.md).
 
 - Item classification (weapons, and possibly armor, materials, spells): our own `_KID.ini`
   distributes `SPO_*` class keywords (records in our ESL) from OCF, Requiem and vanilla
@@ -985,6 +983,9 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-21 | **New:** read CommonLibSSE-NG `EXCEPTIONS.md` (Q-TECH-2) |
 | R-22 | Done (static): vanilla AVIF values confirmed (Smithing `UseMult`: 160 in Skyrim.esm, 1 in Update.esm), LoreRim GMST overrides, Experience / SSL / jail / Legendary settings, perk override chains: [`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md). Left: 6 engine-default GMSTs to read in game (§5 there); the `P_skill` / `P_sub` estimate itself (Q-ML-7, Q-DYN-15) |
 | R-23 | **New (runtime):** block stamina cost: formula, whether the GMST can be swapped per hit, where the drain happens, threads, Parrying RPG / Dual Wield Parrying / MCO Block Recovery. Details: [`research/R-23-block-stamina.md`](research/R-23-block-stamina.md) |
+| R-24 | **New:** does a LoreRim mod already slow time on block / parry (For Honor in Skyrim `MA_SlowTime`, Parrying RPG…), before restoring Quick Reflexes. Details: [`research/R-24-quick-reflexes-slowtime.md`](research/R-24-quick-reflexes-slowtime.md) |
+| R-25 | **New:** injecting conditions / values into existing perks from the DLL: CommonLib fields, gating of entry points and abilities, perks menu display, NPC exception, old saves. Details: [`research/R-25-perk-condition-injection.md`](research/R-25-perk-condition-injection.md) |
+| R-26 | **New:** spell aim: launch noise through `Projectile::Launch` (missile, lobber), aim sway for beams, TDM / SmoothCam interaction, how Requiem sways a bow without stamina. Details: [`research/R-26-spell-aim.md`](research/R-26-spell-aim.md) |
 
 Original task list:
 
