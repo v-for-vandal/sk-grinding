@@ -88,3 +88,6 @@ perk tree.
   See research R-14 and question Q-DYN-8.
 - If option 3 is used, our own effect formulas must stay sane at any level: linear or saturating,
   never exploding.
+- **Decided (design §5.1):** sub-skills have no practical cap. The design scale is 0–200, and the
+  technical `hardCap` is 500, set by float32 storage of `level + progress`. Every continuous
+  effect must saturate (e.g. `Bmax × (1 − e^(−L/s))`) or clamp its level argument at 200.

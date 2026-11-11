@@ -6,7 +6,11 @@ Model
 * XP cost of one level L -> L+1 (main skill and sub-skills, each with its own parameters):
       cost(L) = improve_mult * L**exponent + improve_offset
 * Conversion of sub-skill XP into main XP, as a function of the sub-skill's *peak* level L:
-      g(L) = k * (1 + exp(-T/w)) / (1 + exp((L - T)/w))      (normalized logistic, g(0) = k)
+      g(L) = k * rise(L) * fall(L)
+      rise(L) = smoothstep(clamp(L / T1, 0, 1)) = x^2 (3 - 2x)   (0 at L = 0, 1 from L = T1)
+      fall(L) = (1 + exp(-T/w)) / (1 + exp((L - T)/w))          (normalized logistic, fall(0) = 1)
+  T1 (rise) is global ([conversion] rise_T1, default 25) and can be overridden per sub-skill.
+  T, w (fall) are per sub-skill; T is where the falloff has halved (unchanged meaning).
   Main XP is produced only by XP that raises the sub-skill's peak (design §4.4), so the total
   main XP a sub-skill can contribute while going from level a to b is
       k * I(a, b),  I(a, b) = sum_{L=a}^{b-1} cost_sub(L) * gn(L + 0.5)
@@ -33,7 +37,7 @@ import sys
 import tomllib
 from dataclasses import dataclass, field
 
-MAX_LEVEL = 1000  # "infinity" for lifetime totals
+MAX_LEVEL = 500  # technical hardCap (design §5.1); "lifetime" totals are computed up to it
 
 
 @dataclass
@@ -67,17 +71,30 @@ class SubSkill:
     group: str
     T: float
     w: float
+    T1: float
     curve: Curve
     k: float = 0.0
     tier: float | None = None
     _cache: dict = field(default_factory=dict, repr=False)
 
-    def gn(self, level: float) -> float:
+    def rise(self, level: float) -> float:
+        if self.T1 <= 0:
+            return 1.0
+        x = min(max(level / self.T1, 0.0), 1.0)
+        return x * x * (3.0 - 2.0 * x)
+
+    def fall(self, level: float) -> float:
         num = 1.0 + math.exp(-self.T / self.w)
         x = (level - self.T) / self.w
         if x > 700:  # avoid overflow; contribution is ~0 anyway
             return 0.0
         return num / (1.0 + math.exp(x))
+
+    def gn(self, level: float) -> float:
+        return self.rise(level) * self.fall(level)
+
+    def peak_gn(self) -> float:
+        return max(self.gn(L / 4) for L in range(0, 4 * MAX_LEVEL))
 
     def g(self, level: float) -> float:
         return self.k * self.gn(level)
@@ -131,10 +148,12 @@ def main() -> int:
     start, target = int(main_cfg["start_level"]), int(main_cfg["target_level"])
     sub_curve_default = load_curve(cfg["sub_curve"])
 
+    rise_T1 = float(cfg.get("conversion", {}).get("rise_T1", 25))
     subs: dict[str, SubSkill] = {}
     for s in cfg["subskill"]:
         subs[s["name"]] = SubSkill(
             name=s["name"], group=s["group"], T=float(s["T"]), w=float(s["w"]),
+            T1=float(s.get("T1", rise_T1)),
             curve=load_curve(s.get("curve", {}), sub_curve_default), tier=s.get("tier"),
         )
 
@@ -196,14 +215,19 @@ def main() -> int:
         alone = main_curve.level_from_xp(start, to_path)
         rows.append([
             s.name + (" *" if s.name in path else ""), s.group,
-            "" if s.tier is None else f"{s.tier:g}", f"{s.T:g}", f"{s.w:g}", f"{s.k:.5g}",
+            "" if s.tier is None else f"{s.tier:g}", f"{s.T1:g}", f"{s.T:g}", f"{s.w:g}",
+            f"{s.peak_gn():.2f}", f"{s.k:.5g}",
             fmt(s.curve.xp_between(0, path_level)), fmt(to_path), f"{start}→{alone:.1f}",
             fmt(life), f"{100 * to_path / life:.0f}%",
         ])
-    print(table(["sub-skill (* = path)", "group", "tier", "T", "w", "k",
+    print(table(["sub-skill (* = path)", "group", "tier", "T1", "T", "w", "peak gn", "k",
                  f"sub XP 0→{path_level}", f"main XP 0→{path_level}",
                  f"main level, alone", "lifetime main XP", f"% of lifetime by {path_level}"], rows))
     print()
+
+    low = [x.name for x in subs.values() if x.peak_gn() < 0.9]
+    if low:
+        print("**Warning:** peak of gn < 0.9 (T1 too close to T): " + ", ".join(low) + "\n")
 
     print("## g(L): conversion factor by peak level\n")
     rows = [[s.name] + [f"{s.g(L):.3g}" for L in [0] + args.levels] for s in subs.values()]

@@ -6,7 +6,11 @@
 > Technical reference notes: [`refs/`](refs/): [`aim-perturbation.md`](refs/aim-perturbation.md),
 > [`per-target-budget.md`](refs/per-target-budget.md),
 > [`perk-requirements.md`](refs/perk-requirements.md),
-> [`dynamic-skill-effects.md`](refs/dynamic-skill-effects.md).
+> [`dynamic-skill-effects.md`](refs/dynamic-skill-effects.md),
+> [`frameworks.md`](refs/frameworks.md) (KID, OCF, AVG, CommonLibSSE-NG),
+> [`vanilla-skill-xp.md`](refs/vanilla-skill-xp.md) (vanilla XP formulas and per-action values).
+> LoreRim worksheets: [`refs/lorerim/`](refs/lorerim/): [`perks.md`](refs/lorerim/perks.md),
+> [`materials.md`](refs/lorerim/materials.md), [`weapons.md`](refs/lorerim/weapons.md).
 > Tools: [`scripts/normalize_conversion.py`](scripts/normalize_conversion.py) (conversion
 > normalization, §4.4).
 
@@ -30,11 +34,25 @@ answer with "ok", "no" or a modification. On the next round I will pick up every
   (perks, keywords, globals, MCM quest) and a small amount of Papyrus (MCM glue only).
 - Target modlist: **Lorerim 5.0+** (Requiem-based Wabbajack modlist). Important Lorerim facts
   already known:
-  - Character level is **decoupled from skills** in Lorerim 5.0+; it grows from quests only.
-    So slowing down main-skill growth does not slow down character leveling.
+  - Runtime: **Skyrim AE 1.6.1170 + SKSE 2.2.6** (CK 1.6.1378). Research of the installed
+    LoreRim 5.0 profile (2026-11-11): [`refs/lorerim/`](refs/lorerim/), report in the research
+    dump (§15.2).
+  - Character level is **decoupled from skills**. It grows through the **Experience** mod from
+    kills, discovering and clearing locations and quests (`bEnableSkillXP = false`). So slowing
+    down main-skill growth does not slow down character leveling.
+  - **Use-based skill leveling is disabled** in LoreRim. All 18 skill AVIFs have `UseMult = 0`
+    and `ImproveOffset = 9999`. Skills grow only through **Static Skill Leveling Rewritten (SSL)**,
+    which distributes 30 points per character level (max 5 per skill). Our mod replaces SSL
+    (§4.1).
   - Clothing experience goes into **Light Armor** in Lorerim.
-  - The "max 5 trainings per level" limit is **removed** in Lorerim.
+  - Trainings: Requiem's `iTrainingNumAllowedPerLevel = 5` is still in effect. *Simply Smart
+    Training* carries unused lessons over to later levels. (The earlier note "limit removed" was
+    wrong.)
   - Thu'um-improving perks live in the **Speech** tree in Lorerim.
+  - Perk trees are a mix of Requiem + Magic Redone + Special Feats + Ordinator + LoreRim patches.
+    The full list is in [`refs/lorerim/perks.md`](refs/lorerim/perks.md).
+  - Keywords must be referenced by **FormKey** (plugin + local ID). Requiem renamed many vanilla
+    keywords (e.g. `ArmorMaterialEbony` is now `REQ_ArmorSet_Ebony`, same FormKey).
 - Development and testing happen on a separate Windows machine with Skyrim, Lorerim and
   Creation Kit. This document and the implementation plan are prepared on Linux, without
   access to the game.
@@ -62,14 +80,16 @@ of skills.
 |---|---|
 | **Main skill** | One of the 18 vanilla skills (One-Handed, Smithing, …), i.e. the engine actor value. |
 | **Sub-skill** | A new, mod-defined proficiency (e.g. `sword`, `ebony-armor`, `missile`). Each sub-skill belongs to exactly one main skill (its *parent*). |
-| **Current** | Present level of a sub-skill, range **0–200**. Goes up with use, decays without use. Drives sub-skill perks. |
+| **Current** | Present level of a sub-skill. Design scale **0–200**, technical cap `hardCap` = 500 (§5.1). Goes up with use, decays without use. Drives sub-skill perks. |
 | **Floor** | "Muscle memory". Current never decays below floor. Has two parts: **own floor** (earned by the sub-skill itself, capped at `floorCap` = 75) and **effective floor** (own floor raised by cross-links, see §6). |
 | **Potential** | Best level ever reached, additionally raised by books, trainers and other external sources. Below potential, current grows faster ("recalling"). Invariant: `potential ≥ current`. |
 | **Sub-skill XP** | Experience earned by a sub-skill from a gameplay event. |
-| **Main XP** | Experience added to a main skill. **The only source of main XP is sub-skill activity** (vanilla XP is suppressed). |
-| **Conversion** | The function mapping sub-skill XP → main XP, defined per sub-skill (may be non-linear). |
+| **Main skill level** | Computed from sub-skill levels (§4.4), not accumulated. Vanilla XP is suppressed; the only source of main-skill growth is sub-skill progress. |
+| **Conversion** | `g(L)` and its integral `M_i(L)`: how much a sub-skill at level `L` is worth to its main skill, defined per sub-skill (rises from 0 over the first levels, then falls off, so `M_i` saturates; §4.4). |
+| **Rust** | `R`, the main skill's own decay, in levels. Grows when the whole main skill is not practised, shrinks with its practice (§4.4.3). |
+| **Idle meter** | `U`, active hours of "not practising", reduced in proportion to raw XP. Drives the grace period of sub-skill decay (§5.5) and of rust. |
 | **Cross-link** | A rule that one sub-skill's own floor raises another sub-skill's effective floor. |
-| **Use event** | Any event that grants XP to a sub-skill; resets its decay timer. |
+| **Use event** | Any event that grants XP to a sub-skill; reduces its idle meter in proportion to the raw XP (§5.5). |
 | **Window rule** | A rule that grants XP depending on whether a complementary event happened within the last N seconds (dual-wield, with-shield, with-magic). |
 | **Zone multiplier** | XP multiplier that depends on where current is relative to floor and potential (§5.3). |
 
@@ -77,11 +97,18 @@ of skills.
 
 ### 4.1 Decisions
 
-- **Flow model.** Sub-skills and main skills are connected by **experience flow**, not by a
-  level formula: every XP gain of a sub-skill produces a (converted) XP gain of its parent
-  main skill. Main skill levels are therefore **monotonic** (never decrease).
+- **Level model.** The main skill level is **computed from the levels of its sub-skills**
+  (§4.4). It can go down: the main skill **rusts** when the whole skill is not practised, and
+  vanilla effects that read the main skill follow. (Replaces the earlier XP-flow model with
+  monotonic main skills: [`old/main-xp-transfer.md`](old/main-xp-transfer.md).)
 - **Vanilla XP is fully suppressed.** The engine's own skill XP awards are intercepted and
-  zeroed. Main skills grow only through §4.2.
+  zeroed. Main skills grow only through §4.2. (In LoreRim they are already zero, since
+  `UseMult = 0`. The hook still provides the *raw* use amount as base XP; see Q-XP-9.)
+- **SSL is disabled** (decided). Static Skill Leveling Rewritten no longer distributes skill
+  points at level-up; our mod is the only source of main-skill growth. Preferably SSL is switched
+  off via its MCM/INI without removing it from the load order (research R-16). Otherwise its
+  distribution would turn into a stream of "external increments" (next point) and flood
+  potential.
 - **Per-sub-skill conversion.** Each sub-skill has its own conversion to main XP, possibly
   non-linear (§4.4). Example design target for `jewelry`: taking `jewelry` from 0 to 75 should
   produce in total only enough main XP to raise Smithing from 15 to 35.
@@ -101,8 +128,9 @@ gameplay event
   → zone multiplier (×3 / ×1.5 / ×1)                           (§5.3)
   → current XP += result; own floor XP += floorRate × result   (§5.4)
   → potential = max(potential, current)
-  → if current XP > peak XP: main XP += Δpeak × g(peak level)   (§4.4; Q-XP-1, Q-XP-2)
-                               peak XP = current XP
+  → peak XP = max(peak XP, current XP)
+  → main skill: reduce idle meter U_main and rust R by raw XP; recompute main level,
+    write it with hysteresis                                    (§4.4)
   → re-evaluate sub-skill perks (with hysteresis)              (§5.6)
 ```
 
@@ -117,13 +145,12 @@ gameplay event
   **Decided for Smithing: (a)** (§7.4). This is safe because conversion is normalized per main
   skill against a reference path (§4.4), so summing does not make the skill grow faster.
   Proposal: (a) + per-skill normalization for all skills.
-  - **A:**
-- **Q-XP-2.** With the peak rule (§4.4) the rotation exploit G-N2 is gone. One case remains:
-  when potential is above peak (raised by books or trainers), XP that raises peak gets the ×1.5
-  recall multiplier. Should Δpeak be converted as is, or divided by the zone multiplier (raw)?
-  Recommendation: raw, so that books/trainers make the sub-skill faster but do not boost the
-  main skill.
-  - **A:**
+  - **A:** (a) + per-skill normalization for all skills.
+- **Q-XP-2.** ~~Convert Δpeak raw or with the recall multiplier?~~ No longer applies: the main
+  skill is computed from levels (§4.4), so there is no Δpeak conversion. Books and trainers
+  speed up sub-skills (×1.5 recall up to potential), and the main skill follows. Accepted
+  (comparable to vanilla books raising the skill directly); see
+  [`old/main-xp-transfer.md`](old/main-xp-transfer.md) §2.
 - **Q-XP-4.** External increments → potential: what is the exchange rate? Proposal:
   `+N main levels` → `+2N potential` (because sub-skills use a 0–200 scale) on every sub-skill
   of that main. And for XP-based script awards (`AdvanceSkill(x)`): convert x to the equivalent
@@ -136,68 +163,277 @@ gameplay event
 - **Q-XP-6.** Jail: vanilla removes skill progress while serving time. With vanilla XP
   suppressed this becomes a no-op. Should jail do something in our model (e.g. start decay
   immediately for all sub-skills), or nothing?
-  - **A:**
+  - **A:**: Jai starts decay immediately and counts as x2 time (one day in jail
+    is two days of inactivity)
+  - Note (R-22): in LoreRim `Less Jail.esp` caps jail at **7 days**, about one day per 1000 gold
+    of bounty (`iCrimeMaxNumberofDaysinJail = 7`, `iCrimeDaysInPrisonMod = 1000`).
 - **Q-XP-7.** Target pacing (how many hours of normal play from 15 to 100 in a main skill,
   how many hours from 0 to 100/200 in an actively used sub-skill). See §15.1 for what we know
   about vanilla and the proposal to measure it.
   - **A:**
 
-### 4.4 Conversion model (decided)
+- **Q-XP-8.** **Experience mod skill cap.** Experience caps skills by character level
+  (`fSkillCapBase = 50`, `fSkillCapMult = 1`, `bUseRacialCaps = false`: `cap = 50 + level`, 51 at
+  level 1, 100 at level 50; confirmed in R-22). Our main skills would hit that cap. Options: (a) disable the Experience skill cap
+  (INI/MCM), so main skills are limited only by our own model; (b) keep it as an additional
+  "level gate". With the level model (§4.4) nothing needs to be stored: the computed value is
+  clamped and rises at once when the cap rises; the UI must explain the cap; (c) replace it with our own gate (e.g. via perk requirements).
+  Recommendation: (a). Character-level progression stays with Experience either way.
+  - **A:** (a), disable cap
+- **Q-XP-9.** **Base XP when `UseMult = 0`.** The design uses the engine's per-action XP amount as
+  base XP. In LoreRim the AVIF multiplier is 0, so after the multiplier the amount is 0. Proposal:
+  hook the call that receives the **raw use points** before the AVIF multiplier
+  (`PlayerCharacter::UseSkill`/`PlayerSkills::UseSkill` *(verify which one applies the
+  multiplier)*). Our own per-skill base multipliers (config) then replace `UseMult`. If raw
+  points are not reachable, compute base XP per event ourselves (§7–§9 rules). Runtime test:
+  R-17.
+  - **A:**
 
-- **Peak rule.** Each sub-skill stores `peakXP`, the highest current XP it has ever had. Main
-  XP is produced **only by XP that raises the peak**. Training back after decay (below peak)
-  produces no main XP. This closes the rotation exploits G-N2, G-N26 and G-S2.
-  - Peak is **not** potential. Potential is also raised by books, trainers and external
-    increments (§4.1, §10). If conversion were tied to potential, a trainer raising potential
-    would make the following learning produce *no* main XP, so training would hurt the main
-    skill. Peak only follows the player's own practice.
-- **Conversion function.** For a sub-skill with peak level `L`:
-  `g(L) = k × (1 + e^(−T/w)) / (1 + e^((L − T)/w))`, a normalized logistic: `g(0) = k`,
-  halved around `L ≈ T`, width `w`. `mainXP += Δpeak × g(L)`.
-  - `k`, `T`, `w` are per sub-skill (config). Usually `k` is shared by a group of sub-skills
-    (e.g. all Smithing materials), and `T` varies with how hard the sub-skill is.
-  - Each sub-skill can contribute only a **finite** amount of main XP over its lifetime, so a
-    high main skill requires breadth (several sub-skills). How much breadth is set per skill
-    with `T`: high for skills where a specialist should go far (weapons), lower for skills where
-    breadth is the theme (crafting, magic).
-  - The sub-skill itself keeps growing for its own perks; only its contribution to the main
-    skill fades.
-- **Normalization.** Per main skill, a **reference path** is defined: a set of sub-skills each
-  trained from 0 to a given level (e.g. 75). This path must take the main skill from 15 to 100.
-  Each group of sub-skills gets a main-XP budget (absolute, e.g. "jewelry = Smithing 15→35", or
-  a share of the rest). The `k` values are solved from the budgets, not tuned by hand.
-- **Tool:** [`scripts/normalize_conversion.py`](scripts/normalize_conversion.py) with a per-skill
-  TOML config (Smithing: [`scripts/smithing.toml`](scripts/smithing.toml)). It computes `k` per
-  group, the main level each sub-skill gives alone, the lifetime contribution, `g(L)` tables,
-  a path check, and (optionally) crafting pace in material units and active days. The XP curves
-  are vanilla-style; the real Lorerim values for the main skill can be read from its AVIF
-  record (or by the DLL at runtime).
+### 4.4 Main skill from sub-skill levels (decided)
+
+The main skill level is **computed from the sub-skill levels via XP analysis**, not accumulated from XP. It can
+go down when the whole skill is not used ("rust"), so every vanilla, Requiem or Ordinator effect
+that reads the main skill follows it: prices, pickpocket chance, magnitudes, perk conditions
+such as `GetActorValue Smithing >= 50`. The previous model (XP transfer with a peak rule) and
+the comparison are in [`old/main-xp-transfer.md`](old/main-xp-transfer.md).
+
+#### 4.4.1 Formula
+
+```
+M_i(L)      = k_i · Σ_{l=0}^{L-1} cost_sub_i(l) · gn_i(l + 0.5)     // main-XP "worth" of sub-skill i at level L
+L_i^main    = max(current_i, peak_i − R)                            // R = rust of the main skill, §4.4.3
+main        = level_from_xp(base, Σ_i (M_i(L_i^main) − M_i(L_i^0)))  // base, L_i^0: §4.4.4
+```
+
+- `gn = g/k` is the normalized conversion, a **rise** times a **fall**:
+  ```
+  g(L)    = k · rise(L) · fall(L)
+  rise(L) = x²·(3 − 2x),  x = clamp(L / T1, 0, 1)          // smoothstep: 0 at L = 0, 1 from L = T1
+  fall(L) = (1 + e^(−T/w)) / (1 + e^((L − T)/w))         // normalized logistic, halved around L ≈ T
+  ```
+  - **Rise (decided, T1 = 25).** The first levels of a fresh sub-skill are worth little to the main
+    skill; the full rate is reached at `T1`. This removes the breadth bias of a plain falloff
+    (§4.4.2). `T1` is global (config), with a per-sub-skill override.
+  - **Fall** keeps its meaning: `T` is where the conversion has halved, `w` its width.
+  - `k`, `T`, `w` are per sub-skill (config). Usually `k` is shared by a group of sub-skills (e.g.
+    all Smithing materials), and `T` varies with how hard the sub-skill is.
+  - The peak of `gn` is ≈ 1 only when `T` is well above `T1` (`T ≥ T1 + 3w`). For lower `T` the
+    peak is lower (Q-ML-10).
+  - The previous curve (fall only, `g(0) = k`) is kept in
+    [`old/conversion-fall-only.md`](old/conversion-fall-only.md).
+- **`M_i` is not "the XP needed to reach level L".** Each sub-skill XP point is weighted by `g` at
+  the level where it is earned, so the falloff is inside `M_i`.
+  - `M_i` is a fixed, monotonic, **saturating** curve per sub-skill (above `T + several w` it
+    barely grows).
+  - It is precomputed as a table over 0…hardCap.
+- Each sub-skill can contribute only a **finite** amount to the main skill, so a high main skill
+  requires breadth (several sub-skills). How much breadth is set per skill with `T`: high for
+  skills where a specialist should go far (weapons), lower for skills where breadth is the theme
+  (crafting, magic). The sub-skill itself keeps growing for its own perks; only its contribution
+  to the main skill fades.
+- **Rotation exploits are closed by construction.** The main skill depends on levels, not on
+  accumulated XP. Letting a sub-skill decay and retraining it returns the main skill to the same
+  value and gives nothing extra (G-N2, G-N26, G-S2). `peak` is still stored per sub-skill: the
+  rust formula needs it.
+- The **Experience skill cap** (Q-XP-8) is applied as a clamp on the computed value. When the
+  character levels up, the main skill rises at once to what has already been earned.
+
+#### 4.4.2 Breadth vs depth
+
+A plain sum of levels is **not** used: ten sub-skills at 10 would be worth one at 100, and are
+far cheaper. With `M_i(L)` the balance is set by `T1` (rise) and `T`/`w` (fall). Example for one
+Smithing-like sub-skill (placeholder curve `cost(L) = 0.25·L^1.95 + 300`, k = 1, `T1 = 25`; in
+brackets: the previous fall-only curve):
+
+| T, w | 10 sub-skills at 10 | 4 at 25 | 1 at 100 | 1 at 200 |
+|---|---|---|---|---|
+| sub XP spent | 30.6k | 34.2k | 96.3k | — |
+| main XP, T=90, w=15 | 4.0k (30.6k) | 18.3k (34.1k) | **66.0k** (69.9k) | 84.6k (88.5k) |
+| main XP, T=60, w=12 | 4.0k (30.5k) | 17.9k (33.7k) | 33.3k (37.2k) | 34.5k (38.4k) |
+| main XP, T=40, w=10 | 3.9k (30.3k) | 16.7k (32.1k) | 15.5k (19.3k) | 15.5k (19.4k) |
+
+- **Per unit of effort**, levels 0–10 of a fresh sub-skill convert at ≈ 13% of `k` (previously
+  100%). Spreading over many barely-trained sub-skills no longer pays. Breadth is still
+  rewarded once each sub-skill is past `T1`.
+- **Depth** loses little (≈ 4k of 70k at T=90), because the cheap first levels are a small part
+  of the XP to 100. The lost part is recovered by `k` in normalization (§4.4.5).
+- The earlier "possible tweaks" against a breadth bias (top-N, descending weights, a count cap
+  per group) are **dropped**: the rise does this job.
+
+#### 4.4.3 Rust: decay of the main skill
+
+The main skill must not follow each sub-skill's decay. Switching sword → mace must not lower
+One-Handed: the player is still a one-handed fighter. Switching sword → greatsword should lower
+One-Handed. So the main skill has its **own** decay, driven by the activity of the whole skill.
+
+- Each main skill has a **rust** `R ≥ 0`, in levels, and an **idle meter** `U_main`. The idle
+  meter works exactly like the sub-skill one (§5.5):
+  - `U_main` grows with **active** game time and shrinks by `c_dec × rawXP` of any of its
+    sub-skills;
+  - `R` grows at rate `r_skill` while `U_main` is past the grace period (same ramp as §5.5);
+  - `R` shrinks with raw XP of **any** of its sub-skills: `R −= c × rawXP` (raw, before zone
+    multipliers), and never goes below 0.
+- **Cross-links do not reduce `R` or `U_main`.** Only the skill's own practice counts. Otherwise
+  Two-Handed practice would keep One-Handed from rusting.
+- **`r_skill` per main skill**, depending on how interesting the skill is to keep up in normal
+  play: crafting skills (Smithing, …) rust **slowly**, weapon and armor skills **faster**.
+- **Time is active game time only** (sleeping, waiting, fast travel and jail do not count), with
+  the same counter as the crafting bucket.
+- Lower bound: `current_i` (decided). The main skill never falls faster than its sub-skills; in
+  the end it falls to `F(effective floors)`.
+
+| Scenario | Sub-skills | `R` | One-Handed |
+|---|---|---|---|
+| Sword → mace | sword decays, mace grows | mace practice keeps `R ≈ 0` | stays at the sword's `F(peak)`: does not drop |
+| Sword → greatsword | sword decays | grows | drops, finally to `F(effective floors)` |
+| Back to one-handed | sword recovers (×3 below potential) | XP gradually reduces `R` | recovers gradually, not from one swing |
+
+- The weakness with the mace is still real, but it comes from the **mace sub-skill**: sub-skill
+  perk requirements and continuous effects (Q-DYN-7) read the sub-skill, not the main skill.
+  Main skill = the class, sub-skill = the specific weapon or material.
+- An occasional poke does not stop rust: `R` shrinks in proportion to XP.
+
+#### 4.4.4 Start, external sources, perks, writes
+
+- **Start.** At a new game, and when the mod is added to an existing save, the current main
+  skill levels are converted into **own floors** of all sub-skills of that skill; current and
+  potential start at the floor. The main skill level at that moment is stored as `base`, and the
+  initial sub-skill levels as `L_i^0` (formula in §4.4.1), so the main skill does not jump at
+  conversion and grows only from further practice. Mapping: Q-ML-9.
+- **External sources.** Quest rewards, `AdvanceSkill`/`IncrementSkill`, Oghma Infinium and
+  similar raise **potential of all sub-skills** of that main skill (no cross-links), as in §4.1.
+  Through faster "recall" practice this also raises the main skill sooner.
+  - **Fortify Skill** effects: if they can be redirected to sub-skills without much effort, do
+    so. Otherwise they keep working as is: they change the AV's modifiers, and we write only the
+    base value, so they raise the main skill and do not affect sub-skills.
+- **Perks when the main skill drops.** Perks of other mods (LoreRim, Requiem, Ordinator) stay
+  and behave as their authors intended: they keep working, or switch off through their own
+  skill-level conditions. We do not change them. **Our own** perks follow "dormant below the
+  threshold, active again when it recovers" (with hysteresis, §5.6).
+- **Legendary is disabled entirely.** A computed main skill cannot be reset. LoreRim does not
+  block it: Requiem only adds warning texts and `fLegendarySkillResetValue = 5` (R-22), so our
+  DLL must block the reset itself.
+- **Writes with hysteresis.** The main skill is recomputed on every sub-skill change, after
+  decay, and on game load. The integer main level is written to the AV (base value) only when
+  `F` leaves a hysteresis band around it (width: Q-ML-6).
+- **UI.** The skills menu progress bar shows the fractional part of `F`. "Skill increased" and
+  "skill decreased" notifications are ours.
+- **Character level.** In LoreRim character XP comes from Experience (kills, locations,
+  quests), not from skill increases, so a falling main skill does not affect character level
+  (`bEnableSkillXP = false`, confirmed in R-22).
+
+#### 4.4.5 Normalization
+
+- Per main skill, a **reference path** is defined: a set of sub-skills each trained from 0 to a
+  given level (e.g. 75). This path must take the main skill from 15 to 100.
+- Each group of sub-skills gets a main-XP budget: absolute (e.g. "jewelry = Smithing 15→35"), or
+  a share of the rest. The `k` values are solved from the budgets, not tuned by hand.
+- **Tool:** [`scripts/normalize_conversion.py`](scripts/normalize_conversion.py), with a per-skill
+  TOML config (Smithing: [`scripts/smithing.toml`](scripts/smithing.toml)). It computes:
+  - `k` per group;
+  - the main level each sub-skill gives alone, and its lifetime contribution;
+  - `g(L)` tables and a check of the reference path;
+  - optionally, the crafting pace in material units and active days.
+
+  `I(0, L)` in the script is `M(L)/k`. The XP curves are vanilla-style; the real LoreRim values
+  for the main skill can be read from its AVIF record (or by the DLL at runtime).
+- To add: a table of `M_i(L)` and breadth/depth scenarios (as in §4.4.2), and a simulation of the
+  rust scenarios of §4.4.3 with placeholder `r`, `c`, decay parameters.
+
+#### 4.4.6 Open questions
+
+- **Q-ML-6.** Hysteresis width for writing the main level (e.g. ±0.5 level) and recompute
+  frequency.
+  - **A:**
+- **Q-ML-7.** How to compute `c` (rust removed per raw XP)? Requirement: normal play with the
+  skill fully cancels the growth of `R`, occasional use does not. Proposal: from a reference
+  pace `P_skill`, raw XP per active game hour of normal play, `c = r / (q × P_skill)`, where
+  `q < 1` is the fraction of the normal pace that is enough to hold `R` at 0 (e.g. 0.3).
+  - Problem: in LoreRim, skill XP is disabled (`UseMult = 0`), so the pace cannot be observed
+    in normal play.
+  - Sources for `P_skill`:
+    - (1) vanilla per-action use values: AVIF `UseMult`/`Offset` from the **vanilla
+      `Skyrim.esm`** (can be dumped with Mutagen, no internet), plus action-specific values
+      documented on UESP (R-22);
+    - (2) our own debug log in playtests: the raw use points hook (Q-XP-9, R-17) logs raw XP
+      per active hour even though `UseMult = 0`.
+
+    Proposal: (1) for first numbers, (2) to calibrate.
+  - **A:**
+- **Q-ML-8.** Values of `r_skill` and the grace period per main skill, in levels per active
+  game day (decided: crafting slow, weapons and armor faster; active time only).
+  - **A:**
+- **Q-ML-9.** Start conversion (§4.4.4): which own floor does a main level give? Proposal:
+  `floor = clamp(2 × (main − 15), 0, floorCap)` for every sub-skill of that skill (sub-skills use
+  a 0–200 scale). Should all sub-skills get the same floor, or only "basic" ones (e.g. `iron`,
+  `steel` for Smithing; the weapon types for One-Handed)? Related: Q-DYN-1, Q-OTH-1.
+  - **A:** formula accepted: `floor = clamp(2 × (main − 15), 0, floorCap)`. A skill at the
+    default 15 gives 0, so most sub-skills start from 0 and go through the rise (§4.4.1); race
+    bonuses (+5 / +10) give floors 10 / 20, still below `T1 = 25`. Open: same floor for all
+    sub-skills or only "basic" ones.
+- **Q-ML-10.** Sub-skills with a low fall `T` (Smithing placeholders: jewelry `T = 15`, iron and
+  leather 25, steel 35) have their conversion peak well below `k` with `T1 = 25` (`gn` peak 0.35 /
+  0.61 / 0.76). Normalization compensates group-wide `k` (jewelry has its own group), but inside
+  the material group these sub-skills lose share. Options: (1) accept; (2) per-sub-skill
+  `T1 ≈ T / 2` for low-`T` sub-skills; (3) raise their `T`. The script warns when the peak is
+  below 0.9.
+  - **A:**
 
 ## 5. Sub-skill value dynamics
 
 ### 5.1 Range and XP curve
 
-- All sub-skills use the range **0–200**.
+- **Design scale 0–200.** Perks, effect formulas, `floorCap`, conversion and pacing are
+  calibrated against 0–200. 200 is the "design max", the level a dedicated specialist reaches
+  late in a long playthrough.
+- **No practical upper limit.** Above 200 the sub-skill keeps growing along the same curve. There
+  is only a technical `hardCap = 500` (config), chosen to fit float32 storage (below). With the
+  vanilla-like curve, 200→500 costs ≈ 144 × (0→75), so the cap is never reached in practice.
+  For reference: 0→200 ≈ 11.4 × (0→75); 200→210 ≈ 1.6 ×; 200→250 ≈ 9.8 ×; 200→300 ≈ 24 ×.
 - XP needed to go from level `L` to `L+1` uses the vanilla-style curve:
   `cost(L) = improveMult × L^1.95 + improveOffset`, with `improveMult`, `improveOffset`
-  configurable per sub-skill (exponent configurable globally). Levels for current, own floor
-  and potential are all derived from their XP totals using the same curve.
-- **Q-DYN-8.** Is a hard cap (200) needed at all? The engine does not require one: sub-skills are
-  DLL data, and main-skill AVs can go above 100. An alternative is no cap, with the growing XP cost
-  as a soft cap (polynomial: slow but endless growth; exponential: practically asymptotic).
-  Constraints: some vanilla/Requiem formulas may clamp at 100 or misbehave above it (R-14), and
-  the vanilla skill menu is designed for 0–100. A "design max" for balancing perks, `floorCap`
-  and conversion is still needed, and all effect formulas must stay sane at any level (see
-  [`refs/dynamic-skill-effects.md`](refs/dynamic-skill-effects.md) §3). Also: what should the
-  *main* skill range be (0–100 as in vanilla, 0–200, uncapped)?
+  configurable per sub-skill (exponent configurable globally). Levels for current, own floor,
+  potential and peak are derived from their XP using the same curve.
+- **Optional soft cap above 200** (config, off by default):
+  `cost(L) × e^((L − 200)/softCapScale)` for `L > 200`. With `softCapScale ≈ 10` each level
+  above 200 is ~10% dearer than the previous one, so the practical ceiling is ≈ 220–230.
+- **Storage (float32, no double).** Each value (current, own floor, potential, peak) is stored as
+  `uint16 level` + `float progress` (XP inside the level, `0 ≤ progress < cost(level)`), **not**
+  as a total XP float.
+  - Reason: total XP in float32 is already imprecise at 200. The total is ≈ 576k there, so the
+    step (ulp) is 0.0625 XP, and small awards (falloff tails, DR, fractions of 1 XP) get rounded
+    or lost. At 1000 the ulp is 4 XP.
+  - With per-level progress, the largest value is `cost(L)`. At `L = 500` it is ≈ 46k, so the ulp
+    is ≈ 0.004 XP. That is fine for increments of ~1 XP and above. For `cost(L) < 2¹⁶`
+    (`L ≲ 600`) the ulp stays ≤ 1/128 XP. This is what sets `hardCap = 500` with a margin.
+  - Precondition: XP units are chosen so that the smallest meaningful award is around 1 XP or
+    larger. If the XP scale changes, re-check `hardCap`.
+  - Comparisons (`current ≥ potential`, peak) are lexicographic on `(level, progress)`.
+    Differences such as Δpeak are computed as "progress across level boundaries", never by
+    subtracting totals.
+- **Effect formulas must saturate.** Every continuous effect (Q-DYN-7/9), and any other formula
+  driven by a sub-skill level, must be bounded: either saturating (e.g.
+  `Bmax × (1 − e^(−L/s))`) or with its level argument clamped to 200. A linear unbounded bonus is
+  not allowed. Perk thresholds are ≤ 200 by convention.
+- **External potential is capped separately.** Without a cap, books, trainers and external
+  increments could raise potential without limit. Then ×1.5 would apply at every level (G-N9).
+  See Q-BT-4.
+- **Q-DYN-8.** Main skill range: 0–100 as in vanilla, or 0–200, or uncapped (main skills are
+  float AVs and can go above 100)? Constraints: some vanilla/Requiem formulas may clamp at 100 or
+  misbehave above it (R-14). The vanilla skill menu is designed for 0–100. With the Smithing
+  placeholders, training all sub-skills to 75 already gives main ≈ 150 (§7.4).
+  - **A:**
+- **Q-DYN-14.** Enable the optional soft cap above 200 by default? If yes, which
+  `softCapScale`?
   - **A:**
 
 ### 5.2 Initial values
 
-- New game is required for now (mid-game installation is deferred; see Q-OTH-1).
-- **Q-DYN-1.** Starting values at new game: all zero, or derived from the race's starting
-  main-skill values (e.g. Nord One-Handed 20 → floor/current of 1H sub-skills = some function)?
-  - **A:**
+- The start conversion (§4.4.4) also covers adding the mod to an existing save. The rest of
+  mid-game installation and uninstallation is still deferred (Q-OTH-1).
+- **Q-DYN-1.** ~~Starting values at new game?~~ Decided: main skill levels are converted into
+  own floors of the sub-skills, at a new game and when the mod is added to an existing save
+  (§4.4.4). Mapping: Q-ML-9.
 
 ### 5.3 Zone multipliers (configurable)
 
@@ -221,36 +457,62 @@ gameplay event
 - **Q-DYN-3.** Should floor gain use the XP before or after the zone multiplier? And should the
   floor grow while current is below floor (catching up)? Proposal: floor uses XP before zone
   multiplier and grows only while `current ≥ effectiveFloor`.
-  - **A:** I agree with the proposal
+  - **A:** 1. Before zone multiplier 2. If floor only grows when current >=
+    effectiveFloor, then we have a problem that having effectiveFloor from
+    other skill will slow down growing own floor. Perhaps we should instead
+    accelerate growing ownFloor while ownFloor <= current <= effectiveFloorL
+    What are the downsides?
 
 ### 5.5 Decay
 
 // TODO: Artem: Надо обсудить decay
 
-- Each sub-skill remembers the game time of its last **use event**.
-- For `t` = game hours since last use:
-  - `t < 24`: no decay (grace period);
-  - `24 ≤ t < 72`: decay rate ramps linearly from 0 to `decayRate_skill`;
-  - `t ≥ 72`: decay rate = `decayRate_skill`.
+- **Time is active game time only** (decided, Q-DYN-5): sleeping, waiting, fast travel and
+  jail do not count. The same "active game hours" counter as the crafting bucket
+  ([`refs/per-target-budget.md`](refs/per-target-budget.md) §10).
+- **Idle meter instead of a "last use" timer** (decided, replaces the old Q-DYN-6 proposal).
+  Each sub-skill has an idle meter `U` (in active game hours):
+  - `U` grows by the elapsed active time: `U += dt`;
+  - `U` shrinks with practice: `U −= c_dec × rawXP` (raw XP of this sub-skill, before zone
+    multipliers; XP from cross-links does not count);
+  - `0 ≤ U ≤ Umax` (`Umax` = 72, so a long break needs no more practice to undo than a 3-day
+    one).
+
+  A few hits on an enemy remove only a little of `U`, so they no longer stop decay
+  (grinding-analysis G-N6). Only practice at a meaningful pace keeps `U` in the grace zone.
+- Decay rate from the idle meter:
+  - `U < 24`: no decay (grace period);
+  - `24 ≤ U < 72`: decay rate ramps linearly from 0 to `decayRate_skill`;
+  - `U ≥ 72`: decay rate = `decayRate_skill`.
+- `c_dec` per sub-skill (config). How to compute it: **Q-DYN-15**.
 - Decay lowers **current** only, never below effective floor. Floor and potential are
-  unaffected. Main skills never decay.
+  unaffected. Main skills do not follow this decay directly; they have their own rust (§4.4.3).
 - `decayRate_skill` is per sub-skill, from config/MCM. Skills that are hard to practise often
   decay slower (e.g. smithing materials), weapons faster.
 - Calibration target: an unused weapon sub-skill fully returns to its floor in about
   **14 game days**.
 - Decay is applied lazily (on each use event, on UI open, and on a periodic tick), computed
-  from elapsed game time — not by a per-frame timer.
+  from elapsed active game time — not by a per-frame timer. Between two events `U` grows
+  linearly with time, so the decay over the interval has a closed form (integral of the
+  piecewise-linear ramp).
+- The main skill's rust (§4.4.3) uses the same idle-meter mechanics at the level of the whole
+  main skill.
 - **Q-DYN-4.** Units of `decayRate`: (a) fixed levels per game day — then a skill at 200 takes
   much longer to fall to floor than a skill at 60; or (b) relative to the gap at decay start —
   `rate = (current₀ − floor) / 12 days`, so "back to floor in 14 days" holds for any level.
   Recommendation: (b), or decay in XP rather than levels.
   - **A:**
-- **Q-DYN-5.** Game time includes sleeping, waiting, fast travel and jail. Sleeping 7 days thus
-  decays skills. Is that intended?
-  - **A:**
-- **Q-DYN-6.** Does any tiny use reset the timer (one hit on a chicken per day prevents all decay
-  — grinding-analysis G-N6)? Proposal: the timer resets only when a sub-skill gained at least
-  `minDailyUseXP` (configurable) within the current game day.
+- **Q-DYN-5.** ~~Game time includes sleeping, waiting, fast travel and jail.~~ Decided: active
+  game time only (see above).
+- **Q-DYN-6.** ~~Does any tiny use reset the timer (G-N6)?~~ Decided: no timer; the idle meter
+  `U` is reduced in proportion to raw XP (see above).
+- **Q-DYN-15.** How to compute `c_dec` (idle hours removed per raw XP)? Requirement: normal
+  practice of the sub-skill keeps `U` in the grace zone, occasional use does not. **Proposal:**
+  from a reference practice pace `P_sub` (raw XP per active hour while the sub-skill is being
+  used, from playtests or the pacing baseline §15.1): `c_dec = 1 / (q × P_sub)`, where `q < 1`
+  is the fraction of the normal pace that is enough to stop `U` from growing (e.g. 0.3). Same
+  approach as `c` for the main-skill rust (experiment Q-ML-7). Add to the normalization
+  script once `P_sub` is known.
   - **A:**
 
 ### 5.6 Sub-skill perks
@@ -263,13 +525,21 @@ gameplay event
 - **Q-DYN-7.** Besides threshold perks, should current level have a small continuous effect
   (e.g. +0.1% weapon damage per level of the matching weapon sub-skill)? Without it, the
   sub-skill system has no gameplay effect until perks are designed.
-  - **A:**
+  - **A:** Yes, it should. Every sub-skill must have designated continuous
+    effect, or multiple, or explicitly stated in design document that there are
+    no continuous effects.
 - **Q-DYN-9.** How should continuous effects (Q-DYN-7) and other numeric bonuses be implemented?
   Sub-skills are not actor values, so ESP perks cannot read them directly. Options (details in
   [`refs/dynamic-skill-effects.md`](refs/dynamic-skill-effects.md)): (1) mirror sub-skills into
   spare AVs, which does not scale; (2) step entries conditioned on globals; (3) **Proposal:**
   compute the bonuses in the DLL via a hook on entry-point evaluation or damage calculation, with
-  formulas from config. ESP perks stay for discrete abilities.
+  formulas from config. ESP perks stay for discrete abilities. (4) **New candidate:** expose
+  sub-skills as *functional* extra values of Actor Value Generator (installed, 2.2.9.4), with
+  the getter in our DLL; CK perks read them via aliased placeholder AVs in conditions and in
+  `Multiply 1 + Actor Value Mult` entry points. Pure data, scales to all sub-skills, but works in
+  perk entry points only if R-18 confirms it ([`refs/frameworks.md`](refs/frameworks.md) §3.5).
+  Decided either way: all
+  continuous formulas must saturate or clamp their level argument at 200 (§5.1).
   - **A:**
 - **Q-DYN-10.** Sub-skill requirements on purchasable perks (e.g. perk P requires
   `smithing-dwarven ≥ 70`): which value is checked? (a) `current` — fluctuates with decay, the
@@ -292,7 +562,9 @@ gameplay event
   `GlobalVariable` in our ESL. On `kDataLoaded` the DLL appends `GetGlobalValue … >= N`
   conditions to existing perks from a config table, so Lorerim `PERK` records are not
   overridden. Alternative: ESP overrides of Lorerim perks (conflicts, breaks on Lorerim
-  updates). Details in [`refs/perk-requirements.md`](refs/perk-requirements.md).
+  updates). Details in [`refs/perk-requirements.md`](refs/perk-requirements.md). Alternative
+  if R-18 succeeds: AVG extra values instead of globals, read with `GetActorValue` conditions
+  ([`refs/frameworks.md`](refs/frameworks.md) §3.5).
   - **A:**
 
 ## 6. Cross-links (floor influence)
@@ -324,10 +596,10 @@ gameplay event
   - **A:**
 - **Q-CL-3.** Do concept sub-skills (`dual-wield`, `with-shield`, `with-magic`) participate in
   cross-links? Proposal: no.
-  - **A:**
+  - **A:** No, they do not
 - **Q-CL-4.** Armor material sub-skills: cross-links between materials (e.g. all heavy materials
   ×1/2 to each other) or none?
-  - **A:**
+  - **A:** No crosslinks between materials
 
 ## 7. Warrior skills
 
@@ -362,10 +634,21 @@ gameplay event
 **Questions:**
 
 - **Q-WPN-1.** Modded weapon types in Lorerim: which ones exist and where do they go
-  (own sub-skill or merged into the closest vanilla one)? Depends on research R-4.
+  (own sub-skill or merged into the closest vanilla one)? Research R-4 found quarterstaff,
+  halberd, pike, spear, javelin, katana, rapier, claw, whip, scythe, shortsword and OCF variants.
+  **Fill in the worksheet [`refs/lorerim/weapons.md`](refs/lorerim/weapons.md)**, which also
+  describes the classifier and config-defined (dynamic) sub-skills.
   - **A:**
-- **Q-WPN-2.** How is light vs heavy bow/crossbow determined (keyword, weight, Requiem
-  classification)? Depends on research R-4.
+- **Q-WPN-2.** How is light vs heavy bow/crossbow determined? Research R-4: by the Requiem
+  keywords `REQ_WeaponType_BowLight/BowHeavy` (`9F9915`/`9F9914:Requiem.esp`) and
+  `REQ_WeaponType_CrossbowLight/CrossbowHeavy` (`9F7179`/`899DBE:Requiem.esp`), never by weight.
+  Proposal: use these. Fallback for unmarked bows: light.
+  - **A:**
+- **Q-WPN-10.** Classifier and sub-skill registry (see
+  [`refs/lorerim/weapons.md`](refs/lorerim/weapons.md)): **Proposal:** sub-skills and weapon
+  rules are defined in drop-in config files. Rules are ordered by FormKey and the first match wins,
+  with the animation type as fallback. The co-save is keyed by sub-skill string id. Automatic
+  creation of sub-skills from unknown keywords is opt-in and off by default.
   - **A:**
 - **Q-WPN-3.** Unarmed combat (fists, claws for Khajiit/werewolf/vampire lord): add a sub-skill
   or ignore? Which main skill?
@@ -395,7 +678,8 @@ gameplay event
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8. Answer separately for each skill: One-Handed, Two-Handed, Archery.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5. Answer separately for each skill: One-Handed, Two-Handed, Archery.
   - **A:**
 
 ### 7.2 Armor (Heavy Armor, Light Armor)
@@ -435,7 +719,7 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
 
 - **Q-ARM-1.** Empty slots: is their share simply lost (current rule), or redistributed among
   occupied slots?
-  - **A:**
+  - **A:** empty slot is treated as clothing
 - **Q-ARM-2.** Main XP for armor depends on Q-XP-1: with the rule above, a single hit gives XP to
   two sub-skills per slot. Which of them feeds the main skill?
   - **A:**
@@ -448,7 +732,8 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8. Answer separately for each skill: Heavy Armor, Light Armor.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5. Answer separately for each skill: Heavy Armor, Light Armor.
   - **A:**
 
 ### 7.3 Block (shields, parry, bash)
@@ -459,7 +744,8 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
 - XP rules follow vanilla (with Requiem modifications), subject to anti-grind rules (§11).
 - Shield type is determined by armor type of the shield (heavy/light).
 - **Q-BLK-1.** A shield bash: XP to `bash` only, or to `bash` and the shield sub-skill?
-  - **A:**
+  - **A:** both. to 'bash' subskill fully, to 'heavy-shield'/'light-shield' with
+    coefficient, say 0.5
 - **Q-BLK-2.** Is there any vanilla/Requiem Block XP source other than blocking hits and bashing
   (e.g. blocking spells/arrows, timed blocks from combat mods in Lorerim)? Research R-6.
   - **A:**
@@ -468,7 +754,8 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ### 7.4 Smithing
@@ -517,41 +804,20 @@ Example: heavy ebony cuirass + light leather helmet + nothing else, base XP 10 �
 game time (G-S1); diminishing repetition by item type (G-S3); improving gives XP only when
 quality rises (G-S5).
 
-**Material table** (Q-SMI-5). Keywords are vanilla/DLC and still need verifying. `tier` and `T`
-are **placeholders** (from `scripts/smithing.toml`) for the user to fill in. Modded materials
-come from research R-5.
+**Material table** (Q-SMI-5): see the worksheet
+[`refs/lorerim/materials.md`](refs/lorerim/materials.md), with 111 material / armor-set keywords
+actually used in LoreRim, record counts, examples and proposals for sub-skill and tier.
+Notes:
+- Requiem armor keywords are **set families** (`REQ_ArmorSet_Guard`, `…_Vigilant`, …), not
+  physical materials. For Smithing, the material of a set comes from its recipe ingredients.
+- **Recipes (COBJ) are not in the research dump yet** (R-15). They are needed for: the set →
+  material mapping, `units` per recipe (§7.4 XP formulas) and temper recipes.
+- Placeholder tiers and `T` values are in `scripts/smithing.toml` (iron 1 … dragon 10).
 
-| Material sub-skill | Keywords (verify) | Default tier source (required perk) | tier (category XP weight) | T (fade) | Notes |
-|---|---|---|---|---|---|
-| `iron` | `WeapMaterialIron`, `ArmorMaterialIron`, `ArmorMaterialIronBanded` | none | 1 | 25 | |
-| `steel` | `WeapMaterialSteel`, `ArmorMaterialSteel`, `ArmorMaterialSteelPlate` | Steel Smithing | 1.5 | 35 | steel plate: own sub-skill or `steel`? |
-| `leather` | `ArmorMaterialLeather` | none | 1 | 25 | |
-| `hide` | `ArmorMaterialHide` | none | ? | ? | merge with `leather`? |
-| `imperial` | `WeapMaterialImperial`, `ArmorMaterialImperialLight/Heavy/Studded` | Steel Smithing | ? | ? | |
-| `scaled` | `ArmorMaterialScaled` | Advanced Armors | ? | ? | |
-| `elven` | `WeapMaterialElven`, `ArmorMaterialElven`, `ArmorMaterialElvenGilded` | Elven Smithing | 3 | 50 | |
-| `orcish` | `WeapMaterialOrcish`, `ArmorMaterialOrcish` | Orcish Smithing | 3 | 50 | |
-| `dwarven` | `WeapMaterialDwarven`, `ArmorMaterialDwarven` | Dwarven Smithing | 3 | 50 | |
-| `glass` | `WeapMaterialGlass`, `ArmorMaterialGlass` | Glass Smithing | 5 | 65 | |
-| `ebony` | `WeapMaterialEbony`, `ArmorMaterialEbony` | Ebony Smithing | 6 | 75 | |
-| `daedric` | `WeapMaterialDaedric`, `ArmorMaterialDaedric` | Daedric Smithing | 8 | 90 | |
-| `dragon` | `DLC1WeapMaterialDragonbone`, `ArmorMaterialDragonplate`, `ArmorMaterialDragonscale` | Dragon Armor | 10 | 90 | bone vs scale split? |
-| `stalhrim` | `DLC2WeaponMaterialStalhrim`, `DLC2ArmorMaterialStalhrimLight/Heavy` | Ebony Smithing (DB) | ? | ? | |
-| `nordic` | `DLC2WeaponMaterialNordic`, `DLC2ArmorMaterialNordicLight/Heavy` | Advanced Armors (DB) | ? | ? | |
-| `bonemold` | `DLC2ArmorMaterialBonemoldLight/Heavy` | Advanced Armors (DB) | ? | ? | |
-| `chitin` | `DLC2ArmorMaterialChitinLight/Heavy` | Elven Smithing (DB) | ? | ? | |
-| `silver` | `WeapMaterialSilver` | ? | ? | ? | also jewelry |
-| `gold` | jewelry only? | ? | ? | ? | also jewelry |
-| `falmer` | `WeapMaterialFalmer`, `ArmorMaterialFalmer` (verify) | ? | ? | ? | |
-| `draugr` / `ancient-nord` | `WeapMaterialDraugr`, `WeapMaterialDraugrHoned` | ? | ? | ? | |
-| `dawnguard` | `DLC1ArmorMaterialDawnguard` | ? | ? | ? | |
-| `wood` | `WeapMaterialWood` (bows) | none | ? | ? | |
-| AE / Creation Club materials | various | ? | ? | ? | R-5 |
-| modded materials | R-5 | ? | ? | ? | R-5 |
-| `other-smithing` | fallback | none | 1 | 25 | |
-
-- **Q-SMI-5.** Fill in the material table: tier (category XP weight), `T`, and any merges or splits
-  (hide/leather, steel/steel plate, dragonbone/dragonscale, AE and modded materials).
+- **Q-SMI-5.** Fill in the materials worksheet
+  ([`refs/lorerim/materials.md`](refs/lorerim/materials.md)): Smithing sub-skill and tier
+  (category XP weight) per keyword, `T` per sub-skill, and merges or splits (hide/leather,
+  steel/steel plate, dragonbone/dragonscale, CC and modded materials).
   - **A:**
 - **Q-SMI-6.** How is the budget left after `jewelry` split between categories and materials?
   The placeholder is 50/50, which means one category 0→75 gives about the same as one mid
@@ -559,26 +825,32 @@ come from research R-5.
   - **A:**
 - **Q-SMI-7.** Is `jewelry` a category like the others, so a silver ring feeds `jewelry` +
   `silver`, or a standalone sub-skill with no material XP? Gems: no XP, or part of `units`?
-  - **A:**
+  - **A:** jewelry is a special category and creating jewelry does not feed
+    materials. E.g. creating silver amulet does not feed smithing-silver at all.
+    Gems only feed jewelry itself, no material xp
 - **Q-SMI-8.** What counts as the "main material" in recipes with several ingredients (glass =
   malachite + moonstone; steel plate = steel + corundum; leather strips everywhere)? Proposal:
   sum the units of all ingredients that belong to the item's material (ingots or ore of that
   material). Ignore generic ones (leather strips, firewood). Fallback: the most numerous
   ingredient.
-  - **A:**
+  - **A:** Clarification required. Creating glass from malachite and moonstone
+    is smellting and it does not give xp. Recipe for armor should only have
+    'glass ingot' as ingridient, should it not ?
 - **Q-SMI-9.** `temperFactor` and the temper XP source. Proposal: same formulas applied to the
   temper recipe units, `temperFactor = 1`. Temper recipes are already cheap (one unit per step),
   and they give XP only when quality rises.
   - **A:**
 - **Q-SMI-10.** Arrows and bolts: one recipe produces a bundle. Proposal: count `units` of the
   recipe as usual (one recipe = one craft), with an optional per-category multiplier.
-  - **A:**
+  - **A:** Agree -count 'units' of the recipe. Batch of arrows as one craft is considered one
+    item
 - **Q-SMI-4.** Perk changes (Smithing): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ## 8. Magic skills
@@ -627,7 +899,12 @@ No cross-links between magic sub-skills, except the Alteration rule (§8.2).
   (harder). Which sub-skill drives the accuracy: the form (`missile`, `beam`, `flame`…), the
   school sub-direction, or both? Proposal: the form, missiles first, beams and flames later. See
   [`refs/aim-perturbation.md`](refs/aim-perturbation.md) §3.
-  - **A:**
+  - **A:** Only masterf of form drives inaccuracy. `Flames` are not subject to
+    inaccuracy, as are 'direct' and any short-distance (e.g. touch or rune).
+    Essentially, only beam, missiles and lobbers are subjects to inaccuracy.
+    For beam I suggest same mechanism that is used for archery when stamina is
+    low and effect should be cummulative and increasing with time of holding
+    the ray.
 - **Q-MAG-4.** Destruction, Illusion and Restoration have no special sections. Is there nothing
   school-specific, or just not written yet?
   - **A:**
@@ -636,7 +913,8 @@ No cross-links between magic sub-skills, except the Alteration rule (§8.2).
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8. Answer separately for each skill: Destruction, Illusion, Restoration — schools without own section.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5. Answer separately for each skill: Destruction, Illusion, Restoration — schools without own section.
   - **A:**
 
 ### 8.2 Alteration
@@ -646,13 +924,14 @@ No cross-links between magic sub-skills, except the Alteration rule (§8.2).
 - **Q-ALT-1.** All magic sub-skills of all schools, or only Alteration sub-skills? Coefficient
   and mapping (main skill scale 0–100 vs sub-skill scale 0–200; proposal:
   `cAlt × 2 × AlterationLevel`, `cAlt = 0.25`, still capped by `floorCap`)?
-  - **A:**
+  - **A:** All sub-skills of all schools
 - **Q-ALT-2.** Perk changes (Alteration): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ### 8.3 Conjuration
@@ -662,7 +941,10 @@ No cross-links between magic sub-skills, except the Alteration rule (§8.2).
 `conjure-spirit` (spectral/ghost summons, familiars), `soul-magic` (Soul Trap, Banish,
 Command Daedra, Expel).
 
-**Optional mechanic A — summon upkeep** (MCM toggle):
+**Optional mechanic A — summon upkeep** — **suspended** (decided 2026-11-11): the mod
+concentrates on how XP is gained. Research R-9 found no unified upkeep in LoreRim, only a
+scripted thrall cost in *Undeath* and Magic Redone summon changes. The text below is kept for
+later:
 - Summoned creatures drain the caster's magicka: `upkeepIdle` per second out of combat,
   `upkeepCombat` per second in combat (configurable). Does not apply to bound weapons.
 - Conjuration XP for summons is granted **only while summons are in combat**.
@@ -672,23 +954,31 @@ Command Daedra, Expel).
   `conjure-reanimated` current level.
 
 - **Q-CON-1.** Accept proposed extra sub-skills?
-  - **A:**
+  - **A:** fold aetronach into daedr a(they are daedra), conjure-sprit and
+    soul-magic is good.
 - **Q-CON-2.** Upkeep: what happens when magicka runs out (summon dismissed? health drain?
   nothing)? What exactly grants XP "in combat": time spent in combat, damage dealt by summons,
   kills?
-  - **A:**
+  - **A:** When magicka runs out, summon is dismissed. I propose that XP is
+    granted by damage dealt by summons, if it is possible to calculate. If not -
+    then by time in combat. Analysis for grinding is requested.
 - **Q-CON-3.** Control loss: how often is the roll made (on summon, every N seconds, on each
   hit taken?), what happens (turns hostile, flees, collapses), how does it interact with
   Requiem/Lorerim permanent thralls?
-  - **A:**
-- **Q-CON-4.** Does Lorerim already have a summon-upkeep mod? (Research R-9.)
+  - **A:** Permanent thralls are immune. Roll is made every N seconds. Summon
+    turns hostile. This only works for `reanimated`.
+- **Q-CON-4.** ~~Does Lorerim already have a summon-upkeep mod?~~ Research R-9: no unified
+  upkeep. Mechanic A is suspended. While it is suspended, how is summon XP granted? Proposal:
+  vanilla casting XP, plus XP for damage dealt by summons to valid targets
+  (`offense-summon` budget, §11.2).
   - **A:**
 - **Q-CON-5.** Perk changes (Conjuration): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ### 8.4 Enchanting
@@ -713,7 +1003,8 @@ Command Daedra, Expel).
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ## 9. Thief skills
@@ -735,21 +1026,27 @@ Command Daedra, Expel).
   - Floor of `speech-trading` grows faster (`floorRate` override, e.g. 0.5).
 
 - **Q-SPE-1.** Bribery: part of `speech-persuasion`, its own sub-skill, or no XP?
-  - **A:**
+  - **A:** Part of persuasion
 - **Q-SPE-2.** Shouts: XP per shout regardless of target, or only when it affects a hostile?
   Scaled by number of words used?
-  - **A:**
+  - **A:** Scaled by number of words used. If we can distinguate between
+    offensive and non-offensive shouts, then offensive give XP only when it
+    affects hostile, and non-offensive give upon use.
+    Note: There are not that many shouts, perhaps DR for each shout is a good
+    idea
 - **Q-SPE-3.** "Saved gold" when selling: `saved = actualSellPrice − referenceSellPrice`. Confirm;
   also what if the result is negative (worse than reference) — zero XP?
-  - **A:**
+  - **A:** Confirm saved formula. ZeroXP
+    when result is negative
 - **Q-SPE-4.** Accept the log formula? Note: per transaction, log rewards splitting one big sale into many small ones (grinding-analysis G-N13); proposal — apply it to cumulative saved gold per merchant per game day.
-  - **A:**
+  - **A:** Confirm proposal for cummulative saved gold
 - **Q-SPE-5.** Perk changes (Speech): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ### 9.2 Alchemy
@@ -791,7 +1088,8 @@ Command Daedra, Expel).
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5.
   - **A:**
 
 ### 9.3 Lockpicking, Pickpocket, Sneak
@@ -807,7 +1105,8 @@ job is only to carry the general mechanic.
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see
   Q-DYN-10 — and the threshold); (2) whether it is a **purchasable** perk (in the main-skill
   tree, costs a perk point) or an **automatic** perk owned only by a sub-skill (added/removed
-  by the DLL at a threshold, §5.6). See [`refs/perk-requirements.md`](refs/perk-requirements.md) §5; depends on research R-8. Answer separately for each skill: Lockpicking, Pickpocket, Sneak.
+  by the DLL at a threshold, §5.6). **Answer in the worksheet [`refs/lorerim/perks.md`](refs/lorerim/perks.md)** (all tree perks of
+  this skill, with handles); see also [`refs/perk-requirements.md`](refs/perk-requirements.md) §5. Answer separately for each skill: Lockpicking, Pickpocket, Sneak.
   - **A:**
 
 ## 10. Skill books and trainers
@@ -834,9 +1133,11 @@ job is only to carry the general mechanic.
 - **Q-BT-3.** "Duration does not stack": does each new lesson reset the timer to 24 h from now
   (refresh), or does the bonus expire 24 h after the first lesson?
   - **A:**
-- **Q-BT-4.** With unlimited trainings (Lorerim) and stacking potential, a rich player can buy
+- **Q-BT-4.** With many trainings (5 per level in LoreRim, unused lessons carry over) and stacking potential, a rich player can buy
   potential up to 200. Cap trainer-granted potential (e.g. not above `current + X`, or not above
-  the trainer's own skill level × 2)? See grinding-analysis G-N9.
+  the trainer's own skill level × 2)? See grinding-analysis G-N9. Decided: external potential
+  (books, trainers, external increments) is capped separately, because sub-skills have no
+  practical upper limit (§5.1). The question is where that cap sits (e.g. ≤ 200).
   - **A:**
 - **Q-BT-5.** Training price: keep vanilla (based on main skill level)?
   - **A:**
@@ -854,7 +1155,9 @@ Full list of grinding methods (vanilla and new ones introduced by this design), 
 - Potion XP scaled by strength.
 - Trading XP proportional (log) to saved gold relative to a reference price.
 - Trainer bonus capped at +30%.
-- **Main XP only from raising the sub-skill peak** (§4.4). Closes G-N2, G-N26, G-S2.
+- **Main skill computed from sub-skill levels** (§4.4). Decay-and-retrain gives nothing extra; closes G-N2, G-N26, G-S2.
+- **Decay idle meter** reduced in proportion to raw XP (§5.5). Closes G-N6.
+- **Conversion rise** (§4.4.1): the first `T1 = 25` levels of a sub-skill ramp its value to the main skill up from 0 (smoothstep). Many barely-trained sub-skills do not add up to a high main skill.
 - **Smithing daily XP bucket** (G-S1). A leaky bucket of raw Smithing XP (all Smithing
   sub-skills share one bucket). Above the bucket, XP falls off smoothly, using the same falloff
   as the per-target budget. The bucket refills **only in active game time**: time spent
@@ -952,8 +1255,10 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   three values and ~150 sub-skills do not fit well).
 - **Q-UI-1.** How is the panel opened: hotkey, from the vanilla skills menu, a lesser power?
   - **A:**
-- **Q-UI-2.** Fallback if PrismaUI turns out problematic in Lorerim (version/compatibility):
-  SKSE Menu Framework (ImGui) as plan B — ok?
+- **Decided:** PrismaUI is **added** to the modlist (it is not in LoreRim, R-3). MCM Helper 1.6.2
+  and SKSE Menu Framework are already there.
+- **Q-UI-2.** Fallback if PrismaUI turns out problematic in Lorerim (input focus, HUD, other
+  DLLs): SKSE Menu Framework (ImGui, already installed) as plan B — ok?
   - **A:**
 - **Q-UI-3.** Notifications: show a message when a sub-skill perk activates/deactivates, when a
   sub-skill starts decaying, when it reaches a new level?
@@ -1003,10 +1308,19 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 
 ## 14. Technical notes (preliminary, for the plan)
 
-- Runtime: Skyrim AE version used by Lorerim 5.0+ (exact version to verify, R-1);
-  CommonLibSSE-NG with Address Library; build on Windows with MSVC + CMake + vcpkg.
-- Persistence: SKSE co-save serialization of all sub-skill states (XP for current, own floor,
-  potential and peak; last-use time), per-target and crafting budgets, the active-game-hours
+- Runtime: **Skyrim AE 1.6.1170, SKSE 2.2.6** (R-1). CommonLibSSE-NG (pinned commit) with
+  Address Library; build on Windows with MSVC + CMake + vcpkg. Hook addresses must be verified
+  for 1.6.1170.
+- **Form references in config** always use `Plugin.esp|0xLocalID` (FormKey) and are resolved with
+  `TESDataHandler::LookupForm(localID, plugin)` at `kDataLoaded`. EditorIDs are not used:
+  they are not loaded at runtime by default, and LoreRim renames many of them.
+- Integration points found in LoreRim (R-6, R-13): **Precision 2.0.4** has a pre-hit/post-hit
+  API, the preferred hook for melee miss/glancing. **Parrying RPG 2.0.1** handles collision
+  parries before the normal hit, so `parry` needs its own adapter. **True Directional Movement
+  2.2.5** adjusts projectiles (aim support / homing), which may undo launch spread.
+- Persistence: SKSE co-save serialization of all sub-skill states (current, own floor,
+  potential and peak, each as `uint16 level + float progress`, see §5.1; idle meter `U`), per main skill rust `R`, idle meter `U_main`, `base` and initial
+  levels `L_i^0` (§4.4), per-target and crafting budgets, the active-game-hours
   counter, trainer bonuses, crafted-potion registry. Format is versioned.
 - Vanilla XP suppression: hook the player's skill-experience award function
   (`PlayerCharacter::AddSkillExperience` or equivalent); the hook also provides the vanilla XP
@@ -1028,8 +1342,29 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   `kDataLoaded` from a config table. Details:
   [`refs/perk-requirements.md`](refs/perk-requirements.md).
 
+- Item classification (weapons, and possibly armor, materials, spells): our own `_KID.ini`
+  distributes `SPO_*` class keywords (records in our ESL) from OCF, Requiem and vanilla
+  keywords; the DLL checks only our keywords, looked up by FormKey. The cache is built after
+  KID's `KID_KeywordDistributionDone` event (or lazily). KID INIs may use EditorIDs; that is
+  resolved by KID, not by our DLL. Details: [`refs/frameworks.md`](refs/frameworks.md) §2, §4.
+- Build: CommonLibSSE-NG from alandtse (branch `ng`) as a submodule, with an xmake (libxse) or
+  CMake + vcpkg template; choose in the plan. Optional: CLibUtil (header-only). Details:
+  [`refs/frameworks.md`](refs/frameworks.md) §5.
+
 - **Q-TECH-1.** Is a mod-added ESP acceptable, or must the mod be DLL-only (perks created at
   runtime)? ESP is simpler and more conventional.
+  - **A:**
+- **Q-TECH-2.** License. The maintained CommonLibSSE-NG (alandtse) is now
+  GPL-3.0-or-later with a modding exception (it was MIT). A plugin that links it statically must
+  use a compatible license. Options: (a) GPL-3.0 for our mod; (b) another license allowed by the
+  modding exception (read `EXCEPTIONS.md`); (c) pin an older MIT-licensed CommonLib (loses
+  fixes). **Proposal:** (a), or (b) after reading the exception.
+  - **A:**
+- **Q-TECH-3.** Dependencies. KID and OCF are already in LoreRim and would become hard
+  requirements for weapon classification; AVG would become one if Q-DYN-9 option (4) is
+  chosen. Is that acceptable, or should the mod also work without them (fallback to the
+  built-in TOML classifier, globals and DLL hooks)? **Proposal:** KID + OCF required; AVG
+  optional, only if R-18 passes.
   - **A:**
 
 ## 15. Research and tooling
@@ -1047,9 +1382,42 @@ anything. Play Lorerim normally for several sessions → we get real XP/hour per
 target pacing as "× of Lorerim baseline".
 
 - **Q-RES-1.** Accept the telemetry-first approach?
-  - **A:**
+  - **A:** Yes, accept
 
 ### 15.2 Research tasks
+
+Static research of the installed profile was done on 2026-11-11 (Mutagen dump; report
+`research-report.md` + TSV tables, kept outside the repo in `~/tmp/research`). Worksheets
+derived from it: [`refs/lorerim/perks.md`](refs/lorerim/perks.md),
+[`materials.md`](refs/lorerim/materials.md), [`weapons.md`](refs/lorerim/weapons.md)
+(generator: `scripts/gen_lorerim_refs.py`). Status per task:
+
+| ID | Status / result |
+|---|---|
+| R-1 | Done: AE 1.6.1170, SKSE 2.2.6 |
+| R-2 | Done (static): Experience 3.7.3, SSL Rewritten + Enhanced Script, Starting Skills, Simply Smart Training, Little Lessons, Typography Training, Tome Trials, Beneficial Speech Checks. Use XP disabled. |
+| R-3 | Done: MCM Helper yes, PrismaUI no (will be added), SKSE Menu Framework yes |
+| R-4 | Done: worksheet `refs/lorerim/weapons.md` |
+| R-5 | Done: worksheet `refs/lorerim/materials.md` (set → material needs COBJ, R-15) |
+| R-6 | Partial: sources listed; actual Block XP callbacks need a runtime test |
+| R-7 | Partial: no unified archetype keyword family; `Traits_DruidicSpell`, Triumvirate `TVR_*` → explicit lists needed |
+| R-8 | Done (static): school directions confirmed by Magic Redone keywords `Nox_KW_*`; perk trees in `refs/lorerim/perks.md` |
+| R-9 | Done (static): no unified upkeep (mechanic suspended) |
+| R-10 | Done: staff perks are in Enchanting (Arcane Artificery, Staff Channeling, Wand Mastery…) |
+| R-11 | Done: a few MCP candidates exist, none validated; Mutagen dump works |
+| R-12 | Done: Custom Skills Framework 3.1.0 + Custom Skills Menu installed |
+| R-13 | Done (static): Precision 2.0.4, Parrying RPG, TDM 2.2.5 present; hook conflicts need runtime check |
+| R-14 | Partial: no general clamp at 100 found, but safety above 100 not proven; runtime probes needed if main > 100 |
+| R-15 | **New:** dump COBJ (recipes: workbench, ingredients, counts, required perks), for Smithing units, set → material, tempering |
+| R-16 | Partial (static, R-22): no master switch. Stop new points with MCM points per level = 0 and level multiplier = 0, and zero the bank `SSL_PointsLeftAfterLvlUp`; SSL also zeroes `fSkillUsageLockPick*`. To verify on a test profile. Details: [`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md) §6 |
+| R-17 | **New (runtime):** which hook gives raw use points with `UseMult = 0` (Q-XP-9); log one award per skill |
+| R-18 | **New (runtime):** AVG 2.2.9.4 on AE 1.6.1170: define one functional extra value with a DLL getter, alias it in a test perk; check (1) `GetActorValue` perk condition, (2) `Multiply 1 + Actor Value Mult` entry point, (3) magic-effect condition. Also: which config path 2.2.9.4 reads ([`refs/frameworks.md`](refs/frameworks.md) §3) |
+| R-19 | **New (runtime):** dump weapons with their keywords **after** KID distribution (on load game), to get real OCF coverage, including Animated Armoury; compare with the static `refs/lorerim/weapons.md` |
+| R-20 | **New:** exact OCF version in LoreRim, and whether a keyword patch (e.g. "Keyword Patch Collection") covers Animated Armoury |
+| R-21 | **New:** read CommonLibSSE-NG `EXCEPTIONS.md` (Q-TECH-2) |
+| R-22 | Done (static): vanilla AVIF values confirmed (Smithing `UseMult`: 160 in Skyrim.esm, 1 in Update.esm), LoreRim GMST overrides, Experience / SSL / jail / Legendary settings, perk override chains: [`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md). Left: 6 engine-default GMSTs to read in game (§5 there); the `P_skill` / `P_sub` estimate itself (Q-ML-7, Q-DYN-15) |
+
+Original task list:
 
 | ID | Task | How |
 |---|---|---|
@@ -1123,9 +1491,10 @@ Researching Lorerim content does not require the game to run, only its **data fi
   recompiling? Proposal: all mappings in config.
   - **A:**
 - **Q-OTH-4.** Main-skill perks (Lorerim trees) still require main skill levels and perk points,
-  unchanged. Since main skills never decrease, "no omnipotence" relies only on sub-skill decay
-  and sub-skill perks. Is that enough, or should something else (e.g. main-skill perk conditions
-  on sub-skill current) also be considered?
+  unchanged. Main skills now rust when not practised (§4.4.3), so "no omnipotence" also works
+  through the main skill. Our own perks go dormant below their threshold; other mods' perks are
+  not changed (§4.4.4). Is anything else needed (e.g. main-skill perk conditions on sub-skill
+  current)?
   - **A:**
 - **Q-OTH-5.** Mod name?
   - **A:**

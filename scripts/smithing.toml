@@ -21,6 +21,10 @@ improve_mult   = 0.25
 improve_offset = 300
 exponent       = 1.95
 
+# Conversion rise (design-v2 §4.4.1): g = k · smoothstep(L/T1) · fall(L). Per sub-skill: T1 = …
+[conversion]
+rise_T1 = 25
+
 # Group budgets: absolute main-level range, or a share of what is left of N.
 [budget]
 jewelry  = { main_from = 15, main_to = 35 }
@@ -43,6 +47,8 @@ category_group = "category"
 
 # ---- sub-skills ------------------------------------------------------------------------------
 # T = level where conversion has fallen to ~half; w = width of the falloff.
+# T1 (optional) overrides [conversion] rise_T1. Open question Q-ML-10: low-T sub-skills (jewelry,
+# iron, leather, steel) have T close to T1, so their conversion peak is well below k.
 # tier = category-XP weight of the material (design §7.4 table; to be filled by the user).
 
 [[subskill]]
