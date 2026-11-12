@@ -1,6 +1,6 @@
 # Plugin foundation: project, build, records, logging, package
 
-- **Status:** chosen (prototype 1).
+- **Status:** in progress (M0 builds and packages; runtime boot checks pending).
 - **Design:** design-v2 §1 (SKSE plugin + small ESL + MCM glue), §14 (runtime, FormKeys,
   persistence), [`refs/frameworks.md`](../refs/frameworks.md) §5 (CommonLibSSE-NG, templates).
 - **Depends on:** nothing.
@@ -105,6 +105,14 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
 (missing → those rules are skipped, logged).
 
 ## Test
+
+## Prototype notes
+
+- CMake + vcpkg, pinned alandtse/ng submodule; build commands: `plugin/README.md`.
+- Generator targets .NET 10 because pinned Mutagen 0.54.4 supports .NET 9/10,
+  not .NET 8. This tool does not run inside Skyrim.
+- M0 Release DLL, pure-logic CTest and MO2 ZIP build successfully on this machine.
+  No game launch has been performed; keyword resolution remains a runtime check.
 
 - The package builds from a clean clone with the commands in `plugin/README.md`.
 - Game starts with the mod; `[boot]` lists 6 managed skills, the right sub-skill count, all 22

@@ -1,1 +1,7 @@
 __pycache__
+.tools/
+dist/
+build/
+**/bin/
+**/obj/
+research/local/
