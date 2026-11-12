@@ -1,7 +1,11 @@
-__pycache__
+# Local tools and generated build files
+__pycache__/
+*.py[cod]
 .tools/
-dist/
-build/
+/build/
 **/bin/
 **/obj/
-research/local/
+/research/local/
+
+# Generated install tree and release archives; rebuilt from tracked sources.
+/dist/

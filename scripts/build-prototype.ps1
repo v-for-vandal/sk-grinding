@@ -1,4 +1,11 @@
-param([switch]$CoreOnly,[switch]$Clean)
+param(
+    [switch]$CoreOnly,
+    [switch]$Clean,
+    [string]$Game = 'D:\SteamLibrary\steamapps\common\Skyrim Special Edition',
+    [string]$LoreRim = 'D:\Modlists\LoreRim',
+    [string]$SkseSources = '',
+    [string]$McmSdk = ''
+)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 Set-Location $root
@@ -6,6 +13,7 @@ $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (!$vs) { throw 'Install VS 2022 Build Tools, Desktop development with C++.' }
 $cmake = Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
 $vcpkg = Join-Path $root '.tools/vcpkg/scripts/buildsystems/vcpkg.cmake'
+if (!(Test-Path $vcpkg)) { throw 'Run scripts/setup-build.ps1 first to fetch build dependencies.' }
 $plugin = if ($CoreOnly) { 'OFF' } else { 'ON' }
 & $cmake -S plugin -B build/prototype -G 'Visual Studio 17 2022' -A x64 "-DCMAKE_TOOLCHAIN_FILE=$vcpkg" -DVCPKG_TARGET_TRIPLET=x64-windows-static-md "-DPRACTICE_PLUGIN=$plugin"
 if ($LASTEXITCODE) { throw 'CMake configure failed' }
@@ -24,5 +32,5 @@ $dotnet = Join-Path $root '.tools/dotnet/dotnet.exe'
 if (!(Test-Path $dotnet)) { $dotnet = (Get-Command dotnet -ErrorAction Stop).Source }
 & $dotnet run --project tools/esp-gen --configuration Release -- $root
 if ($LASTEXITCODE) { throw 'ESP generator failed' }
-& "$PSScriptRoot/compile-papyrus.ps1"
+& "$PSScriptRoot/compile-papyrus.ps1" -Game $Game -LoreRim $LoreRim -SkseSources $SkseSources -McmSdk $McmSdk
 & "$PSScriptRoot/package-prototype.ps1"

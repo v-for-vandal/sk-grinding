@@ -7,19 +7,32 @@ SDK. No game files are written by the build.
 From the repository root in PowerShell:
 
 ```powershell
-git submodule update --init --recursive
-git clone https://github.com/microsoft/vcpkg.git .tools/vcpkg
-git -C .tools/vcpkg checkout b58529e33332fbb6dfe20317a82009b78ceeab36
-.tools/vcpkg/bootstrap-vcpkg.bat -disableMetrics
-git clone --branch v1.6.2 https://github.com/Exit-9B/MCM-Helper.git .tools/downloads/MCM-Helper
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-build.ps1
 # Uses .tools/dotnet/dotnet.exe when present, otherwise the installed dotnet SDK.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-prototype.ps1
 ```
 
 The script configures CMake, builds Release, runs CTest, generates the ESP and
 packages `dist/SkillPractice.zip`. `-CoreOnly` skips the DLL and package; `-Clean`
-also rebuilds CommonLib from scratch. Set Creation Kit/script-source paths in
-`scripts/compile-papyrus.ps1` for a different machine.
+also rebuilds CommonLib from scratch. On another machine pass paths explicitly:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-prototype.ps1 -Game 'C:\Games\Skyrim Special Edition' -SkseSources 'C:\SDK\skse\scripts\Source'
+```
+
+`-Game` must contain `Papyrus Compiler/PapyrusCompiler.exe` (Creation Kit) and
+`Data/Source/Scripts`, including `TESV_Papyrus_Flags.flg`. `-SkseSources` points
+to the SKSE source scripts; when omitted it is derived from `-LoreRim` using
+the local MO2 mod directory name. `-McmSdk` can override the downloaded public
+SDK directory. Skyrim, Creation Kit and SKSE sources must be installed separately;
+they are not stored in this repository. Dependency setup and the first build
+need network access. Build support is Windows x64.
+
+Track `plugin/`, `config/`, `tools/esp-gen/`, `papyrus/`, `mcm/`, `ui/` and
+`scripts/`, including `.gitmodules` and the CommonLib submodule reference.
+`.tools/`, `build/`, `dist/`, and .NET `bin/` / `obj/` are generated and ignored.
+`scripts/package-prototype.ps1` creates the ZIP after the DLL, ESP and Papyrus
+script have been built; normally `build-prototype.ps1` runs it automatically.
 Dependencies use the pinned vcpkg baseline in `plugin/vcpkg.json`.
 CommonLibSSE-NG is a pinned submodule; its original license remains there.
 PrismaUI_API.h is copied from the framework's 1.5.1 tag. No project license

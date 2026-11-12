@@ -1,13 +1,15 @@
 param(
     [string]$Game = 'D:\SteamLibrary\steamapps\common\Skyrim Special Edition',
-    [string]$LoreRim = 'D:\Modlists\LoreRim'
+    [string]$LoreRim = 'D:\Modlists\LoreRim',
+    [string]$SkseSources = '',
+    [string]$McmSdk = ''
 )
 $ErrorActionPreference = 'Stop'
 $root=Split-Path $PSScriptRoot
 $compiler=Join-Path $Game 'Papyrus Compiler/PapyrusCompiler.exe'
 $vanilla=Join-Path $Game 'Data/Source/Scripts'
-$sdk=Join-Path $root '.tools/downloads/MCM-Helper/scripts/public'
-$skse=Join-Path $LoreRim 'mods/Skyrim Script Extender (SKSE64)/Scripts/Source'
+$sdk = if ($McmSdk) { $McmSdk } else { Join-Path $root '.tools/downloads/MCM-Helper/scripts/public' }
+$skse = if ($SkseSources) { $SkseSources } else { Join-Path $LoreRim 'mods/Skyrim Script Extender (SKSE64)/Scripts/Source' }
 foreach ($path in @($compiler,$vanilla,$sdk,$skse)) { if (!(Test-Path $path)) { throw "Missing Papyrus requirement: $path" } }
 # CK ships a CLR 2 executable. Use the installed CLR 4 without enabling a Windows
 # feature or modifying the game's compiler directory.
