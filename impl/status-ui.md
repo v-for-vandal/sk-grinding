@@ -121,6 +121,10 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
 
 ## Prototype notes
 
+- 0.1.1: mock fetching is restricted to HTTP(S) browser previews. In PrismaUI's
+  file view, the native spAction binding may arrive after app.js executes; that
+  interval must not start mock mode. File-startup regression checks this case.
+
 - Vanilla HTML/CSS/JS view in `ui/`, integration in `plugin/src/UI.cpp`.
 - Browser checks in `ui/test.html` pass in headless Chrome: all 6 / 76 rows,
   filter, sorting, tabs, JSON actions, reinitialization guard and Escape.

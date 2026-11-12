@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Prisma startup regression</title></head><body>
+<p id="result">pending</p><div id="fixture"></div>
+<script>
+// Run this page over file://, like PrismaUI. The native bridge is deliberately
+// absent until after app.js has loaded. No mock fetch may happen during that gap.
+window.fetchCalls=0;
+window.fetch=()=>{++window.fetchCalls;return Promise.reject(Error('Unexpected mock fetch'));};
+</script>
+<script src="startup-fixture.js"></script>
+</body></html>

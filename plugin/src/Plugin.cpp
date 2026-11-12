@@ -6,7 +6,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
     auto sink=std::make_shared<spdlog::sinks::basic_file_sink_mt>((*path/"SkillPractice.log").string(),true);
     auto logger=std::make_shared<spdlog::logger>("SkillPractice",sink);spdlog::set_default_logger(logger);
     spdlog::set_pattern("[%H:%M:%S.%e] [%l] %v");spdlog::flush_on(spdlog::level::warn);spdlog::flush_every(std::chrono::seconds(1));
-    spdlog::info("[boot] SkillPractice 0.1.0 runtime={}",skse->RuntimeVersion().string());
+    spdlog::info("[boot] SkillPractice 0.1.1 runtime={}",skse->RuntimeVersion().string());
     if(skse->RuntimeVersion()!=REL::Version{1,6,1170,0}){spdlog::critical("[boot] prototype supports only runtime 1.6.1170");return false;}
     runtime::start();return SKSE::GetMessagingInterface()->RegisterListener(runtime::message);
 }

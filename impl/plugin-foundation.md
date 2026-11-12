@@ -106,6 +106,11 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
 
 ## Prototype notes
 
+- 0.1.1 startup fix: SKSE DataLoaded is received on a loading thread in the
+  user's LoreRim log. Lifecycle initialization is now scheduled onto SKSE's main
+  task queue before recording the main-thread ID or registering event sinks.
+  Recording the loader ID previously made main-thread events requeue themselves.
+
 - CMake + vcpkg, pinned alandtse/ng submodule; build commands: `plugin/README.md`.
 - Generator targets .NET 10 because pinned Mutagen 0.54.4 supports .NET 9/10,
   not .NET 8. This tool does not run inside Skyrim.

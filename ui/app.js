@@ -26,4 +26,6 @@ $('reinit').onclick=()=>{if($('sure').checked){send('reinitAll');$('sure').check
 $('give').onclick=()=>send('giveXP',{id:$('sub').value,raw:Number($('raw').value)});
 $('set').onclick=()=>send('setCurrent',{id:$('sub').value,level:Number($('level').value)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='F7'){e.preventDefault();send('close');}});
-if(typeof window.spAction!=='function')fetch('mock.json').then(r=>r.json()).then(window.spUpdate).catch(e=>{$('summary').textContent='Serve ui/ over HTTP to load mock.json: '+e.message;});
+// PrismaUI loads file:// views and binds spAction after scripts have executed.
+// Absence of that binding during startup does not mean browser mock mode.
+if(/^https?:$/.test(location.protocol)&&typeof window.spAction!=='function')fetch('mock.json').then(r=>r.json()).then(window.spUpdate).catch(e=>{$('summary').textContent='Could not load mock.json: '+e.message;});

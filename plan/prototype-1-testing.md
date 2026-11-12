@@ -2,7 +2,15 @@
 
 Build: `dist/SkillPractice.zip` (MO2 archive). M0–M6 are implemented; M7
 concept-window XP is excluded. The C++/Papyrus builds, pure tests and browser
-checks pass. **No in-game result is claimed yet.** Use a separate test save.
+checks pass. **Successful in-game validation is still pending.** Use a separate test save.
+
+Startup hotfix 0.1.1: replace the previous MO2 mod from the rebuilt archive.
+Expect `[boot] SkillPractice 0.1.1`, `main-task initialization thread=...`,
+and `[ui] DOM ready thread=...` with the same thread ID. A file-view mock.json
+fetch error must no longer appear. First check that the main menu stays
+responsive before loading a save. The old log captured a loader-thread ID as
+main, which could cause main-thread context events to repeatedly enqueue themselves.
+The fix is built/tested locally; its in-game result still needs confirmation.
 
 1. **Install PrismaUI.** Download [Prisma UI 1.5.1](https://www.nexusmods.com/skyrimspecialedition/mods/148718).
    MO2 → Install a new mod from archive → enable it. It has an SKSE DLL and

@@ -40,9 +40,16 @@ void synchronize(){auto p=RE::PlayerCharacter::GetSingleton();if(!p||failedSave)
 void award(std::string_view id,double raw,std::string_view origin,double points){sp::Skill* sk=nullptr;auto s=model.find(std::string(id),&sk);if(!s){spdlog::debug("[xp] unmanaged sub={} skipped",id);return;}if(!ready(*sk))return;double before=s->current.value(s->curve);double zone=model.settings.get("xp",before<s->floor.value(s->curve)?"zone_catch_up":before<s->potential.value(s->curve)?"zone_recall":"zone_new");model.award(std::string(id),raw);if(model.settings.flag("log","xp_verbose"))spdlog::info("[xp] t={} src={} skill={} sub={} pts={} raw={} z_start={} cur={}->{} floor={} pot={} peak={} U={} R={} F={}",model.activeHours,origin,sk->av,id,points<0?raw:points,raw,zone,before,s->current.value(s->curve),s->floor.value(s->curve),s->potential.value(s->curve),s->peak.value(s->curve),s->idle,sk->rust,sk->computed(model.settings.get("main","min_level"),model.settings.get("main","max_level")));}
 void resetContext();
 void message(SKSE::MessagingInterface::Message* m){
-    if(m->type==SKSE::MessagingInterface::kDataLoaded){reload();if(model.skills.empty()){spdlog::critical("[boot] disabled: no valid configuration");return;}size_t n=0;for(auto& s:model.skills)n+=s.subs.size();spdlog::info("[boot] managed={} subskills={}",model.skills.size(),n);installTelemetry();installGameplay();setupUI();installAim();}
-    else if(m->type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();ensureMCM();if(!restored)model.raceClosed=true;if(!restored||!model.pendingInit)for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
-    else if(m->type==SKSE::MessagingInterface::kNewGame){reload();model.raceClosed=false;model.pendingInit=true;resetContext();ensureMCM();spdlog::info("[init] new game pending; awaiting RaceSex close and first use per skill");}
+    // DataLoaded can run on a loader thread. Bind thread identity and install
+    // event sinks on SKSE's main task queue before any callback can repost itself.
+    const auto type=m->type;
+    if(type!=SKSE::MessagingInterface::kDataLoaded&&type!=SKSE::MessagingInterface::kPostLoadGame&&type!=SKSE::MessagingInterface::kNewGame)return;
+    spdlog::info("[boot] queue lifecycle message={} callerThread={}",type,GetCurrentThreadId());
+    SKSE::GetTaskInterface()->AddTask([type]{
+        if(type==SKSE::MessagingInterface::kDataLoaded){mainThread=GetCurrentThreadId();spdlog::info("[boot] main-task initialization thread={}",mainThread);reload();if(model.skills.empty()){spdlog::critical("[boot] disabled: no valid configuration");return;}size_t n=0;for(auto& s:model.skills)n+=s.subs.size();spdlog::info("[boot] managed={} subskills={}",model.skills.size(),n);installTelemetry();installGameplay();setupUI();installAim();}
+        else if(type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();ensureMCM();if(!restored)model.raceClosed=true;if(!restored||!model.pendingInit)for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
+        else {reload();model.raceClosed=false;model.pendingInit=true;resetContext();ensureMCM();spdlog::info("[init] new game pending; awaiting RaceSex close and first use per skill");}
+    });
 }
 void start(){auto si=SKSE::GetSerializationInterface();si->SetUniqueID(0x534B5052);si->SetSaveCallback(save);si->SetLoadCallback(load);si->SetRevertCallback(revert);}
 }
