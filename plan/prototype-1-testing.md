@@ -5,6 +5,10 @@ concept-window XP is excluded. The C++/Papyrus builds, pure tests and browser
 checks pass. **Successful in-game validation is still pending.** Use a separate test save.
 
 Startup hotfix 0.1.1: replace the previous MO2 mod from the rebuilt archive.
+Load hotfix 0.1.3 also replaces recursive SKSE task reposting with a queue
+drained by the player update. Expect `[load] complete`, then
+`[load] first player update: complete` and periodic `[health]` lines.
+Successful save loading is still pending runtime confirmation.
 Expect `[boot] SkillPractice 0.1.1`, `main-task initialization thread=...`,
 and `[ui] DOM ready thread=...` with the same thread ID. A file-view mock.json
 fetch error must no longer appear. First check that the main menu stays

@@ -106,6 +106,15 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
 
 ## Prototype notes
 
+- 0.1.3 load-hang fix: the 0.1.2 minidump shows worker thread 9768 in
+  `Events::ProcessEvent -> SKSE::TaskInterface::AddTask`, while the recorded
+  main thread is 25572. Moving startup alone did not eliminate recursive
+  reposting during save loading. Off-thread events now enter a mutex-protected
+  queue drained exclusively by the player's update on the recorded main thread.
+  A drain takes a finite batch outside the mutex; at most 4096 events are queued.
+  Load/revert clears deferred events. Lifecycle and first-update diagnostics
+  remain enabled. This change still requires an in-game confirmation.
+
 - 0.1.1 startup fix: SKSE DataLoaded is received on a loading thread in the
   user's LoreRim log. Lifecycle initialization is now scheduled onto SKSE's main
   task queue before recording the main-thread ID or registering event sinks.
