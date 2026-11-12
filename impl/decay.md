@@ -1,6 +1,6 @@
 # Decay: active time, idle meter, sub-skill decay
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (pure tests passed; active-time runtime checks pending).
 - **Design:** design-v2 §5.5 (decay, idle meter), §4.4.3 (rust uses the same meter),
   §11.1 (active game time).
 - **Depends on:** [`subskill-state.md`](subskill-state.md); rust itself is in
@@ -52,6 +52,16 @@ rate     = decay_rate / 24 × ramp(U)             // levels per active hour (Q-D
 `[dynamics] decay_rate, pace_sub` in [`config/skills/*.toml`](../config/skills/).
 
 ## Test
+
+## Prototype notes
+
+- Player Update posts no worker: all decay runs on the main thread at the
+  configured tick interval. Paused, loading and sleep/wait updates advance the
+  calendar baseline without advancing active hours; large jumps are logged/skipped.
+- The closed-form ramp is tested against fine numerical integration. Integration
+  tests cover floor stopping, rust growth/recovery and equivalent split intervals.
+- Trace logs summarize ticks; debug logs record crossed sub-skill levels.
+  Actual menu/time-jump behaviour still requires the in-game checklist.
 
 - Unit: the closed-form integral equals a fine numeric sum for intervals inside, across and after
   the ramp.

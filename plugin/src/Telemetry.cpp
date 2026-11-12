@@ -49,7 +49,7 @@ void update(RE::PlayerCharacter* player,float dt){
     if(paused){if(hours-model.lastHours>model.settings.get("decay","max_tick_game_hours"))spdlog::debug("[time] skipped paused jump={} hours={}",hours-model.lastHours,hours);model.lastHours=hours;tickElapsed=0;}
     else if(tickElapsed>=model.settings.get("decay","tick_seconds")){
         double delta=hours-model.lastHours;model.lastHours=hours;tickElapsed=0;
-        if(delta>0&&delta<=model.settings.get("decay","max_tick_game_hours")){if(!telemetryOnly){model.tick(delta);synchronize();}}
+        if(delta>0&&delta<=model.settings.get("decay","max_tick_game_hours")){if(!telemetryOnly){std::vector<double> before;for(auto& sk:model.skills)for(auto& sub:sk.subs)before.push_back(sub.current.value(sub.curve));model.tick(delta);size_t i=0;for(auto& sk:model.skills)for(auto& sub:sk.subs){double after=sub.current.value(sub.curve);if(int(before[i])!=int(after))spdlog::debug("[decay] sub={} cur={}->{} floor={} U={}",sub.id,before[i],after,sub.floor.value(sub.curve),sub.idle);++i;}spdlog::trace("[decay] tick dt={} scale={} activeHours={}",delta,model.settings.get("debug","time_scale"),model.activeHours);synchronize();}}
         else if(delta!=0)spdlog::debug("[time] skipped delta={} hours={}",delta,hours);
     }
     if(!telemetryOnly)refreshUI(paused?0:dt);
