@@ -867,7 +867,7 @@ def render_removed(ctx: Ctx, av: str, title: str, L: list[str]):
 
 
 # ---- materials -------------------------------------------------------------------------------------
-MAT_PROPOSAL = [  # (regex on editor IDs, smithing sub-skill, tier) — tiers on the placeholder scale of scripts/smithing.toml
+MAT_PROPOSAL = [  # (regex on editor IDs, smithing sub-skill, tier) — tiers on the placeholder scale of config/skills/smithing.toml
     (r"Iron(Banded)?\b|_Iron|TreatAsMaterialIron", "iron", "1"),
     (r"SteelPlate", "steel (plate? Q-SMI-5)", "2"), (r"SkyforgeSteel|WAF_WeapMaterialSkyforge", "steel", "1.5"),
     (r"Steel", "steel", "1.5"), (r"NetchLeather", "leather (netch?)", "1"), (r"Leather", "leather", "1"),

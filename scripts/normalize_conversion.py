@@ -19,13 +19,15 @@ Model
   sub-skills in a group share one k. Each group gets a main-XP budget M_g. Group k is solved so
   that the reference path (listed sub-skills trained 0 -> path level) yields exactly M_g:
       k_g = M_g / sum_{i in path, group(i) = g} I_i(0, path_level)
+  A sub-skill with a fixed `k = …` in the config (concept sub-skills: k = 0) is not normalized
+  and needs no budget.
   Budgets are given either as an absolute main-level range ("main_from"/"main_to") or as a share
   of what remains of N = mainXP(start_level -> target_level) after the absolute budgets.
 
 Usage
 -----
-    python3 scripts/normalize_conversion.py scripts/smithing.toml
-    python3 scripts/normalize_conversion.py scripts/smithing.toml --levels 25 50 75 100 150 200
+    python3 scripts/normalize_conversion.py config/skills/smithing.toml
+    python3 scripts/normalize_conversion.py config/skills/smithing.toml --levels 25 50 75 100 150 200
 
 Only the Python standard library is needed (Python 3.11+ for tomllib).
 """
@@ -75,6 +77,7 @@ class SubSkill:
     curve: Curve
     k: float = 0.0
     tier: float | None = None
+    fixed_k: float | None = None  # `k = …` in the config: not normalized (concept sub-skills: 0)
     _cache: dict = field(default_factory=dict, repr=False)
 
     def rise(self, level: float) -> float:
@@ -135,7 +138,7 @@ def table(headers: list[str], rows: list[list[str]]) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("config", help="TOML config, see scripts/smithing.toml")
+    ap.add_argument("config", help="TOML config, see config/skills/smithing.toml")
     ap.add_argument("--levels", type=int, nargs="*", default=[10, 25, 50, 75, 100, 125, 150, 200],
                     help="sub-skill levels for the per-level tables")
     args = ap.parse_args()
@@ -155,7 +158,10 @@ def main() -> int:
             name=s["name"], group=s["group"], T=float(s["T"]), w=float(s["w"]),
             T1=float(s.get("T1", rise_T1)),
             curve=load_curve(s.get("curve", {}), sub_curve_default), tier=s.get("tier"),
+            fixed_k=None if "k" not in s else float(s["k"]),
         )
+        if subs[s["name"]].fixed_k is not None:
+            subs[s["name"]].k = subs[s["name"]].fixed_k
 
     path_cfg = cfg["reference_path"]
     path_level = int(path_cfg["level"])
@@ -182,16 +188,16 @@ def main() -> int:
 
     # ---- solve k per group -------------------------------------------------------------------
     for g, M in budgets.items():
-        members = [subs[m] for m in path if subs[m].group == g]
+        members = [subs[m] for m in path if subs[m].group == g and subs[m].fixed_k is None]
         if not members:
             sys.exit(f"budget group '{g}' has no members in the reference path")
         I = sum(s.integral(0, path_level) for s in members)
         k = M / I
         for s in subs.values():
-            if s.group == g:
+            if s.group == g and s.fixed_k is None:
                 s.k = k
     for s in subs.values():
-        if s.group not in budgets:
+        if s.group not in budgets and s.fixed_k is None:
             sys.exit(f"subskill '{s.name}' is in group '{s.group}', which has no budget")
 
     # ---- report ------------------------------------------------------------------------------
@@ -203,7 +209,7 @@ def main() -> int:
     print("## Group budgets and k\n")
     rows = []
     for g, M in budgets.items():
-        k = next(s.k for s in subs.values() if s.group == g)
+        k = next(s.k for s in subs.values() if s.group == g and s.fixed_k is None)
         rows.append([g, fmt(M), f"{100 * M / N:.1f}%", f"{k:.5g}"])
     print(table(["group", "budget M (main XP)", "share of N", "k"], rows) + "\n")
 
@@ -218,14 +224,14 @@ def main() -> int:
             "" if s.tier is None else f"{s.tier:g}", f"{s.T1:g}", f"{s.T:g}", f"{s.w:g}",
             f"{s.peak_gn():.2f}", f"{s.k:.5g}",
             fmt(s.curve.xp_between(0, path_level)), fmt(to_path), f"{start}→{alone:.1f}",
-            fmt(life), f"{100 * to_path / life:.0f}%",
+            fmt(life), f"{100 * to_path / life:.0f}%" if life else "—",
         ])
     print(table(["sub-skill (* = path)", "group", "tier", "T1", "T", "w", "peak gn", "k",
                  f"sub XP 0→{path_level}", f"main XP 0→{path_level}",
                  f"main level, alone", "lifetime main XP", f"% of lifetime by {path_level}"], rows))
     print()
 
-    low = [x.name for x in subs.values() if x.peak_gn() < 0.9]
+    low = [x.name for x in subs.values() if x.fixed_k is None and x.peak_gn() < 0.9]
     if low:
         print("**Warning:** peak of gn < 0.9 (T1 too close to T): " + ", ".join(low) + "\n")
 
@@ -237,7 +243,8 @@ def main() -> int:
     rows = []
     for s in subs.values():
         life = s.main_xp(0, MAX_LEVEL)
-        rows.append([s.name] + [f"{100 * s.main_xp(0, L) / life:.0f}%" for L in args.levels])
+        rows.append([s.name] + [f"{100 * s.main_xp(0, L) / life:.0f}%" if life else "—"
+                                for L in args.levels])
     print(table(["sub-skill"] + [f"L={L}" for L in args.levels], rows) + "\n")
 
     print("## Reference path check\n")

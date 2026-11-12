@@ -1,5 +1,5 @@
 # Smithing conversion normalization config (design-v2 §4.4, skills/smithing/design.md).
-# Run:  python3 scripts/normalize_conversion.py scripts/smithing.toml
+# Run:  python3 scripts/normalize_conversion.py config/skills/smithing.toml
 #
 # ALL NUMBERS ARE PLACEHOLDERS except the structure decided in the design:
 #   - reference path = jewelry + 3 categories (equal) + steel + orcish + glass, each 0 -> 75;
@@ -9,6 +9,7 @@
 
 # Main skill XP curve. Vanilla-style; verify Lorerim's Smithing AVIF values (R-1/R-2).
 [main]
+actor_value    = "Smithing"   # RE::ActorValue::kSmithing; a skill is managed by the DLL only if it has a file here
 improve_mult   = 0.25
 improve_offset = 300
 exponent       = 1.95
@@ -36,6 +37,13 @@ level   = 75
 members = ["jewelry",
            "one-handed-smithing", "heavy-armor-smithing", "light-armor-smithing",
            "steel", "orcish", "glass"]
+
+[dynamics]             # read by the DLL only (impl/decay.md, impl/main-skill-level.md); placeholders
+base_mult  = 1.0       # raw XP = raw use points × base_mult (Update.esm UseMult; LoreRim craft points = 0.5 × item value)
+decay_rate = 1.0       # sub-skill decay at full rate, levels per active game day (crafting decays slowly)
+rust_rate  = 0.5       # r_skill: rust R growth at full rate, levels per active game day (crafting rusts slowly)
+pace_sub   = 600       # P_sub: raw XP per active game hour while a sub-skill is practised (Q-DYN-15)
+pace_skill = 150       # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
 
 # Optional crafting pace estimate (raw XP before zone multipliers / DR / bucket falloff).
 [crafting]
@@ -154,4 +162,11 @@ name = "dragon"
 group = "material"
 tier = 10
 T = 90
+w = 12
+# fallback when no material is recognized (skills/smithing/design.md)
+[[subskill]]
+name = "other-smithing"
+group = "material"
+tier = 2
+T = 50
 w = 12

@@ -4,7 +4,7 @@
   (direction noise at launch; `missile` includes lobber projectiles, Q-MAG-1); details to confirm in R-26.
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md), *Accuracy* (Q-MAG-5);
   background: [`refs/aim-perturbation.md`](../refs/aim-perturbation.md) (options A and B there).
-- **Depends on:** *subskill-state*, *spell-form-classifier*, *projectile-launch-hook* (planned,
+- **Depends on:** *subskill-state*, *spell-classifier*, *projectile-launch-hook* (planned,
   see [README](README.md)).
 - **Research:** [R-26](../research/R-26-spell-aim.md).
 - **Shared with archery:** the same two mechanisms are planned for arrows (launch noise + visible
@@ -67,6 +67,27 @@ with the same cumulative amplitude. If B is undone by TDM homing, apply the nois
 disable its aim support for player spells (R-26 check 2).
 
 **Several projectiles per cast** (decided): each projectile gets its own random `δ`.
+
+## Prototype 1
+
+- `L` = current level of `<school>/missile` or `<school>/beam` of the spell's school
+  ([`spell-classifier.md`](spell-classifier.md); per-school forms are a prototype assumption for
+  Q-CAT-1). Only managed schools (Destruction, Restoration) are perturbed.
+- **Missile (B).** First choice: a hook on `RE::Projectile::Launch` (R-26 check 1). If a function
+  hook on it is hard to install, use the fallback: a vtable hook on `MissileProjectile` (and the
+  lobber class, if it is separate) that, on the **first** update of a projectile whose shooter is
+  the player, rotates its `linearVelocity` and its angles by `δ`. Log which variant is used.
+- **Beam (A).** Trigger: a player `MagicCaster` (left, right or dual) is charging or casting a
+  spell whose form is `beam` (`MagicCaster::state`, R-26 check 5). `t` counts from the start of
+  charging, so a fire-and-forget beam (Lightning Bolt) sways while it is charged and goes where
+  the crosshair is at release; a concentration beam (Sparks) sways while held. Apply the offset
+  as a per-frame **delta** to the player's yaw / pitch (so the player can still turn), and remove
+  nothing at the end (the offset is a disturbance, not a lock). Smooth noise: sum of two sines
+  per axis with random phases, frequency around `beam_noise_hz`.
+- Config keys: `[aim]` in [`config/SkillPractice.toml`](../config/SkillPractice.toml); MCM toggles
+  for both ([`mcm-config.md`](mcm-config.md)). Values: σ at level 0 = 6°, sway 4° after 3 s, both
+  0 from level 75 (placeholders).
+- The debug panel shows `σ(L)` and the current sway amplitude ([`status-ui.md`](status-ui.md)).
 
 ## Config
 

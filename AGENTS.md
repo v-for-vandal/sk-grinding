@@ -23,12 +23,14 @@ sub-skills. This repository holds the **design** for now; the code comes later.
 
 ## Where things are
 
-- [`design-v2.md`](design-v2.md): general rules. The root [`design.md`](design.md) is the original
-  Russian draft, kept unchanged; do not edit it.
+- [`design-v2.md`](design-v2.md): general rules.
 - [`skills/`](skills/README.md): per-skill design (`design.md`) and perk worksheets (`perks*.md`).
 - [`impl/`](impl/README.md): one file per decided mechanism (how it will be implemented). Keep
   them up to date when a decision changes.
 - [`research/`](research/): `R-<n>-*.md`, details of research tasks; index in design-v2 §15.2.
+- [`config/`](config/): the plugin's config files (all numbers, placeholders for now);
+  [`config/skills/`](config/skills/) also drives `scripts/normalize_conversion.py`.
+- [`plan/`](plan/): tasks for the implementing agent (first: [`plan/prototype-1.md`](plan/prototype-1.md)).
 - [`refs/`](refs/): background notes. [`old/`](old/): superseded designs.
 
 ## Conventions

@@ -1,0 +1,63 @@
+# Block: conversion normalization + prototype dynamics (design-v2 §4.4, §5.5).
+# Run:  python3 scripts/normalize_conversion.py config/skills/block.toml
+# The DLL reads the same file (impl/main-skill-level.md) and solves k itself.
+#
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). One group for all Block sub-skills (skills/block/design.md).
+
+[main]                 # vanilla AVIF curve (refs/vanilla-skill-xp.md §2); LoreRim's own AVIF has ImproveOffset 9999
+actor_value    = "Block"   # RE::ActorValue::kBlock; a skill is managed by the DLL only if it has a file here
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+start_level    = 15
+target_level   = 100
+
+[sub_curve]            # sub-skill XP curve, 0..200 scale (design-v2 §5.1)
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+
+[conversion]
+rise_T1 = 25
+
+[dynamics]             # read by the DLL only (impl/decay.md, impl/main-skill-level.md)
+base_mult  = 8.1        # raw XP = raw use points × base_mult (vanilla AVIF UseMult; Q-XP-9)
+decay_rate = 3.0        # sub-skill decay at full rate, levels per active game day (Q-DYN-4 (a))
+rust_rate  = 1.5        # r_skill: rust R growth at full rate, levels per active game day (Q-ML-8)
+pace_sub   = 2000        # P_sub: raw XP per active game hour while a sub-skill is practised (Q-DYN-15)
+pace_skill = 1000        # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
+
+[routing]              # impl/xp-capture.md
+bash_shield_factor = 0.5   # shield bash: the shield sub-skill gets raw × this, `bash` gets raw (Q-BLK-1)
+
+[budget]
+block = { share = 1.0 }
+
+[reference_path]
+level   = 75
+members = ["heavy-shield", "bash"]
+
+# ---- sub-skills -------------------------------------------------------------------------------
+[[subskill]]
+name = "heavy-shield"
+group = "block"
+T = 90
+w = 15
+
+[[subskill]]
+name = "light-shield"
+group = "block"
+T = 90
+w = 15
+
+[[subskill]]
+name = "parry"
+group = "block"
+T = 90
+w = 15
+
+[[subskill]]
+name = "bash"
+group = "block"
+T = 90
+w = 15

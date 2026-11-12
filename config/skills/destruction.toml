@@ -1,0 +1,147 @@
+# Destruction: conversion normalization + prototype dynamics (design-v2 §4.4, §5.5).
+# Run:  python3 scripts/normalize_conversion.py config/skills/destruction.toml
+# The DLL reads the same file (impl/main-skill-level.md) and solves k itself.
+#
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Magic sub-skills (skills/magic/design.md). Prototype assumption for Q-CAT-1 (open): one set of form and archetype sub-skills per school, ids `<school>/<form>`; archetype: only `<school>/standard` (R-7 not done). Groups: form, direction (school sub-direction), archetype.
+
+[main]                 # vanilla AVIF curve (refs/vanilla-skill-xp.md §2); LoreRim's own AVIF has ImproveOffset 9999
+actor_value    = "Destruction"   # RE::ActorValue::kDestruction; a skill is managed by the DLL only if it has a file here
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+start_level    = 15
+target_level   = 100
+
+[sub_curve]            # sub-skill XP curve, 0..200 scale (design-v2 §5.1)
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+
+[conversion]
+rise_T1 = 25
+
+[dynamics]             # read by the DLL only (impl/decay.md, impl/main-skill-level.md)
+base_mult  = 1.35        # raw XP = raw use points × base_mult (vanilla AVIF UseMult; Q-XP-9)
+decay_rate = 2.0        # sub-skill decay at full rate, levels per active game day (Q-DYN-4 (a))
+rust_rate  = 1.0        # r_skill: rust R growth at full rate, levels per active game day (Q-ML-8)
+pace_sub   = 1500        # P_sub: raw XP per active game hour while a sub-skill is practised (Q-DYN-15)
+pace_skill = 800        # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
+
+[budget]
+form      = { share = 0.35 }
+direction = { share = 0.45 }
+archetype = { share = 0.20 }
+
+[reference_path]
+level   = 75
+members = ["destruction/missile", "destruction/flame", "destruction/fire", "destruction/frost", "destruction/standard"]
+
+# ---- sub-skills -------------------------------------------------------------------------------
+# forms (T lower: a form is learned sooner), school sub-directions, archetype
+[[subskill]]
+name = "destruction/missile"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/explosion"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/beam"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/flame"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/rune"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/wall"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/cloak"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/direct"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/self"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/touch"
+group = "form"
+T = 60
+w = 12
+
+[[subskill]]
+name = "destruction/fire"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/frost"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/shock"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/arcane"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/blood"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/entropic"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/other"
+group = "direction"
+T = 90
+w = 15
+
+[[subskill]]
+name = "destruction/standard"
+group = "archetype"
+T = 50
+w = 12

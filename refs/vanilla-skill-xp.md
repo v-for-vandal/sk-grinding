@@ -17,7 +17,7 @@ The dump is local, in `~/tmp/research2/` (`skill-xp-report.md`, `tables/skill-av
 from the same run: §6.
 
 Cross-check: the Smithing values (Improve Mult 0.25, Improve Offset 300, total 15→100 ≈ 91,601)
-match `scripts/smithing.toml` and the N ≈ 91.6k computed by the normalization script.
+match `config/skills/smithing.toml` and the N ≈ 91.6k computed by the normalization script.
 
 ## 1. Formulas (UESP Skyrim:Leveling)
 

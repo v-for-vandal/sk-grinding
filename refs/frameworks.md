@@ -1,7 +1,7 @@
 # Frameworks and libraries
 
 Reference note for [`design-v2.md`](../design-v2.md) §14 (technical notes) and research tasks
-R-18…R-21 (§15.2).
+R-18…R-21 (§15.2); §6: PrismaUI (§12.1).
 
 **Status.** This note comes from web research done on 2026-11-11, mostly from the authors'
 GitHub repositories, wikis and source code. The Nexus pages returned HTTP 403, so nothing was read
@@ -261,7 +261,57 @@ Keyword list: wiki "Keyword Reference".
 - **Recommendation for stage 2 (plan):** alandtse `ng` as a submodule, with the libxse xmake
   template or a CMake + vcpkg template. Decide together with Q-TECH-2.
 
-## 6. Not researched yet
+## 6. PrismaUI
+
+Web research of 2026-11-12 (docs https://www.prismaui.dev, source
+https://github.com/PrismaUI-SKSE/framework, official example
+https://github.com/PrismaUI-SKSE/example-skse-plugin). The Nexus page (mod 148718) returned
+HTTP 403; facts from it come from search snippets. Used by
+[`impl/status-ui.md`](../impl/status-ui.md).
+
+- **Version:** 1.5.1 (latest; 1.0.0, 1.1.0 and 1.2.0 each needed a full reinstall). HTML / CSS / JS
+  rendered by Ultralight (WebKit). Custom license: free for non-commercial use; plugins that use
+  it are fine.
+- **Game:** docs say SE and AE; 1.5.0 added 1.7 and VR. Built on CommonLib-NG with Address
+  Library. **1.6.1170 is not listed explicitly** *(verify)*; one user reports 1.5.1 working on
+  1.6.1170.
+- **Requirements:** SKSE, Address Library, **Media Keys Fix SKSE** (Nexus 92948, needed for
+  keyboard input). LoreRim already has Media Keys Fix SKSE 1.0.1 and Address Library (profile of
+  2026-11-11). No VC++ runtime mentioned *(verify)*.
+- **Files:** everything under `Data` since 1.2.0 (no files in the game root). Views in
+  `Data/PrismaUI/views/<name>/`. Log: `Documents\My Games\Skyrim Special Edition\SKSE\PrismaUI.log`.
+  Exact file list *(verify)*.
+- **Conflicts:** "non-invasive" (does not touch Scaleform; runs alongside SkyUI). Nothing official
+  on ENB, Community Shaders or SKSE Menu Framework *(verify)*. Some reports of CTDs when opening
+  views in other mods (SkyrimNet issue 647); some mods now prefer "Magelight UI".
+- **C++ API** (`PrismaUI_API.h`, header-only, namespace `PRISMA_UI_API`; interfaces `IVPrismaUI1`,
+  `IVPrismaUI2`):
+  - `RequestPluginAPI(InterfaceVersion)`: call at or after PostLoad; docs and example use
+    `kDataLoaded`.
+  - `PrismaView CreateView(htmlPath, OnDomReady)`: path relative to `Data/PrismaUI/views/`; call JS
+    only after DOM ready. Docs recommend one view per plugin.
+  - `Invoke(view, script, cb)` (async, result as string); `InteropCall(view, fn, arg)` (fast, one
+    string argument, global JS function, no result) for frequent updates.
+  - `RegisterJSListener(view, name, cb)` creates `window.name(str)`; the C++ side gets one
+    `const char*` (send JSON). Listeners survive page reloads.
+  - `Show` / `Hide` / `IsHidden`, `Focus(view, pauseGame, disableFocusMenu)` (opens a modal focus
+    menu: cursor, game controls off) / `Unfocus` / `HasFocus`, `SetOrder`, `Destroy`.
+  - Inspector: `CreateInspectorView`, `SetInspectorBounds`, `SetInspectorVisibility` (first open
+    ~5 s). V2: `RegisterConsoleCallback` forwards JS `console.*` (exact signature *(verify)*).
+  - All callbacks are plain function pointers.
+- **Threads:** API callbacks run on the main thread since 1.1.0 (internal per-view queue);
+  Ultralight runs on its own thread. Whether callers may use the API from other threads is not
+  documented: call it from the main thread.
+- **Hotkey:** none built in. The example registers a `BSTEventSink<RE::InputEvent*>` on
+  `BSInputDeviceManager` and toggles `Focus` / `Unfocus` on a key-down. Whether game input events
+  still reach our sink while a view is focused *(verify)* (the example closes with the same key,
+  so probably yes).
+- **Limits:** ES2022, no WebGL, no video or audio, CPU rendering at ≤ 60 FPS (avoid heavy CSS
+  effects), `contextmenu` does not fire; local files from the views folder, remote URLs allowed
+  but not recommended. A page can be developed in a normal browser if the bound functions are
+  guarded.
+
+## 7. Not researched yet
 
 - Custom Skills Framework API (deferred).
 - Precision, TDM and Parrying RPG APIs (integration points in design §14).

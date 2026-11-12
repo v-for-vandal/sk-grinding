@@ -1,6 +1,6 @@
 # Skill Practice Overhaul — Design Document (draft v2)
 
-> Status: **draft v2**. Translated from the original draft (`design.md`, kept unchanged),
+> Status: **draft v2**. Translated from the original draft ([`old/design.md`](old/design.md), kept unchanged),
 > with consistent terminology and decisions from the first review round applied.
 > Companion document: [`grinding-analysis.md`](grinding-analysis.md).
 > Technical reference notes: [`refs/`](refs/): [`aim-perturbation.md`](refs/aim-perturbation.md),
@@ -324,7 +324,7 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
 - Each group of sub-skills gets a main-XP budget: absolute (e.g. "jewelry = Smithing 15→35"), or
   a share of the rest. The `k` values are solved from the budgets, not tuned by hand.
 - **Tool:** [`scripts/normalize_conversion.py`](scripts/normalize_conversion.py), with a per-skill
-  TOML config (Smithing: [`scripts/smithing.toml`](scripts/smithing.toml)). It computes:
+  TOML config (Smithing: [`config/skills/smithing.toml`](config/skills/smithing.toml)). It computes:
   - `k` per group;
   - the main level each sub-skill gives alone, and its lifetime contribution;
   - `g(L)` tables and a check of the reference path;
@@ -792,7 +792,7 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   since they have no target.
   - **A:**
 - **Q-AG-10.** Crafting bucket parameters: size (raw XP per active game day), refill period,
-  falloff (`p`, `mMin`). Placeholder in `scripts/smithing.toml`: 4000 raw XP per active day.
+  falloff (`p`, `mMin`). Placeholder in `config/skills/smithing.toml`: 4000 raw XP per active day.
   - **A:**
 - **Q-AG-11.** "Active game time": exclude sleep, wait, fast travel and jail. Anything else?
   Carriage rides are fast travel. Should time spent in dialogue or in menus count? Game time
@@ -977,7 +977,7 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-14 | Partial: no general clamp at 100 found, but safety above 100 not proven; runtime probes needed if main > 100 |
 | R-15 | **New:** dump COBJ (recipes: workbench, ingredients, counts, required perks), for Smithing units, set → material, tempering |
 | R-16 | Partial (static, R-22): no master switch. Stop new points with MCM points per level = 0 and level multiplier = 0, and zero the bank `SSL_PointsLeftAfterLvlUp`; SSL also zeroes `fSkillUsageLockPick*`. To verify on a test profile. Details: [`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md) §6 |
-| R-17 | **New (runtime):** which hook gives raw use points with `UseMult = 0` (Q-XP-9); log one award per skill |
+| R-17 | **New (runtime, prototype 1 milestone 1):** which hook gives raw use points with `UseMult = 0` (Q-XP-9); log one award per skill; context of the award. Details: [`research/R-17-raw-use-points.md`](research/R-17-raw-use-points.md) |
 | R-18 | **New (runtime):** AVG 2.2.9.4 on AE 1.6.1170: define one functional extra value with a DLL getter, alias it in a test perk; check (1) `GetActorValue` perk condition, (2) `Multiply 1 + Actor Value Mult` entry point, (3) magic-effect condition. Also: which config path 2.2.9.4 reads ([`refs/frameworks.md`](refs/frameworks.md) §3) |
 | R-19 | **New (runtime):** dump weapons with their keywords **after** KID distribution (on load game), to get real OCF coverage, including Animated Armoury; compare with the static `refs/lorerim/weapons.md` |
 | R-20 | **New:** exact OCF version in LoreRim, and whether a keyword patch (e.g. "Keyword Patch Collection") covers Animated Armoury |
@@ -987,6 +987,7 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-24 | **New:** does a LoreRim mod already slow time on block / parry (For Honor in Skyrim `MA_SlowTime`, Parrying RPG…), before restoring Quick Reflexes. Details: [`research/R-24-quick-reflexes-slowtime.md`](research/R-24-quick-reflexes-slowtime.md) |
 | R-25 | **New:** injecting conditions / values into existing perks from the DLL: CommonLib fields, gating of entry points and abilities, perks menu display, NPC exception, old saves. Details: [`research/R-25-perk-condition-injection.md`](research/R-25-perk-condition-injection.md) |
 | R-26 | **New:** spell aim: launch noise through `Projectile::Launch` (missile, lobber), aim sway for beams, TDM / SmoothCam interaction, how Requiem sways a bow without stamina. Details: [`research/R-26-spell-aim.md`](research/R-26-spell-aim.md) |
+| R-27 | **New:** when to run the start conversion on a new game in LoreRim (Alternate Perspective, Norden Starting Skills, SSL). Details: [`research/R-27-new-game-init.md`](research/R-27-new-game-init.md) |
 
 Original task list:
 

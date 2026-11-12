@@ -41,7 +41,7 @@
   `jewelry` fades very early.
 - **Reference path:** `jewelry` + 3 categories (equal to each other) + `steel` + `orcish` +
   `glass`, each 0→75 ⇒ Smithing 15→100. `jewelry` 0→75 alone ⇒ Smithing 15→35.
-- With the placeholder values in [`scripts/smithing.toml`](../../scripts/smithing.toml) (vanilla-like
+- With the placeholder values in [`config/skills/smithing.toml`](../../config/skills/smithing.toml) (vanilla-like
   curve): N(15→100) ≈ 91.6k main XP; `jewelry` ≈ 9.5% of N; the rest is split 50/50 between
   categories and materials (Q-SMI-6). Reaching 200 in every path sub-skill gives Smithing ≈ 117.
   Training all sub-skills to 75 gives ≈ 150 (the main-skill cap is Q-DYN-8).
@@ -58,7 +58,7 @@ Notes:
   physical materials. For Smithing, the material of a set comes from its recipe ingredients.
 - **Recipes (COBJ) are not in the research dump yet** (R-15). They are needed for: the set →
   material mapping, `units` per recipe (XP formulas above) and temper recipes.
-- Placeholder tiers and `T` values are in `scripts/smithing.toml` (iron 1 … dragon 10).
+- Placeholder tiers and `T` values are in `config/skills/smithing.toml` (iron 1 … dragon 10).
 
 - **Q-SMI-5.** Fill in the materials worksheet
   ([`refs/lorerim/materials.md`](../../refs/lorerim/materials.md)): Smithing sub-skill and tier

@@ -6,7 +6,7 @@
   this block); per-skill verdicts in `skills/<skill>/perks*.md` (*Sub-skill requirements*),
   e.g. [`skills/block/perks.md`](../skills/block/perks.md). Background:
   [`refs/perk-requirements.md`](../refs/perk-requirements.md).
-- **Depends on:** *subskill-state* (planned, see [README](README.md)); our ESL with the globals.
+- **Depends on:** [*subskill-state*](subskill-state.md); our ESL with the globals.
 - **Research:** [R-25](../research/R-25-perk-condition-injection.md).
 
 ## What it does
