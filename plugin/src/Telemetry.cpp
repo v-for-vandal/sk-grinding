@@ -27,7 +27,7 @@ void use(RE::Actor* who,RE::ActorValue av,float points,RE::TESForm* arg){
     spdlog::debug("[use] t_us={} frame={} av={} pts={} arg={:08X} type={} name={} thread={}",stamp(),frame,int(av),points,arg?arg->GetFormID():0,arg?int(arg->GetFormType()):0,arg?arg->GetName():"",GetCurrentThreadId());
     if(who!=RE::PlayerCharacter::GetSingleton()||telemetryOnly||GetCurrentThreadId()!=mainThread){originalUse(who,av,points,arg);return;}
     auto sk=skill(av);if(!sk||!ready(*sk)){originalUse(who,av,points,arg);return;}
-    if(points>0&&!model.settings.flag("debug","fixed_xp")){
+    if(std::isfinite(points)&&points>0&&!model.settings.flag("debug","fixed_xp")){
         if(arg)route(av,points,arg,"use",fresh(bashCtx));
         else pending.push_back({av,points,0,stamp()});
     }
@@ -36,7 +36,7 @@ void use(RE::Actor* who,RE::ActorValue av,float points,RE::TESForm* arg){
 void drain(bool force=false){
     auto now=stamp();for(auto it=pending.begin();it!=pending.end();){RE::TESForm* form=nullptr;bool bash=fresh(bashCtx);
         if(it->skill==RE::ActorValue::kSmithing&&fresh(craft))form=RE::TESForm::LookupByID(craft.form);
-        else if((it->skill==RE::ActorValue::kDestruction||it->skill==RE::ActorValue::kRestoration)&&fresh(cast))form=RE::TESForm::LookupByID(cast.form);
+        else if(it->skill==RE::ActorValue::kDestruction||it->skill==RE::ActorValue::kRestoration){if(fresh(cast)){auto s=RE::TESForm::LookupByID<RE::SpellItem>(cast.form);if(s&&classify(s).actorValue==it->skill)form=s;}}
         else if(fresh(hit))form=RE::TESForm::LookupByID(hit.form);
         if(form||force||now-it->time>=model.settings.get("xp","context_window_ms")*1000){route(it->skill,it->points,form,"use",bash);it=pending.erase(it);}else ++it;
     }
@@ -46,7 +46,7 @@ void update(RE::PlayerCharacter* player,float dt){
     if(!telemetryOnly)drain();
     auto ui=RE::UI::GetSingleton();bool paused=!ui||ui->GameIsPaused()||ui->IsMenuOpen(RE::LoadingMenu::MENU_NAME)||ui->IsMenuOpen(RE::SleepWaitMenu::MENU_NAME);
     double hours=RE::Calendar::GetSingleton()->GetHoursPassed();tickElapsed+=std::max(0.f,dt);
-    if(paused){model.lastHours=hours;tickElapsed=0;}
+    if(paused){if(hours-model.lastHours>model.settings.get("decay","max_tick_game_hours"))spdlog::debug("[time] skipped paused jump={} hours={}",hours-model.lastHours,hours);model.lastHours=hours;tickElapsed=0;}
     else if(tickElapsed>=model.settings.get("decay","tick_seconds")){
         double delta=hours-model.lastHours;model.lastHours=hours;tickElapsed=0;
         if(delta>0&&delta<=model.settings.get("decay","max_tick_game_hours")){if(!telemetryOnly){model.tick(delta);synchronize();}}
@@ -56,6 +56,7 @@ void update(RE::PlayerCharacter* player,float dt){
 }
 class Events : public RE::BSTEventSink<RE::TESHitEvent>,public RE::BSTEventSink<RE::TESSpellCastEvent>,public RE::BSTEventSink<RE::ItemCrafted::Event>,public RE::BSTEventSink<RE::BSAnimationGraphEvent>,public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
     RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* e,RE::BSTEventSource<RE::TESHitEvent>*) override {
+        if(e&&GetCurrentThreadId()!=mainThread){auto copy=*e;SKSE::GetTaskInterface()->AddTask([this,copy]{ProcessEvent(&copy,nullptr);});return RE::BSEventNotifyControl::kContinue;}
         if(!e)return RE::BSEventNotifyControl::kContinue;auto p=RE::PlayerCharacter::GetSingleton();bool isBash=e->flags.any(RE::TESHitEvent::Flag::kBashAttack);
         if(e->cause.get()==p){hit={e->source,stamp(),false,isBash};context("hit",hit);if(isBash)bashCtx=hit;
             if(!telemetryOnly&&model.settings.flag("debug","fixed_xp")){auto f=RE::TESForm::LookupByID(e->source);auto w=f?f->As<RE::TESObjectWEAP>():nullptr;if(isBash)route(RE::ActorValue::kBlock,0,f,"fixed",true);else if(!f||w){auto sub=weapon(w);if(sub.starts_with("1h-"))route(RE::ActorValue::kOneHanded,0,f,"fixed");else if(sub.starts_with("2h-"))route(RE::ActorValue::kTwoHanded,0,f,"fixed");}}
@@ -64,15 +65,19 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,public RE::BSTEventSink<
         if(!telemetryOnly)drain();return RE::BSEventNotifyControl::kContinue;
     }
     RE::BSEventNotifyControl ProcessEvent(const RE::TESSpellCastEvent* e,RE::BSTEventSource<RE::TESSpellCastEvent>*) override {
+        if(e&&GetCurrentThreadId()!=mainThread){auto copy=*e;SKSE::GetTaskInterface()->AddTask([this,copy]{ProcessEvent(&copy,nullptr);});return RE::BSEventNotifyControl::kContinue;}
         if(e&&e->object.get()==RE::PlayerCharacter::GetSingleton()){cast={e->spell,stamp()};context("cast",cast);auto f=RE::TESForm::LookupByID<RE::SpellItem>(e->spell);if(!telemetryOnly&&f){auto c=classify(f);if(model.settings.flag("debug","fixed_xp"))route(c.actorValue,0,f,"fixed");drain();}}return RE::BSEventNotifyControl::kContinue;
     }
     RE::BSEventNotifyControl ProcessEvent(const RE::ItemCrafted::Event* e,RE::BSTEventSource<RE::ItemCrafted::Event>*) override {
+        if(e&&GetCurrentThreadId()!=mainThread){auto copy=*e;SKSE::GetTaskInterface()->AddTask([this,copy]{ProcessEvent(&copy,nullptr);});return RE::BSEventNotifyControl::kContinue;}
         if(e&&e->item){craft={e->item->GetFormID(),stamp()};context("craft",craft);auto ui=RE::UI::GetSingleton();if(!telemetryOnly&&ui&&ui->IsMenuOpen(RE::CraftingMenu::MENU_NAME)){if(model.settings.flag("debug","fixed_xp"))route(RE::ActorValue::kSmithing,0,e->item,"fixed");drain();}}return RE::BSEventNotifyControl::kContinue;
     }
     RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* e,RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override {
+        if(e&&GetCurrentThreadId()!=mainThread){auto copy=*e;SKSE::GetTaskInterface()->AddTask([this,copy]{ProcessEvent(&copy,nullptr);});return RE::BSEventNotifyControl::kContinue;}
         if(e&&e->holder==RE::PlayerCharacter::GetSingleton()){std::string tag=e->tag.c_str();if(tag=="weaponSwing"||tag=="weaponLeftSwing"){swing={0,stamp(),tag=="weaponLeftSwing"};auto item=RE::PlayerCharacter::GetSingleton()->GetEquippedObject(swing.left);swing.form=item?item->GetFormID():0;context(tag.c_str(),swing);}else if(tag=="bashRelease"||tag=="bashPowerStart"){bashCtx={0,stamp(),false,true};context(tag.c_str(),bashCtx);}}return RE::BSEventNotifyControl::kContinue;
     }
     RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* e,RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override {
+        if(e&&GetCurrentThreadId()!=mainThread){auto copy=*e;SKSE::GetTaskInterface()->AddTask([this,copy]{ProcessEvent(&copy,nullptr);});return RE::BSEventNotifyControl::kContinue;}
         if(e){spdlog::debug("[ctx] t_us={} frame={} menu={} open={}",stamp(),frame,e->menuName.c_str(),e->opening);if(e->menuName==RE::RaceSexMenu::MENU_NAME&&!e->opening)model.raceClosed=true;if(e->menuName==RE::JournalMenu::MENU_NAME&&!e->opening&&!telemetryOnly)reload();}return RE::BSEventNotifyControl::kContinue;
     }
 };

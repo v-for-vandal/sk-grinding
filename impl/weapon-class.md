@@ -1,6 +1,6 @@
 # Weapon class: KID keywords → weapon sub-skill
 
-- **Status:** chosen (the KID config exists; runtime coverage is checked in prototype 1).
+- **Status:** done (prototype implementation; runtime coverage pending).
 - **Design:** [`skills/weapons/design.md`](../skills/weapons/design.md) (*Weapon class is
   determined by keywords only*, Q-WPN-2, Q-WPN-11); data:
   [`refs/lorerim/weapons.md`](../refs/lorerim/weapons.md); KID:
@@ -53,6 +53,15 @@ sub-skill in the DLL.
   (compare with the static 13 081 / 13 140 in `refs/lorerim/weapons.md`).
 
 ## Test
+
+## Prototype notes
+
+- Fixed FormKeys 0x800–0x815 in SkillPractice.esp resolve at DataLoaded;
+  `WeaponClasses.h` is checked against the KID file by the pure tests.
+- Classification is cached lazily; multiple class keywords and fallbacks are
+  logged. The runtime dump includes owner plugin, FormID, name and sub-skill.
+- Beast races and crafting furniture exclusions use resolved vanilla FormKeys,
+  never load-order-prefixed runtime IDs.
 
 - Equip a vanilla sword, dagger, greatsword, warhammer, a LoreRim spear: the panel shows the
   expected class.

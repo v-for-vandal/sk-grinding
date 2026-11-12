@@ -40,7 +40,7 @@ void award(std::string_view id,double raw,std::string_view origin){sp::Skill* sk
 void resetContext();
 void message(SKSE::MessagingInterface::Message* m){
     if(m->type==SKSE::MessagingInterface::kDataLoaded){reload();if(model.skills.empty()){spdlog::critical("[boot] disabled: no valid configuration");return;}size_t n=0;for(auto& s:model.skills)n+=s.subs.size();spdlog::info("[boot] managed={} subskills={}",model.skills.size(),n);installTelemetry();installGameplay();setupUI();installAim();}
-    else if(m->type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();if(!restored)model.raceClosed=true;for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
+    else if(m->type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();if(!restored)model.raceClosed=true;if(!restored||!model.pendingInit)for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
     else if(m->type==SKSE::MessagingInterface::kNewGame){reload();model.raceClosed=false;model.pendingInit=true;resetContext();spdlog::info("[init] new game pending; awaiting RaceSex close and first use per skill");}
 }
 void start(){auto si=SKSE::GetSerializationInterface();si->SetUniqueID(0x534B5052);si->SetSaveCallback(save);si->SetLoadCallback(load);si->SetRevertCallback(revert);}

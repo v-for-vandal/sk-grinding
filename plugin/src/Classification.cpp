@@ -1,5 +1,6 @@
 ﻿#include "Runtime.h"
 #include "WeaponClasses.h"
+#include "SpellRules.h"
 #include <unordered_map>
 #include <unordered_set>
 namespace runtime {
@@ -33,13 +34,10 @@ Classification classify(RE::SpellItem* spell){
     auto& d=m->data;auto p=d.projectileBase;auto delivery=spell->GetDelivery();auto casting=spell->GetCastingType();
     if(p)c.projectile=p->IsBeam()?"beam":p->IsGrenade()?"lobber":p->IsMissile()?"missile":p->IsArrow()?"arrow":p->IsFlamethrower()?"flamethrower":p->IsCone()?"cone":p->IsBarrier()?"barrier":"unknown";
     using D=RE::MagicSystem::Delivery;using A=RE::EffectSetting::Archetype;
-    if(d.archetype==A::kSummonCreature){}
-    else if(d.archetype==A::kCloak)c.form="cloak";
-    else if(delivery==D::kSelf)c.form="self";
-    else if(delivery==D::kTouch)c.form="touch";
-    else if(delivery==D::kTargetActor)c.form="direct";
-    else if(delivery==D::kTargetLocation)c.form=casting==RE::MagicSystem::CastingType::kConcentration?"wall":"rune";
-    else if(p){if(p->IsBeam())c.form="beam";else if(p->IsFlamethrower()||p->IsCone())c.form="flame";else if(p->IsBarrier())c.form="wall";else if(p->IsMissile()||p->IsGrenade()||p->IsArrow())c.form=(d.explosion||p->data.explosionType)?"explosion":"missile";}
+    sp::SpellShape shape;using SD=sp::SpellShape::Delivery;
+    shape.delivery=delivery==D::kSelf?SD::Self:delivery==D::kTouch?SD::Touch:delivery==D::kTargetActor?SD::Actor:delivery==D::kTargetLocation?SD::Location:SD::Other;
+    shape.summon=d.archetype==A::kSummonCreature;shape.cloak=d.archetype==A::kCloak;shape.concentration=casting==RE::MagicSystem::CastingType::kConcentration;
+    shape.beam=p&&p->IsBeam();shape.flame=p&&(p->IsFlamethrower()||p->IsCone());shape.barrier=p&&p->IsBarrier();shape.missile=p&&(p->IsMissile()||p->IsGrenade()||p->IsArrow());shape.explosion=d.explosion||(p&&p->data.explosionType);c.form=sp::spellForm(shape);
     c.direction=c.school+"/other";
     for(auto& row:model.settings.values["directions"][c.school]){bool match=false;for(auto& key:row["keywords"])if(has(m,keyword(key)))match=true;if(match){c.direction=row["subskill"];break;}}
     return c;
@@ -48,7 +46,7 @@ void dumpWeapons(){std::map<std::string,unsigned> counts;for(auto w:RE::TESDataH
 void dumpSpells(){auto p=RE::PlayerCharacter::GetSingleton();for(auto s:RE::TESDataHandler::GetSingleton()->GetFormArray<RE::SpellItem>())if(s&&p->HasSpell(s)){auto c=classify(s);spdlog::info("[spell] form={:08X} name={} school={} casting={} delivery={} projectile={} formClass={} direction={}",s->GetFormID(),s->GetName(),c.school,int(s->GetCastingType()),int(s->GetDelivery()),c.projectile,c.form,c.direction);}spdlog::default_logger()->flush();}
 RE::TESForm* swingWeapon();
 RE::TESForm* selectedCraft(){auto menu=RE::UI::GetSingleton()->GetMenu<RE::CraftingMenu>();if(!menu)return nullptr;auto sub=menu->GetCraftingSubMenu();if(auto smith=skyrim_cast<RE::CraftingSubMenus::SmithingMenu*>(sub)){if(smith->currentIndex<smith->recipes.size())return smith->recipes[smith->currentIndex].item;}if(auto construct=skyrim_cast<RE::CraftingSubMenus::ConstructibleObjectMenu*>(sub)){if(construct->currentIndex<construct->recipes.size()){auto recipe=construct->recipes[construct->currentIndex].constructibleObject;return recipe?recipe->createdItem:nullptr;}}return nullptr;}
-bool smithingStation(){auto ref=RE::PlayerCharacter::GetSingleton()->GetOccupiedFurniture().get();auto f=ref?ref->GetBaseObject()->As<RE::TESFurniture>():nullptr;if(!f)return true;return !(smelter&&f->HasKeyword(smelter))&&!(tanning&&f->HasKeyword(tanning));}
+bool smithingStation(){auto ref=RE::PlayerCharacter::GetSingleton()->GetOccupiedFurniture().get();auto f=ref?ref->GetBaseObject()->As<RE::TESFurniture>():nullptr;if(!f)return true;if(!f->workBenchData.usesSkill.any(RE::ActorValue::kSmithing))return false;return !(smelter&&f->HasKeyword(smelter))&&!(tanning&&f->HasKeyword(tanning));}
 void route(RE::ActorValue value,float points,RE::TESForm* source,std::string_view origin,bool bash){
     if(value==RE::ActorValue::kSmithing&&!smithingStation()){spdlog::debug("[ctx] smelting/tanning skipped");return;}
     auto sk=skill(value);if(!sk||!ready(*sk))return;
