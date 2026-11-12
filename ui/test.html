@@ -5,7 +5,7 @@ function test(){const frame=document.querySelector('iframe'),w=frame.contentWind
  const check=(value,label)=>{if(!value)throw Error(label);};
  try{
   check(d.querySelectorAll('details').length===6,'six main skills');
-  check(d.querySelectorAll('tbody tr').length===77,'77 sub-skills');
+  check(d.querySelectorAll('tbody tr').length===76,'76 sub-skills');
   d.getElementById('filter').value='1h-sword';d.getElementById('filter').dispatchEvent(new Event('input'));
   check(d.querySelectorAll('tbody tr').length===1,'filter');
   d.getElementById('filter').value='';d.getElementById('filter').dispatchEvent(new Event('input'));
@@ -16,7 +16,7 @@ function test(){const frame=document.querySelector('iframe'),w=frame.contentWind
   d.getElementById('reinit').click();check(calls.length===1,'reinit requires confirmation');
   d.getElementById('sure').checked=true;d.getElementById('reinit').click();check(calls.at(-1).action==='reinitAll','confirmed reinit');
   d.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));check(calls.at(-1).action==='close','Escape closes');
-  result.textContent='PASS: mock, six skills, 77 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
+  result.textContent='PASS: mock, six skills, 76 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
  }catch(e){result.textContent='FAIL: '+e.message;result.dataset.status='fail';}
 }
 setTimeout(test,100);

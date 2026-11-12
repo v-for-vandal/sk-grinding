@@ -1,6 +1,6 @@
 # Sub-skill state: registry, values, XP award, co-save
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (prototype implementation; in-game save/load validation pending).
 - **Design:** design-v2 §3 (glossary), §4.2 (pipeline), §5.1 (range, curve, storage), §5.3 (zones),
   §5.4 (floor), §6 (cross-links), §14 (persistence).
 - **Depends on:** *plugin-foundation* ([`plugin-foundation.md`](plugin-foundation.md)): config
@@ -100,6 +100,18 @@ or removing sub-skills in config never shifts saved data.
 [`config/skills/*.toml`](../config/skills/).
 
 ## Test
+
+## Prototype notes
+
+- Implemented in `plugin/src/Core.*`, `Config.cpp` and `State.cpp`.
+- The SKSE SUBS/MAIN/TIME/STAT records use version 1 and UTF-8 JSON payloads,
+  instead of the proposed packed binary layout. LevelXP still stores integer
+  level and float progress; IDs, unknown sub-skills and their initial baselines
+  survive removal and re-addition. Unsupported/truncated saves disable gameplay
+  for that load, rather than replacing progress silently.
+- Pure tests cover normalization against the Python reference, zones, caps,
+  fractional curves, initialization and co-save payload round trips. SKSE's
+  actual save/load callbacks still need the user's in-game check.
 
 - Unit tests (no game, see [`plugin-foundation.md`](plugin-foundation.md)): `LevelXP` add / sub
   across many levels, at `hard_cap`, with `cost(0) = 0`; zone split at both boundaries;

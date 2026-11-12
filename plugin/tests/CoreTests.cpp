@@ -19,6 +19,8 @@ int main(int argc,char** argv)try {
     double raw=s->curve.between(5,10)/3+s->curve.between(10,20)/1.5+s->curve.between(20,22);m.award(s->id,raw);near(s->current.value(s->curve),22);near(s->potential.value(s->curve),22);check(s->floor.value(s->curve)<=22,"floor<=current");
     auto saved=m.save();saved["subs"]["removed"]={{"test",42}};saved["mains"]["removed"]={{"test",7}};Model loaded;loaded.loadConfig(argv[1]);loaded.restore(saved);check(loaded.save()==saved,"save roundtrip/unknown IDs");
     LevelXP below;below.set(3,c,500);below.subtract(1,c,floor);near(below.value(c),3);
+    auto removed=loaded;auto& list=removed.skills[0].subs;auto removedID=list[0].id;list.erase(list.begin());auto temporary=removed.save();Model returned;returned.loadConfig(argv[1]);returned.restore(temporary);check(returned.save()["subs"][removedID]==saved["subs"][removedID],"removed subskill survives save and re-add");
+    auto added=saved;added["subs"].erase("1h-mace");for(auto& [key,v]:added["mains"].items())if(v.contains("initial"))v["initial"].erase("1h-mace");Model fresh;fresh.loadConfig(argv[1]);fresh.restore(added);near(fresh.find("1h-mace")->current.value(fresh.find("1h-mace")->curve),70);check(fresh.save()["subs"]["1h-sword"]==saved["subs"]["1h-sword"],"new subskill preserves existing progress");
     m.settings.values["debug"]["no_grace"]=true;m.settings.values["debug"]["time_scale"]=1000;m.tick(24);near(s->current.value(s->curve),s->floor.value(s->curve));check(m.skills[0].rust>=0,"rust nonnegative");
     std::cout<<"Core tests passed: six normalization paths, fractional curves, cap, zones, floors, decay integral, initialization, persistence.\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}

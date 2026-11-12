@@ -79,7 +79,7 @@ void Model::tick(double hours) {
 static json lv(const LevelXP& l){return json::array({l.level,l.progress});}
 json Model::save() const {
     json out={{"version",1},{"subs",unknownSubs},{"mains",unknownMains},{"activeHours",activeHours},{"lastHours",lastHours},{"pendingInit",pendingInit},{"raceClosed",raceClosed}};
-    for(auto& sk:skills){json initials=json::object();for(auto& s:sk.subs){out["subs"][s.id]={{"current",lv(s.current)},{"floor",lv(s.floor)},{"potential",lv(s.potential)},{"peak",lv(s.peak)},{"idle",s.idle}};initials[s.id]=s.initial;}
+    for(auto& sk:skills){json initials=unknownMains.contains(sk.av)?unknownMains.at(sk.av).value("initial",json::object()):json::object();for(auto& s:sk.subs){out["subs"][s.id]={{"current",lv(s.current)},{"floor",lv(s.floor)},{"potential",lv(s.potential)},{"peak",lv(s.peak)},{"idle",s.idle}};initials[s.id]=s.initial;}
         out["mains"][sk.av]={{"initialized",sk.initialized},{"base",sk.base},{"rust",sk.rust},{"idle",sk.idle},{"written",sk.written},{"initial",initials}};
     }return out;
 }
@@ -88,7 +88,11 @@ void Model::restore(const json& j) {
     auto read=[](const json& a){return LevelXP{a.at(0).get<std::uint16_t>(),a.at(1).get<float>()};};
     unknownSubs=j.at("subs");unknownMains=j.at("mains");activeHours=j.at("activeHours");lastHours=j.at("lastHours");pendingInit=j.at("pendingInit");raceClosed=j.at("raceClosed");
     for(auto& sk:skills){sk.initialized=false;if(unknownMains.contains(sk.av)){auto v=unknownMains[sk.av];sk.initialized=v.at("initialized");sk.base=v.at("base");sk.rust=v.at("rust");sk.idle=v.at("idle");sk.written=v.at("written");
-        for(auto& s:sk.subs){if(!unknownSubs.contains(s.id)||!v.at("initial").contains(s.id)){sk.initialized=false;continue;}auto q=unknownSubs[s.id];s.current=read(q.at("current"));s.floor=read(q.at("floor"));s.potential=read(q.at("potential"));s.peak=read(q.at("peak"));s.idle=q.at("idle");s.initial=v["initial"][s.id];}
+        for(auto& s:sk.subs){if(!unknownSubs.contains(s.id)||!v.at("initial").contains(s.id)){double f=(s.fixed&&s.k==0)?0:std::clamp(settings.get("init","floor_per_level")*(sk.base-settings.get("init","floor_zero_at")),0.,settings.get("xp","floor_cap"));s.initial=f;s.current.set(f,s.curve,int(settings.get("xp","hard_cap")));s.floor=s.potential=s.peak=s.current;s.idle=s.lastXP=0;continue;}auto q=unknownSubs[s.id];s.current=read(q.at("current"));s.floor=read(q.at("floor"));s.potential=read(q.at("potential"));s.peak=read(q.at("peak"));s.idle=q.at("idle");s.initial=v["initial"][s.id];
+            for(auto l:{s.current,s.floor,s.potential,s.peak})if(l.level>settings.get("xp","hard_cap")||!std::isfinite(l.progress)||l.progress<0)throw std::runtime_error("invalid saved subskill "+s.id);
+            if(!std::isfinite(s.idle)||s.idle<0||!std::isfinite(s.initial))throw std::runtime_error("invalid saved dynamics");
+        }
+        if(!std::isfinite(sk.base)||!std::isfinite(sk.rust)||sk.rust<0||!std::isfinite(sk.idle)||sk.idle<0||!std::isfinite(sk.written))throw std::runtime_error("invalid saved main skill");
     }}
 }
 json Model::snapshot() const {
