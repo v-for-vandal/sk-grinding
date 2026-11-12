@@ -1,6 +1,6 @@
 # Plugin foundation: project, build, records, logging, package
 
-- **Status:** in progress (M0 builds and packages; runtime boot checks pending).
+- **Status:** done (prototype builds and packages; runtime boot checks pending).
 - **Design:** design-v2 §1 (SKSE plugin + small ESL + MCM glue), §14 (runtime, FormKeys,
   persistence), [`refs/frameworks.md`](../refs/frameworks.md) §5 (CommonLibSSE-NG, templates).
 - **Depends on:** nothing.
@@ -104,8 +104,6 @@ Requirements: SKSE, Address Library, Keyword Item Distributor, OCF, SkyUI, MCM H
 LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which LoreRim has). `Requiem - Magic Redone.esp` is used for sub-direction keywords
 (missing → those rules are skipped, logged).
 
-## Test
-
 ## Prototype notes
 
 - CMake + vcpkg, pinned alandtse/ng submodule; build commands: `plugin/README.md`.
@@ -113,6 +111,8 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
   not .NET 8. This tool does not run inside Skyrim.
 - M0 Release DLL, pure-logic CTest and MO2 ZIP build successfully on this machine.
   No game launch has been performed; keyword resolution remains a runtime check.
+
+## Test
 
 - The package builds from a clean clone with the commands in `plugin/README.md`.
 - Game starts with the mod; `[boot]` lists 6 managed skills, the right sub-skill count, all 22

@@ -99,8 +99,6 @@ or removing sub-skills in config never shifts saved data.
 `[xp]` in [`config/SkillPractice.toml`](../config/SkillPractice.toml); per sub-skill fields in
 [`config/skills/*.toml`](../config/skills/).
 
-## Test
-
 ## Prototype notes
 
 - Implemented in `plugin/src/Core.*`, `Config.cpp` and `State.cpp`.
@@ -112,6 +110,11 @@ or removing sub-skills in config never shifts saved data.
 - Pure tests cover normalization against the Python reference, zones, caps,
   fractional curves, initialization and co-save payload round trips. SKSE's
   actual save/load callbacks still need the user's in-game check.
+- Debug Set current can deliberately put current below its own floor for aim
+  testing. Neither decay nor later XP reduces that permanent floor; XP uses
+  catch-up until current catches it again. Normal awards preserve floor ≤ current.
+
+## Test
 
 - Unit tests (no game, see [`plugin-foundation.md`](plugin-foundation.md)): `LevelXP` add / sub
   across many levels, at `hard_cap`, with `cost(0) = 0`; zone split at both boundaries;

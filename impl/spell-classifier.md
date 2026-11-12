@@ -60,8 +60,6 @@ Always `<school>/standard` in prototype 1 (R-7: archetype lists not made yet).
 - Button *Dump player spells*: logs every spell the player knows, for all schools, with casting,
   delivery, projectile type, explosion yes/no, form and sub-direction.
 
-## Test
-
 ## Prototype notes
 
 - Pure rule precedence is tested in SpellRules.h; Classification.cpp supplies
@@ -69,6 +67,8 @@ Always `<school>/standard` in prototype 1 (R-7: archetype lists not made yet).
 - Keyword FormKeys resolve at DataLoaded and after config reload. Missing
   keywords are logged and skipped. Spell classification is read live rather
   than cached, so another plugin's post-load form edits are visible.
+
+## Test
 
 - Ice Spike (`02B96C:Skyrim.esm`) and Firebolt (`012FD0`) → `missile`; Lightning Bolt (`02DD29`)
   and Sparks (`02DD2A`) → `beam`; Fireball (`01C789`) → `explosion`; Flames → `flame`; Healing →

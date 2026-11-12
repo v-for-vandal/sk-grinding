@@ -7,6 +7,14 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 
 if(args.Length>0 && args[0]=="--sources") { Sources.Extract(args.Skip(1).ToArray()); return; }
+if(args.Length>1 && args[0]=="--inspect-mcm") {
+ using var source=SkyrimMod.CreateFromBinaryOverlay(args[1],SkyrimRelease.SkyrimSE);
+ foreach(var q in source.Quests.Where(q=>q.VirtualMachineAdapter?.Scripts.Any(s=>s.Name.Contains("Config"))==true)) {
+ Console.WriteLine($"{q.EditorID} {q.FormKey} flags={q.Flags}");
+ foreach(var a in q.Aliases)Console.WriteLine($"alias {a.ID} {a.Name} forced={a.ForcedReference.FormKey}");
+ foreach(var a in q.VirtualMachineAdapter!.Aliases)Console.WriteLine($"VMAD alias object={a.Property.Object.FormKey} alias={a.Property.Alias} scripts={string.Join(',',a.Scripts.Select(s=>s.Name))}");
+ }return;
+}
 if(args.Length>0 && args[0]=="--schema") {
  foreach(var type in typeof(Quest).Assembly.GetTypes().Where(t=>args.Skip(1).Contains(t.Name))) {
  Console.WriteLine(type.FullName);foreach(var p in type.GetProperties())Console.WriteLine($"  {p.Name}: {p.PropertyType}");

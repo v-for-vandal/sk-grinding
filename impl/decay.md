@@ -51,8 +51,6 @@ rate     = decay_rate / 24 × ramp(U)             // levels per active hour (Q-D
 `[decay]`, `[debug] time_scale, no_grace` in [`config/SkillPractice.toml`](../config/SkillPractice.toml);
 `[dynamics] decay_rate, pace_sub` in [`config/skills/*.toml`](../config/skills/).
 
-## Test
-
 ## Prototype notes
 
 - Player Update posts no worker: all decay runs on the main thread at the
@@ -62,6 +60,8 @@ rate     = decay_rate / 24 × ramp(U)             // levels per active hour (Q-D
   tests cover floor stopping, rust growth/recovery and equivalent split intervals.
 - Trace logs summarize ticks; debug logs record crossed sub-skill levels.
   Actual menu/time-jump behaviour still requires the in-game checklist.
+
+## Test
 
 - Unit: the closed-form integral equals a fine numeric sum for intervals inside, across and after
   the ramp.

@@ -26,7 +26,9 @@ void context(const char* name,const Context& c){spdlog::debug("[ctx] t_us={} fra
 void use(RE::Actor* who,RE::ActorValue av,float points,RE::TESForm* arg){
     spdlog::debug("[use] t_us={} frame={} av={} pts={} arg={:08X} type={} name={} thread={}",stamp(),frame,int(av),points,arg?arg->GetFormID():0,arg?int(arg->GetFormType()):0,arg?arg->GetName():"",GetCurrentThreadId());
     if(who!=RE::PlayerCharacter::GetSingleton()||telemetryOnly||GetCurrentThreadId()!=mainThread){originalUse(who,av,points,arg);return;}
-    auto sk=skill(av);if(!sk||!ready(*sk)){originalUse(who,av,points,arg);return;}
+    auto sk=skill(av);if(!sk){originalUse(who,av,points,arg);return;}
+    if(!std::isfinite(points)||points<=0||(!sk->initialized&&model.settings.flag("debug","fixed_xp"))){if(!sk->initialized||model.settings.flag("debug","vanilla_passthrough"))originalUse(who,av,points,arg);return;}
+    if(!ready(*sk)){originalUse(who,av,points,arg);return;}
     if(std::isfinite(points)&&points>0&&!model.settings.flag("debug","fixed_xp")){
         if(arg)route(av,points,arg,"use",fresh(bashCtx));
         else pending.push_back({av,points,0,stamp()});
@@ -84,6 +86,7 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,public RE::BSTEventSink<
 Events events;
 }
 RE::TESForm* swingWeapon(){return fresh(swing)?RE::TESForm::LookupByID(swing.form):nullptr;}
+RE::SpellItem* recentSpell(RE::ActorValue value){if(!fresh(cast))return nullptr;auto s=RE::TESForm::LookupByID<RE::SpellItem>(cast.form);return s&&classify(s).actorValue==value?s:nullptr;}
 void resetContext(){pending.clear();swing=hit=cast=craft=bashCtx={};tickElapsed=0;loaded=true;model.lastHours=RE::Calendar::GetSingleton()->GetHoursPassed();auto p=RE::PlayerCharacter::GetSingleton();if(p)p->AddAnimationGraphEventSink(&events);}
 void installTelemetry(){
     mainThread=GetCurrentThreadId();REL::Relocation<std::uintptr_t> vt{RE::VTABLE_PlayerCharacter[0]};

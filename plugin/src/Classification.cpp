@@ -46,6 +46,7 @@ Classification classify(RE::SpellItem* spell){
 void dumpWeapons(){std::map<std::string,unsigned> counts;for(auto w:RE::TESDataHandler::GetSingleton()->GetFormArray<RE::TESObjectWEAP>())if(w){auto sub=weapon(w);++counts[sub];spdlog::info("[class] form={:08X} plugin={} name={} sub={}",w->GetFormID(),w->GetFile(0)?w->GetFile(0)->fileName:"",w->GetName(),sub);}for(auto& [sub,count]:counts)spdlog::info("[class] summary sub={} count={}",sub,count);spdlog::default_logger()->flush();}
 void dumpSpells(){auto p=RE::PlayerCharacter::GetSingleton();for(auto s:RE::TESDataHandler::GetSingleton()->GetFormArray<RE::SpellItem>())if(s&&p->HasSpell(s)){auto c=classify(s);spdlog::info("[spell] form={:08X} name={} school={} casting={} delivery={} projectile={} formClass={} direction={}",s->GetFormID(),s->GetName(),c.school,int(s->GetCastingType()),int(s->GetDelivery()),c.projectile,c.form,c.direction);}spdlog::default_logger()->flush();}
 RE::TESForm* swingWeapon();
+RE::SpellItem* recentSpell(RE::ActorValue);
 RE::TESForm* selectedCraft(){auto menu=RE::UI::GetSingleton()->GetMenu<RE::CraftingMenu>();if(!menu)return nullptr;auto sub=menu->GetCraftingSubMenu();if(auto smith=skyrim_cast<RE::CraftingSubMenus::SmithingMenu*>(sub)){if(smith->currentIndex<smith->recipes.size())return smith->recipes[smith->currentIndex].item;}if(auto construct=skyrim_cast<RE::CraftingSubMenus::ConstructibleObjectMenu*>(sub)){if(construct->currentIndex<construct->recipes.size()){auto recipe=construct->recipes[construct->currentIndex].constructibleObject;return recipe?recipe->createdItem:nullptr;}}return nullptr;}
 bool smithingStation(){auto ref=RE::PlayerCharacter::GetSingleton()->GetOccupiedFurniture().get();auto f=ref?ref->GetBaseObject()->As<RE::TESFurniture>():nullptr;if(!f)return true;if(!f->workBenchData.usesSkill.any(RE::ActorValue::kSmithing))return false;return !(smelter&&f->HasKeyword(smelter))&&!(tanning&&f->HasKeyword(tanning));}
 void route(RE::ActorValue value,float points,RE::TESForm* source,std::string_view origin,bool bash){
@@ -53,7 +54,7 @@ void route(RE::ActorValue value,float points,RE::TESForm* source,std::string_vie
     auto sk=skill(value);if(!sk||!ready(*sk))return;
     double raw=origin=="fixed"?model.settings.get("debug","fixed_xp_value"):points*sk->baseMult;raw*=model.settings.get("debug","xp_mult");
     auto p=RE::PlayerCharacter::GetSingleton();auto left=p->GetEquippedObject(true),right=p->GetEquippedObject(false);
-    auto give=[&](std::string_view id,double scale=1.){award(id,raw*scale,origin);};
+    auto give=[&](std::string_view id,double scale=1.){award(id,raw*scale,origin,origin=="fixed"?model.settings.get("debug","fixed_xp_value")*scale:points*scale);};
     if(value==RE::ActorValue::kOneHanded||value==RE::ActorValue::kTwoHanded){auto race=p->GetRace();if(race&&(race==werewolf||race==vampireLord))return;
         auto w=source?source->As<RE::TESObjectWEAP>():nullptr;
         if(!w){auto swing=swingWeapon();w=swing?swing->As<RE::TESObjectWEAP>():nullptr;}
@@ -68,7 +69,10 @@ void route(RE::ActorValue value,float points,RE::TESForm* source,std::string_vie
         else if(a)give(a->IsHeavyArmor()?"heavy-armor-smithing":a->IsLightArmor()?"light-armor-smithing":"clothing-smithing");
     }else if(value==RE::ActorValue::kDestruction||value==RE::ActorValue::kRestoration){
         auto s=source?source->As<RE::SpellItem>():nullptr;if(source&&(source->As<RE::ScrollItem>()||source->As<RE::EnchantmentItem>()))return;
-        if(!s)for(auto hand:{RE::MagicSystem::CastingSource::kLeftHand,RE::MagicSystem::CastingSource::kRightHand,RE::MagicSystem::CastingSource::kOther}){auto caster=p->GetMagicCaster(hand);auto magic=caster?caster->currentSpell:nullptr;auto spell=magic?magic->As<RE::SpellItem>():nullptr;if(spell&&classify(spell).actorValue==value){s=spell;break;}}
+        auto hint=source?source->As<RE::EffectSetting>():nullptr;
+        auto matches=[&](RE::SpellItem* candidate){if(!candidate||classify(candidate).actorValue!=value)return false;if(!hint)return true;for(auto effect:candidate->effects)if(effect&&effect->baseEffect==hint)return true;return false;};
+        if(!s){auto recent=recentSpell(value);if(matches(recent))s=recent;}
+        if(!s)for(auto hand:{RE::MagicSystem::CastingSource::kLeftHand,RE::MagicSystem::CastingSource::kRightHand,RE::MagicSystem::CastingSource::kOther}){auto caster=p->GetMagicCaster(hand);auto magic=caster?caster->currentSpell:nullptr;auto spell=magic?magic->As<RE::SpellItem>():nullptr;if(matches(spell)){s=spell;break;}}
         std::string prefix=school(value);if(s){auto c=classify(s);if(c.actorValue!=value){spdlog::warn("[ctx] unresolved spell school mismatch");return;}if(!c.form.empty())give(prefix+"/"+c.form);give(c.direction);give(prefix+"/standard");}
         else {spdlog::warn("[ctx] unresolved spell av={}",int(value));give(prefix+"/other");give(prefix+"/standard");}
     }

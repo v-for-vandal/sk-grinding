@@ -117,8 +117,6 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 `[conversion]`, `[budget]`, `[reference_path]`, `[dynamics] rust_rate, pace_skill` in
 [`config/skills/*.toml`](../config/skills/).
 
-## Test
-
 ## Prototype notes
 
 - The pure formula, initialization and rust fields are implemented in Core;
@@ -127,6 +125,8 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 - New sub-skills absent from a co-save receive a floor and zero-contribution
   baseline without resetting existing sub-skills. Removed IDs retain baselines.
 - No Legendary blocking, books/trainers, cross-links or perk changes are included.
+
+## Test
 
 - Unit: `k` equals the script's output (6 files); `levelFromXP(15, N) = 100`; path members all at
   75, others 0 → `F = 100` for a fresh character (base 15, `L0 = 0`).

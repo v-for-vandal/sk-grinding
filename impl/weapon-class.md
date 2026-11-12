@@ -52,8 +52,6 @@ sub-skill in the DLL.
   keyword (or `fallback`) and plugin; summary counts per class. This is the runtime answer to R-19
   (compare with the static 13 081 / 13 140 in `refs/lorerim/weapons.md`).
 
-## Test
-
 ## Prototype notes
 
 - Fixed FormKeys 0x800–0x815 in SkillPractice.esp resolve at DataLoaded;
@@ -62,6 +60,8 @@ sub-skill in the DLL.
   logged. The runtime dump includes owner plugin, FormID, name and sub-skill.
 - Beast races and crafting furniture exclusions use resolved vanilla FormKeys,
   never load-order-prefixed runtime IDs.
+
+## Test
 
 - Equip a vanilla sword, dagger, greatsword, warhammer, a LoreRim spear: the panel shows the
   expected class.

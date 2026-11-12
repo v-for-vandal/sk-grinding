@@ -12,6 +12,7 @@ void check(bool x,const char* s){if(!x)throw std::runtime_error(s);}
 void near(double a,double b,double tolerance=1e-5){if(std::abs(a-b)>tolerance)throw std::runtime_error("expected "+std::to_string(b)+", got "+std::to_string(a));}
 int main(int argc,char** argv)try {
     check(argc>=2,"config path required");Model m;m.loadConfig(argv[1]);check(m.skills.size()==6,"six skills");
+    Model defaults;defaults.loadConfig("",true);check(defaults.settings.values==m.settings.values,"compiled defaults match repository TOML");
     if(argc==3){for(auto& sk:m.skills)m.initialize(sk,50);m.pendingInit=false;std::ofstream(argv[2])<<m.snapshot().dump(2)<<'\n';return 0;}
     auto fixture=std::filesystem::path(argv[1]).parent_path()/"plugin/tests/normalization.json";
     std::ifstream ref(fixture);json expected;ref>>expected;
@@ -23,6 +24,7 @@ int main(int argc,char** argv)try {
     for(double u:{0.,20.,30.,70.,90.})for(double dt:{.1,10.,80.}){double numeric=0;int steps=100000;for(int i=0;i<steps;++i)numeric+=ramp(u+(i+.5)*dt/steps,24,72)*dt/steps;near(rampIntegral(u,dt,24,72),numeric,1e-6);}
     auto* s=m.find("1h-sword");s->curve={1,10,1};s->current.set(5,s->curve,500);s->floor.set(10,s->curve,500);s->potential.set(20,s->curve,500);s->peak=s->potential;
     double raw=s->curve.between(5,10)/3+s->curve.between(10,20)/1.5+s->curve.between(20,22);m.award(s->id,raw);near(s->current.value(s->curve),22);near(s->potential.value(s->curve),22);check(s->floor.value(s->curve)<=22,"floor<=current");
+    double permanent=s->floor.value(s->curve);s->current.set(1,s->curve,500);m.award(s->id,1);check(s->floor.value(s->curve)>=permanent,"debug low current never erases permanent floor");s->current.set(22,s->curve,500);
     auto saved=m.save();saved["subs"]["removed"]={{"test",42}};saved["mains"]["removed"]={{"test",7}};Model loaded;loaded.loadConfig(argv[1]);loaded.restore(saved);check(loaded.save()==saved,"save roundtrip/unknown IDs");
     LevelXP below;below.set(3,c,500);below.subtract(1,c,floor);near(below.value(c),3);
     auto removed=loaded;auto& list=removed.skills[0].subs;auto removedID=list[0].id;list.erase(list.begin());auto temporary=removed.save();Model returned;returned.loadConfig(argv[1]);returned.restore(temporary);check(returned.save()["subs"][removedID]==saved["subs"][removedID],"removed subskill survives save and re-add");

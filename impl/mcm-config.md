@@ -57,8 +57,6 @@
 Each control has a help text (MCM Helper `help`) saying what it does and that it is for
 testing. Enum values are stored as an index; the DLL maps the index to the value.
 
-## Test
-
 ## Prototype notes
 
 - Generator creates the start-enabled quest at SkillPractice.esp|0x816, its
@@ -70,6 +68,12 @@ testing. Enum values are stored as an index; the DLL maps the index to the value
   with zero warnings and errors against the MCM Helper public SDK.
 - Default INI values load first, then the MO2-visible user INI; enum indices
   are range checked. The final log level and all changes are logged.
+- First-load TOML failures use compiled copies of the repository TOML files.
+  Reload failures retain the previous complete configuration. Pure tests verify
+  compiled defaults match repository files. Duplicate sub-skill entries are
+  reported and skipped; unsupported main skills are rejected in this prototype.
+
+## Test
 
 - Change *XP multiplier* to ×100, close the journal: one `[cfg]` line; the next sword hit gives
   100 times the XP of the previous one (`[xp]` lines).

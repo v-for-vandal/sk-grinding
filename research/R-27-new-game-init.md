@@ -1,6 +1,6 @@
 # R-27. When to run the start conversion on a new game
 
-- **Status:** new (static + runtime).
+- **Status:** lazy-init prototype built; LoreRim runtime checks pending.
 - **For:** [`impl/main-skill-level.md`](../impl/main-skill-level.md) (*Start conversion*,
   *When*); design-v2 §4.4.4, Q-ML-9.
 
@@ -23,6 +23,11 @@ Rewritten** (points at level-up), Experience.
 | 4 | Is "first XP event after the race menu was closed" late enough, and never too late (e.g. XP during the start room)? | prototype 1 logs `[init]` with the skill values at that moment | keep the rule, or wait for a quest stage of the start quest |
 
 ## Prototype rule
+
+Implementation logs RaceSex menu opens/closes and every skill initialization.
+Pending state survives co-save round trips; an existing save without our data
+initializes at post-load. See checklist step 13. No claim about Norden/SSL event
+ordering is made before receiving a new-game log.
 
 Lazy: initialize a skill at its first XP event after the RaceSex menu has been closed at least
 once, or with the debug button *Initialize now*. All external changes before that are part of

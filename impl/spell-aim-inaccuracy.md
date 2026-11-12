@@ -89,8 +89,6 @@ disable its aim support for player spells (R-26 check 2).
   0 from level 75 (placeholders).
 - The debug panel shows `σ(L)` and the current sway amplitude ([`status-ui.md`](status-ui.md)).
 
-## Config
-
 ## Prototype notes
 
 - Launch uses Address Library 42928/44108 and a MinHook trampoline. The original
@@ -103,6 +101,8 @@ disable its aim support for player spells (R-26 check 2).
   enables the fixed yaw probe for R-26; leave it at zero for normal gameplay.
 - The panel shows actual current beam amplitude and missile sigma. No aim
   compatibility result is inferred from successful compilation.
+
+## Config
 
 - per form (`missile`, `beam`): `L_0`;
 - B: `σ_max` (degrees);

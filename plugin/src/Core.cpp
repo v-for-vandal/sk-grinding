@@ -34,7 +34,8 @@ void Skill::solve(int cap) {
         for(auto& s:subs)if(!s.fixed&&s.group==g)s.k=b/sum;
     }
 }
-double Skill::computed(double lo,double hi) const {double x=0;for(auto& s:subs)x+=s.worth(std::max(s.current.value(s.curve),s.peak.value(s.curve)-rust))-s.worth(s.initial);return std::clamp(curve.levelFromXP(base,x),lo,hi);}
+double Skill::worthDelta() const {double x=0;for(auto& s:subs)x+=s.worth(std::max(s.current.value(s.curve),s.peak.value(s.curve)-rust))-s.worth(s.initial);return x;}
+double Skill::computed(double lo,double hi) const {return std::clamp(curve.levelFromXP(base,worthDelta()),lo,hi);}
 double Settings::get(const char* s,const char* k) const {return values.at(s).at(k).get<double>();}
 bool Settings::flag(const char* s,const char* k) const {return values.at(s).at(k).get<bool>();}
 double ramp(double u,double g,double e) {return e<=g?(u>g?1:0):std::clamp((u-g)/(e-g),0.,1.);}
@@ -50,7 +51,7 @@ void Model::initialize(Skill& sk,double b) {
 Sub* Model::find(const std::string& id,Skill** parent) {for(auto& sk:skills)for(auto& s:sk.subs)if(s.id==id){if(parent)*parent=&sk;return &s;}return nullptr;}
 void Model::award(const std::string& id,double raw) {
     if(!std::isfinite(raw)||raw<=0)return;Skill* sk=nullptr;Sub* s=find(id,&sk);if(!s||!sk->initialized)return;
-    int cap=int(settings.get("xp","hard_cap"));double left=raw;
+    int cap=int(settings.get("xp","hard_cap"));double left=raw,oldFloor=s->floor.value(s->curve);
     while(left>1e-10 && s->current.level<cap) {
         double cur=s->current.value(s->curve),f=s->floor.value(s->curve),p=s->potential.value(s->curve),boundary=cap;
         double z=settings.get("xp","zone_new");
@@ -60,7 +61,7 @@ void Model::award(const std::string& id,double raw) {
         s->current.add(part*z,s->curve,cap);left-=part;
     }
     s->floor.add(raw*settings.get("xp","floor_rate"),s->curve,cap);
-    s->floor.set(std::min({s->floor.value(s->curve),settings.get("xp","floor_cap"),s->current.value(s->curve)}),s->curve,cap);
+    s->floor.set(std::max(oldFloor,std::min({s->floor.value(s->curve),settings.get("xp","floor_cap"),s->current.value(s->curve)})),s->curve,cap);
     if(s->current.value(s->curve)>s->potential.value(s->curve))s->potential=s->current;
     if(s->current.value(s->curve)>s->peak.value(s->curve))s->peak=s->current;
     double q=settings.get("decay","q");s->idle=std::max(0.,s->idle-raw/(q*sk->paceSub));s->lastXP=raw;
@@ -99,7 +100,7 @@ json Model::snapshot() const {
     json out={{"state",pendingInit?"pending":"running"},{"activeHours",activeHours},{"debug",settings.values["debug"]},{"skills",json::array()},{"equipped",json::array()}};
     out["debug"]["write_main_skills"]=settings.flag("main","write_main_skills");
     double g=settings.get("decay","grace_hours"),e=settings.get("decay","ramp_end_hours");if(settings.flag("debug","no_grace"))g=e=0;
-    for(auto& sk:skills){json a={{"av",sk.av},{"name",sk.av},{"F",sk.computed(settings.get("main","min_level"),settings.get("main","max_level"))},{"written",sk.written},{"base",sk.base},{"R",sk.rust},{"Umain",sk.idle},{"rustPerDay",sk.rustRate*ramp(sk.idle,g,e)},{"external",sk.external},{"pending",!sk.initialized},{"subs",json::array()}};
+    for(auto& sk:skills){json a={{"av",sk.av},{"name",sk.av=="OneHanded"?"One-Handed":sk.av=="TwoHanded"?"Two-Handed":sk.av},{"F",sk.computed(settings.get("main","min_level"),settings.get("main","max_level"))},{"X",sk.worthDelta()},{"written",sk.written},{"base",sk.base},{"R",sk.rust},{"Umain",sk.idle},{"rustPerDay",sk.rustRate*ramp(sk.idle,g,e)},{"external",sk.external},{"pending",!sk.initialized},{"subs",json::array()}};
         for(auto& s:sk.subs){double c=s.current.value(s.curve),f=s.floor.value(s.curve),p=s.potential.value(s.curve);a["subs"].push_back({{"id",s.id},{"ownFloor",f},{"effFloor",f},{"current",c},{"potential",p},{"peak",s.peak.value(s.curve)},{"U",s.idle},{"decayPerDay",s.decay*ramp(s.idle,g,e)},{"zone",settings.get("xp",c<f?"zone_catch_up":c<p?"zone_recall":"zone_new")},{"worth",s.worth(std::max(c,s.peak.value(s.curve)-sk.rust))-s.worth(s.initial)},{"lastXP",s.lastXP}});}out["skills"].push_back(a);
     }return out;
 }

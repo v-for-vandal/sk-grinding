@@ -45,6 +45,7 @@ struct Skill {
     double base=15,rust=0,idle=0,written=15;
     unsigned external=0;
     void solve(int cap);
+    double worthDelta() const;
     double computed(double minimum,double maximum) const;
 };
 struct Settings {
@@ -58,7 +59,7 @@ struct Model {
     double activeHours=0,lastHours=0;
     bool pendingInit=true,raceClosed=false;
     json unknownSubs=json::object(),unknownMains=json::object();
-    void loadConfig(const std::string& root);
+    void loadConfig(const std::string& root,bool builtIn=false);
     void initialize(Skill&, double base);
     Sub* find(const std::string& id,Skill** parent=nullptr);
     void award(const std::string& id,double raw);

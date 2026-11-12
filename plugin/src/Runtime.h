@@ -21,7 +21,7 @@ extern DWORD mainThread;
 RE::ActorValue av(std::string_view);
 sp::Skill* skill(RE::ActorValue);
 bool ready(sp::Skill&);
-void award(std::string_view,double,std::string_view);
+void award(std::string_view,double,std::string_view,double points=-1);
 struct Classification {std::string school,form,direction,projectile;RE::ActorValue actorValue=RE::ActorValue::kNone;};
 Classification classify(RE::SpellItem*);
 std::string weapon(RE::TESObjectWEAP*);

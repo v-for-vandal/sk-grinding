@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <set>
 #include <toml++/toml.hpp>
+#include "Defaults.h"
 namespace sp {
 namespace {
 json convert(const toml::node& n) {
@@ -9,24 +10,28 @@ json convert(const toml::node& n) {
     if(auto a=n.as_array()){json j=json::array();for(auto& v:*a)j.push_back(convert(v));return j;}
     if(n.is_boolean())return *n.value<bool>();
     if(n.is_integer())return *n.value<std::int64_t>();
-    if(n.is_floating_point())return *n.value<double>();
+    if(n.is_floating_point()){double v=*n.value<double>();if(!std::isfinite(v))throw std::runtime_error("non-finite TOML value");return v;}
     if(n.is_string())return *n.value<std::string>();
     throw std::runtime_error("unsupported TOML value");
 }
 Curve curve(const json& j,Curve c={}) {c.mult=j.value("improve_mult",c.mult);c.offset=j.value("improve_offset",c.offset);c.exponent=j.value("exponent",c.exponent);if(c.mult<0||c.offset<0||c.exponent<=0)throw std::runtime_error("invalid curve");return c;}
 }
-void Model::loadConfig(const std::string& root) {
+void Model::loadConfig(const std::string& root,bool builtIn) {
     Model next;
-    next.settings.values=convert(toml::parse_file(root+"/SkillPractice.toml"));
+    auto parse=[&](const std::string& name){return convert(builtIn?toml::parse(defaults.at(name),name):toml::parse_file(root+"/"+name));};
+    next.settings.values=parse("SkillPractice.toml");
+    next.settings.values["configWarnings"]=json::array();
     int cap=int(next.settings.get("xp","hard_cap"));
     if(next.settings.get("aim","missile_L0")<=0||next.settings.get("aim","beam_L0")<=0||next.settings.get("aim","beam_t_full_sec")<=0||next.settings.get("aim","beam_secondary_weight")<0)throw std::runtime_error("invalid aim settings");
     if(cap<1||cap>65534||next.settings.get("decay","q")<=0||next.settings.get("xp","zone_new")<=0||next.settings.get("xp","zone_recall")<=0||next.settings.get("xp","zone_catch_up")<=0||next.settings.get("main","hysteresis_up")<=0||next.settings.get("main","hysteresis_down")<0||next.settings.get("decay","tick_seconds")<=0||next.settings.get("decay","idle_max_hours")<next.settings.get("decay","ramp_end_hours"))throw std::runtime_error("invalid XP/decay configuration");
     std::set<std::string> ids,avs;
     std::vector<std::filesystem::path> files;
-    for(auto& f:std::filesystem::directory_iterator(root+"/skills"))if(f.path().extension()==".toml")files.push_back(f.path());
+    if(builtIn){for(auto& [name,content]:defaults)if(name.starts_with("skills/"))files.emplace_back(name);}
+    else for(auto& f:std::filesystem::directory_iterator(root+"/skills"))if(f.path().extension()==".toml")files.push_back(std::filesystem::path("skills")/f.path().filename());
     std::sort(files.begin(),files.end());
-    for(auto& path:files){auto j=convert(toml::parse_file(path.string()));Skill sk;auto m=j.at("main"),d=j.at("dynamics");
+    for(auto& path:files){auto j=parse(path.generic_string());Skill sk;auto m=j.at("main"),d=j.at("dynamics");
         sk.av=m.at("actor_value");if(!avs.insert(sk.av).second)throw std::runtime_error("duplicate skill "+sk.av);
+        if(sk.av!="OneHanded"&&sk.av!="TwoHanded"&&sk.av!="Block"&&sk.av!="Smithing"&&sk.av!="Destruction"&&sk.av!="Restoration")throw std::runtime_error("unsupported prototype skill "+sk.av);
         sk.curve=curve(m);sk.start=m.at("start_level");sk.target=m.at("target_level");sk.baseMult=d.at("base_mult");sk.decay=d.at("decay_rate");sk.rustRate=d.at("rust_rate");sk.paceSub=d.at("pace_sub");sk.paceSkill=d.at("pace_skill");
         if(sk.paceSub<=0||sk.paceSkill<=0||sk.decay<0||sk.rustRate<0)throw std::runtime_error("invalid dynamics");
         sk.bashFactor=j.value("routing",json::object()).value("bash_shield_factor",.5);
@@ -35,12 +40,13 @@ void Model::loadConfig(const std::string& root) {
         for(auto& [g,b]:j.at("budget").items())if(b.contains("main_from")){double n=sk.curve.between(b.at("main_from"),b.at("main_to"));sk.budgets[g]=n;remain-=n;}else shares+=b.at("share").get<double>();
         if(remain<0)throw std::runtime_error("absolute budgets exceed target");
         for(auto& [g,b]:j.at("budget").items())if(b.contains("share")){if(shares<=0)throw std::runtime_error("invalid shares");sk.budgets[g]=remain*b.at("share").get<double>()/shares;}
-        for(auto& v:j.at("subskill")){Sub s;s.id=v.at("name");if(!ids.insert(s.id).second)throw std::runtime_error("duplicate subskill "+s.id);s.group=v.at("group");s.T=v.at("T");s.w=v.at("w");s.T1=v.value("T1",j.at("conversion").value("rise_T1",25.));s.fixed=v.contains("k");s.k=v.value("k",0.);s.decay=v.value("decay_rate",sk.decay);s.curve=curve(v.value("curve",json::object()),curve(j.at("sub_curve")));if(s.w<=0||s.decay<0)throw std::runtime_error("invalid subskill");if(!s.fixed&&!sk.budgets.contains(s.group))throw std::runtime_error("missing group budget");sk.subs.push_back(s);}
+        for(auto& v:j.at("subskill")){Sub s;s.id=v.at("name");if(!ids.insert(s.id).second){next.settings.values["configWarnings"].push_back("duplicate subskill ignored: "+s.id);continue;}s.group=v.at("group");s.T=v.at("T");s.w=v.at("w");s.T1=v.value("T1",j.at("conversion").value("rise_T1",25.));s.fixed=v.contains("k");s.k=v.value("k",0.);s.decay=v.value("decay_rate",sk.decay);s.curve=curve(v.value("curve",json::object()),curve(j.at("sub_curve")));if(s.w<=0||s.decay<0)throw std::runtime_error("invalid subskill");if(!s.fixed&&!sk.budgets.contains(s.group))throw std::runtime_error("missing group budget");sk.subs.push_back(s);}
         for(auto& id:sk.path)if(std::none_of(sk.subs.begin(),sk.subs.end(),[&](auto& s){return s.id==id;}))throw std::runtime_error("unknown path member "+id);
         sk.solve(cap);next.skills.push_back(sk);
     }
-    next.settings.values["materials"]=convert(toml::parse_file(root+"/smithing-materials.toml"));
-    next.settings.values["directions"]=convert(toml::parse_file(root+"/magic-directions.toml"));
+    if(next.skills.empty())throw std::runtime_error("no skill configurations");
+    next.settings.values["materials"]=parse("smithing-materials.toml");
+    next.settings.values["directions"]=parse("magic-directions.toml");
     if(!skills.empty())next.restore(save());
     *this=std::move(next);
 }
