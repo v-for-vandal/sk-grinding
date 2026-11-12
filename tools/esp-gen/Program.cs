@@ -7,6 +7,12 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 
 if(args.Length>0 && args[0]=="--sources") { Sources.Extract(args.Skip(1).ToArray()); return; }
+if(args.Length>0 && args[0]=="--schema") {
+ foreach(var type in typeof(Quest).Assembly.GetTypes().Where(t=>args.Skip(1).Contains(t.Name))) {
+ Console.WriteLine(type.FullName);foreach(var p in type.GetProperties())Console.WriteLine($"  {p.Name}: {p.PropertyType}");
+ if(type.IsEnum)Console.WriteLine(string.Join(", ",Enum.GetNames(type)));
+ }return;
+}
 var root = Path.GetFullPath(args.Length > 0 ? args[0] : ".");
 var output = Path.Combine(root, "dist", "SkillPractice");
 Directory.CreateDirectory(output);
@@ -22,6 +28,22 @@ foreach(var name in names) {
     var kw = new Keyword(new FormKey(mod.ModKey,id++),SkyrimRelease.SkyrimSE) { EditorID = name };
     mod.Keywords.Add(kw); rows.Add(new {editorID=name,localID=$"0x{kw.FormKey.ID:X6}"});
 }
+var quest = new Quest(new FormKey(mod.ModKey,0x816),SkyrimRelease.SkyrimSE) {
+    EditorID="SkillPractice_MCM", Name="Skill Practice", Flags=Quest.Flag.StartGameEnabled,
+    Priority=0, NextAliasID=1,
+    VirtualMachineAdapter=new QuestAdapter { Version=5,ObjectFormat=2 }
+};
+var mcmScript=new ScriptEntry { Name="SkillPractice_MCMScript" };
+mcmScript.Properties.Add(new ScriptStringProperty {Name="ModName",Data="SkillPractice"});
+quest.VirtualMachineAdapter.Scripts.Add(mcmScript);
+var player = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"),0x14);
+var alias=new QuestAlias {ID=0,Name="PlayerAlias"};
+alias.ForcedReference.SetTo(player);quest.Aliases.Add(alias);
+var fragment=new QuestFragmentAlias {Version=5,ObjectFormat=2,Property=new ScriptObjectProperty {Alias=0}};
+fragment.Property.Object.SetTo(quest.FormKey);
+fragment.Scripts.Add(new ScriptEntry {Name="SKI_PlayerLoadGameAlias"});
+quest.VirtualMachineAdapter.Aliases.Add(fragment);
+mod.Quests.Add(quest);
 var path=Path.Combine(output,"SkillPractice.esp");
 mod.WriteToBinary(path);
 File.WriteAllText(Path.Combine(root,"tools","esp-gen","keywords.json"),JsonSerializer.Serialize(rows,new JsonSerializerOptions{WriteIndented=true})+"\n");

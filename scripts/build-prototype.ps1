@@ -20,4 +20,5 @@ $env:NUGET_PACKAGES = Join-Path $root '.tools/nuget'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 & .tools/dotnet/dotnet.exe run --project tools/esp-gen --configuration Release -- $root
 if ($LASTEXITCODE) { throw 'ESP generator failed' }
+& "$PSScriptRoot/compile-papyrus.ps1"
 & "$PSScriptRoot/package-prototype.ps1"

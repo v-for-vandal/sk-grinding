@@ -23,7 +23,7 @@ void LevelXP::add(double xp,const Curve& c,int cap) {
     while(level<cap && p>=c.cost(level)) {p-=c.cost(level);++level;}
     progress=level>=cap?0:float(p);
 }
-void LevelXP::subtract(double levels,const Curve& c,const LevelXP& f) {set(std::max(f.value(c),value(c)-std::max(0.,levels)),c,65535);}
+void LevelXP::subtract(double levels,const Curve& c,const LevelXP& f) {if(value(c)<=f.value(c))return;set(std::max(f.value(c),value(c)-std::max(0.,levels)),c,65535);}
 double Sub::shape(double l) const {double x=T1<=0?1:std::clamp(l/T1,0.,1.);double e=(l-T)/w;return e>700?0:x*x*(3-2*x)*(1+std::exp(-T/w))/(1+std::exp(e));}
 void Sub::prepare(int cap) {integral.assign(cap+1,0);for(int i=0;i<cap;++i)integral[i+1]=integral[i]+curve.cost(i)*shape(i+.5);}
 double Sub::worth(double l) const {l=std::clamp(l,0.,double(integral.size()-1));auto n=size_t(l);return k*(integral[n]+(n+1<integral.size()?(l-n)*(integral[n+1]-integral[n]):0));}

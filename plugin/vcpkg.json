@@ -1,5 +1,5 @@
 {
   "name": "skill-practice", "version-string": "0.1.0",
   "builtin-baseline": "b58529e33332fbb6dfe20317a82009b78ceeab36",
-  "dependencies": ["spdlog", "rapidcsv", "directxtk", "tomlplusplus", "nlohmann-json"]
+  "dependencies": ["spdlog", "rapidcsv", "directxtk", "tomlplusplus", "nlohmann-json", "minhook"]
 }

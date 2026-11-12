@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Skill Practice</title><link rel="stylesheet" href="style.css"></head>
+<body><main><header><h1>Skill Practice <small>Prototype 1</small></h1><button id="close">Close · F7 / Esc</button></header><p id="summary" role="status">Connecting…</p>
+<nav><button data-tab="skills">Sub-skills</button><button data-tab="debug">Debug</button></nav>
+<section id="skills"><div class="tools"><label>Filter <input id="filter" type="search" placeholder="Sub-skill name"></label><label><input id="untouched" type="checkbox"> Hide untouched</label></div><div id="tables"></div></section>
+<section id="debug" hidden><h2>Equipped</h2><pre id="equipped"></pre><h2>Actions</h2><div class="tools"><button data-action="dumpState">Dump state</button><button data-action="dumpWeapons">Dump weapon classes</button><button data-action="dumpSpells">Dump player spells</button><button data-action="reloadConfig">Reload config</button><button data-action="initNow">Initialize now</button></div>
+<p><label><input id="sure" type="checkbox"> I am sure</label> <button id="reinit">Re-initialize all</button></p>
+<div class="tools"><label>Sub-skill <select id="sub"></select></label><label>Raw XP <input id="raw" type="number" min="0" value="10000"></label><button id="give">Give XP</button><label>Level <input id="level" type="number" min="0" max="500" value="75"></label><button id="set">Set current</button></div><p>MCM → SkillPractice → Debug changes the testing switches.</p><p id="feedback" role="status"></p></section>
+</main><script src="app.js"></script></body></html>

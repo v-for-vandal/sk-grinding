@@ -1,6 +1,6 @@
 # XP capture: vanilla use points → sub-skill XP
 
-- **Status:** chosen for prototype 1 (the hook point is confirmed by R-17 in milestone 1).
+- **Status:** in progress (M1 telemetry and routing compile; R-17 runtime results pending).
 - **Design:** design-v2 §4.1 (vanilla XP suppressed), §4.2 (pipeline), Q-XP-9 (raw use points),
   Q-XP-1 (a) (several sub-skills per event); per-skill rules:
   [weapons](../skills/weapons/design.md), [block](../skills/block/design.md),
@@ -151,6 +151,20 @@ of the prototype can then be tested in the same game session.
 - [`config/smithing-materials.toml`](../config/smithing-materials.toml).
 
 ## Test
+
+## Prototype notes
+
+- `PlayerCharacter::UseSkill` slot 0xF7 and player `Update` slot 0xAD chain
+  existing vfunc owners. Context logs include steady-clock microseconds and the
+  update counter. Off-main-thread UseSkill calls pass through without changing state.
+- The pinned CommonLib has no `PlayerSkills::AdvanceSkill` declaration or ID.
+  The log-only second hook is `PlayerCharacter::AddSkillExperience`, Address
+  Library 39413/40488, using MinHook. It always calls its original. This is a
+  deliberate telemetry substitution, not proof of complete engine-path coverage.
+- The pending queue waits for context up to the configured window. Selected
+  SmithingMenu / ConstructibleObjectMenu recipes supply the tempering fallback.
+- The six-skill implementation, UI and serialization share one runtime lifecycle;
+  these integration sources are introduced with M1 and validated further in M2–M6.
 
 - With `[log] level = "debug"`: every hit, block, bash, craft, temper, destruction hit, heal and
   ward absorb writes one `[use]` line and one or more `[xp]` lines naming the right sub-skills.
