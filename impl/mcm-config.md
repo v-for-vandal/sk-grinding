@@ -1,6 +1,6 @@
 # MCM and configuration
 
-- **Status:** chosen (prototype 1: Debug page only).
+- **Status:** done (Debug page built; in-game MCM registration/controls pending).
 - **Design:** design-v2 §12.2 (MCM Helper + config file), §13 (Debug page), Q-UI-4 (format: TOML
   for the plugin's own files, prototype choice; JSON only where MCM Helper needs it).
 - **Depends on:** [`plugin-foundation.md`](plugin-foundation.md) (ESL quest, Papyrus build).
@@ -58,6 +58,18 @@ Each control has a help text (MCM Helper `help`) saying what it does and that it
 testing. Enum values are stored as an index; the DLL maps the index to the value.
 
 ## Test
+
+## Prototype notes
+
+- Generator creates the start-enabled quest at SkillPractice.esp|0x816, its
+  PlayerRef alias and VMAD scripts; ESP read-back validates their presence.
+- To support an existing save without relying on SEQ generation, the DLL starts
+  this quest on post-load/new-game if it is neither running nor starting.
+- CK's compiler is copied locally under .tools, with a CLR 4 activation config;
+  the original compiler/game directory is untouched. Our empty script compiles
+  with zero warnings and errors against the MCM Helper public SDK.
+- Default INI values load first, then the MO2-visible user INI; enum indices
+  are range checked. The final log level and all changes are logged.
 
 - Change *XP multiplier* to ×100, close the journal: one `[cfg]` line; the next sword hit gives
   100 times the XP of the previous one (`[xp]` lines).

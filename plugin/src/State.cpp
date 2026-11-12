@@ -6,6 +6,7 @@ sp::Model model;
 namespace {
 constexpr std::uint32_t subsTag=0x53554253,mainTag=0x4D41494E,timeTag=0x54494D45,statTag=0x53544154;
 bool restored=false,failedSave=false;
+void ensureMCM(){auto q=RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(0x816,"SkillPractice.esp");if(!q){spdlog::warn("[cfg] missing MCM quest SkillPractice.esp|0x816");return;}if(!q->IsRunning()&&!q->IsStarting())spdlog::info("[cfg] MCM quest Start result={}",q->Start());}
 std::string root="Data/SKSE/Plugins/SkillPractice";
 void write(SKSE::SerializationInterface* out,std::uint32_t tag,const sp::json& j){auto text=j.dump();if(!out->OpenRecord(tag,1)||!out->WriteRecordData(text.data(),static_cast<std::uint32_t>(text.size())))spdlog::error("[save] write failed tag={:X}",tag);}
 void save(SKSE::SerializationInterface* out){auto j=model.save();write(out,subsTag,j["subs"]);write(out,mainTag,j["mains"]);write(out,timeTag,{{"activeHours",j["activeHours"]},{"lastHours",j["lastHours"]}});write(out,statTag,{{"pendingInit",j["pendingInit"]},{"raceClosed",j["raceClosed"]}});spdlog::info("[save] saved version=1 subs={} mains={}",j["subs"].size(),j["mains"].size());}
@@ -40,8 +41,8 @@ void award(std::string_view id,double raw,std::string_view origin){sp::Skill* sk
 void resetContext();
 void message(SKSE::MessagingInterface::Message* m){
     if(m->type==SKSE::MessagingInterface::kDataLoaded){reload();if(model.skills.empty()){spdlog::critical("[boot] disabled: no valid configuration");return;}size_t n=0;for(auto& s:model.skills)n+=s.subs.size();spdlog::info("[boot] managed={} subskills={}",model.skills.size(),n);installTelemetry();installGameplay();setupUI();installAim();}
-    else if(m->type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();if(!restored)model.raceClosed=true;if(!restored||!model.pendingInit)for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
-    else if(m->type==SKSE::MessagingInterface::kNewGame){reload();model.raceClosed=false;model.pendingInit=true;resetContext();spdlog::info("[init] new game pending; awaiting RaceSex close and first use per skill");}
+    else if(m->type==SKSE::MessagingInterface::kPostLoadGame){reload();resetContext();ensureMCM();if(!restored)model.raceClosed=true;if(!restored||!model.pendingInit)for(auto& sk:model.skills)if(!sk.initialized)ready(sk);synchronize();}
+    else if(m->type==SKSE::MessagingInterface::kNewGame){reload();model.raceClosed=false;model.pendingInit=true;resetContext();ensureMCM();spdlog::info("[init] new game pending; awaiting RaceSex close and first use per skill");}
 }
 void start(){auto si=SKSE::GetSerializationInterface();si->SetUniqueID(0x534B5052);si->SetSaveCallback(save);si->SetLoadCallback(load);si->SetRevertCallback(revert);}
 }

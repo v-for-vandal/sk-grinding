@@ -34,17 +34,20 @@ var quest = new Quest(new FormKey(mod.ModKey,0x816),SkyrimRelease.SkyrimSE) {
     VirtualMachineAdapter=new QuestAdapter { Version=5,ObjectFormat=2 }
 };
 var mcmScript=new ScriptEntry { Name="SkillPractice_MCMScript" };
-mcmScript.Properties.Add(new ScriptStringProperty {Name="ModName",Data="SkillPractice"});
+mcmScript.Properties.Add(new ScriptStringProperty {Name="ModName",Data="SkillPractice",Flags=ScriptProperty.Flag.Edited});
 quest.VirtualMachineAdapter.Scripts.Add(mcmScript);
 var player = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"),0x14);
 var alias=new QuestAlias {ID=0,Name="PlayerAlias"};
 alias.ForcedReference.SetTo(player);quest.Aliases.Add(alias);
-var fragment=new QuestFragmentAlias {Version=5,ObjectFormat=2,Property=new ScriptObjectProperty {Alias=0}};
+var fragment=new QuestFragmentAlias {Version=5,ObjectFormat=2,Property=new ScriptObjectProperty {Alias=0,Flags=ScriptProperty.Flag.Edited}};
 fragment.Property.Object.SetTo(quest.FormKey);
 fragment.Scripts.Add(new ScriptEntry {Name="SKI_PlayerLoadGameAlias"});
 quest.VirtualMachineAdapter.Aliases.Add(fragment);
 mod.Quests.Add(quest);
 var path=Path.Combine(output,"SkillPractice.esp");
 mod.WriteToBinary(path);
+using(var check=SkyrimMod.CreateFromBinaryOverlay(path,SkyrimRelease.SkyrimSE)) {
+ if(check.Keywords.Count!=22||check.Quests.Count!=1||check.Quests.First().Aliases.Count!=1||check.Quests.First().VirtualMachineAdapter?.Aliases.Count!=1)throw new Exception("Generated ESP failed read-back validation");
+}
 File.WriteAllText(Path.Combine(root,"tools","esp-gen","keywords.json"),JsonSerializer.Serialize(rows,new JsonSerializerOptions{WriteIndented=true})+"\n");
 Console.WriteLine($"Wrote {path}: 22 keywords; SHA256 {Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)))}");
