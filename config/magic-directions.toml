@@ -1,0 +1,50 @@
+# School sub-direction of a spell, from the keywords of its costliest effect (impl/spell-classifier.md).
+# Keywords by FormKey (Plugin|0xLocalID); FormKeys from the LoreRim research dump (2026-11-11).
+# Rules are checked in order; the first rule with any matching keyword wins; no match -> <school>/other.
+# Destruction list: proposal of skills/destruction/design.md (Q-DES-1 open).
+# Restoration list: decided, skills/restoration/design.md (Q-RES-1).
+
+[[destruction]]
+subskill = "destruction/blood"
+keywords = ["Requiem - Magic Redone.esp|0x006012",   # Nox_KW_Destruction_Perk_BloodMagic
+            "Requiem - Magic Redone.esp|0x005DA8"]   # Nox_KW_Destruction_Absorb_MS
+[[destruction]]
+subskill = "destruction/entropic"
+keywords = ["Requiem - Magic Redone.esp|0x005B01",   # Nox_KW_Destruction_Entropic
+            "Requiem - Magic Redone.esp|0x006019"]   # Nox_KW_Destruction_Perk_EntropicFocus
+[[destruction]]
+subskill = "destruction/arcane"
+keywords = ["Requiem - Magic Redone.esp|0x005B00",   # Nox_KW_Destruction_Arcane
+            "Requiem - Magic Redone.esp|0x006018"]   # Nox_KW_Destruction_Perk_ArcaneFocus
+[[destruction]]
+subskill = "destruction/fire"
+keywords = ["Skyrim.esm|0x01CEAD",                   # MagicDamageFire
+            "Requiem - Magic Redone.esp|0x006015"]   # Nox_KW_Destruction_Perk_Pyromancy
+[[destruction]]
+subskill = "destruction/frost"
+keywords = ["Skyrim.esm|0x01CEAE",                   # MagicDamageFrost
+            "Requiem - Magic Redone.esp|0x006016"]   # Nox_KW_Destruction_Perk_Cryomancy
+[[destruction]]
+subskill = "destruction/shock"
+keywords = ["Skyrim.esm|0x01CEAF",                   # MagicDamageShock
+            "Requiem - Magic Redone.esp|0x006017"]   # Nox_KW_Destruction_Perk_Electromancy
+
+[[restoration]]
+subskill = "restoration/wards"
+keywords = ["Skyrim.esm|0x01EA69"]                   # MagicWard
+[[restoration]]
+subskill = "restoration/poison"
+keywords = ["Requiem - Magic Redone.esp|0x005C22",   # Nox_KW_Restoration_Poison
+            "Requiem - Magic Redone.esp|0x00601A"]   # Nox_KW_Restoration_Perk_Venomancy
+[[restoration]]
+subskill = "restoration/sun"
+keywords = ["Requiem - Magic Redone.esp|0x00601B"]   # Nox_KW_Restoration_Perk_Heliomancy
+[[restoration]]
+subskill = "restoration/other"
+keywords = ["Skyrim.esm|0x0BD83F"]                   # MagicTurnUndead
+[[restoration]]
+subskill = "restoration/help"
+keywords = ["Skyrim.esm|0x01CEB0",                   # MagicRestoreHealth
+            "Requiem - Magic Redone.esp|0x005FBF",   # Nox_KW_Restoration_Cure
+            "Requiem - Magic Redone.esp|0x006204",   # Nox_KW_Restoration_ResistMagic
+            "Requiem - Magic Redone.esp|0x005D05"]   # Nox_KW_Restoration_FortifyAttributes

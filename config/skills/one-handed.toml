@@ -1,0 +1,112 @@
+# One-Handed: conversion normalization + prototype dynamics (design-v2 §4.4, §5.5; skills/weapons/design.md).
+# Run:  python3 scripts/normalize_conversion.py config/skills/one-handed.toml
+# The DLL reads the same file (impl/main-skill-level.md) and solves k itself.
+#
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Structure: one group for all weapon sub-skills
+# (high T: a specialist goes far); concept sub-skills have k = 0.
+
+[main]                 # vanilla AVIF curve (refs/vanilla-skill-xp.md §2); LoreRim's own AVIF has ImproveOffset 9999
+actor_value    = "OneHanded"   # RE::ActorValue::kOneHanded; a skill is managed by the DLL only if it has a file here
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+start_level    = 15
+target_level   = 100
+
+[sub_curve]            # sub-skill XP curve, 0..200 scale (design-v2 §5.1)
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+
+[conversion]
+rise_T1 = 25
+
+[budget]
+weapon = { share = 1.0 }
+
+[reference_path]
+level   = 75
+members = ["1h-sword", "1h-mace"]
+
+[dynamics]             # read by the DLL only (impl/decay.md, impl/main-skill-level.md)
+base_mult  = 6.3     # raw XP = raw use points × base_mult (vanilla AVIF UseMult; Q-XP-9)
+decay_rate = 4.0       # sub-skill decay at full rate, levels per active game day (Q-DYN-4 (a))
+rust_rate  = 2.0       # r_skill: rust R growth at full rate, levels per active game day (Q-ML-8)
+pace_sub   = 2000      # P_sub: raw XP per active game hour while a sub-skill is practised (Q-DYN-15)
+pace_skill = 1000      # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
+
+# ---- sub-skills -------------------------------------------------------------------------------
+[[subskill]]
+name = "1h-sword"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-short-sword"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-dagger"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-mace"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-war-axe"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-spear"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-scythe"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-unarmed"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "1h-other"
+group = "weapon"
+T = 100
+w = 20
+
+[[subskill]]
+name = "dual-wield"
+group = "concept"
+k = 0          # concept sub-skill: no main-skill contribution
+T = 100
+w = 20
+
+[[subskill]]
+name = "with-shield"
+group = "concept"
+k = 0          # concept sub-skill: no main-skill contribution
+T = 100
+w = 20
+
+[[subskill]]
+name = "with-magic"
+group = "concept"
+k = 0          # concept sub-skill: no main-skill contribution
+T = 100
+w = 20

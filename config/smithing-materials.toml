@@ -1,0 +1,429 @@
+# Smithing material keywords -> material sub-skill (impl/xp-capture.md, Smithing).
+# Generated from the "Proposal: sub-skill" column of refs/lorerim/materials.md (placeholder,
+# Q-SMI-5 open): the first proposed name that is a material sub-skill of
+# config/skills/smithing.toml, otherwise other-smithing. Keywords by FormKey (Plugin|0xLocalID).
+# The first matching keyword of an item wins; order = this file.
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71F"   # WeapMaterialDaedric; proposal: daedric
+subskill = "daedric"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71E"   # WeapMaterialEbony; proposal: ebony
+subskill = "ebony"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E719"   # WeapMaterialSteel; proposal: steel
+subskill = "steel"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x02622F"   # DLC2WeaponMaterialStalhrim; proposal: stalhrim
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71B"   # WeapMaterialElven; proposal: elven
+subskill = "elven"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71D"   # WeapMaterialGlass; proposal: glass
+subskill = "glass"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E718"   # WeapMaterialIron; proposal: iron
+subskill = "iron"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71A"   # WeapMaterialDwarven; proposal: dwarven
+subskill = "dwarven"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x026230"   # DLC2WeaponMaterialNordic; proposal: nordic / quicksilver
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E71C"   # WeapMaterialOrcish; proposal: orcish
+subskill = "orcish"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDB"   # REQ_ArmorSet_Leather; proposal: leather
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD8"   # REQ_ArmorSet_Ebony; proposal: ebony
+subskill = "ebony"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE6"   # REQ_ArmorSet_Steel; proposal: steel
+subskill = "steel"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD9"   # REQ_ArmorSet_Elven; proposal: elven
+subskill = "elven"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD67"   # ccBGSSSE025_WeapMaterialAmber; proposal: amber (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD68"   # ccBGSSSE025_WeapMaterialMadness; proposal: madness (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDC"   # REQ_ArmorSet_Glass; proposal: glass
+subskill = "glass"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD69"   # ccBGSSSE025_WeapMaterialGolden; proposal: gold (jewelry?)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD6A"   # ccBGSSSE025_WeapMaterialDark; proposal: dark (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE7"   # REQ_ArmorSet_SteelPlate; proposal: steel (plate? Q-SMI-5)
+subskill = "steel"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD4"   # REQ_ArmorSet_Daedric; proposal: daedric
+subskill = "daedric"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024102"   # REQ_ArmorSet_ChitinLight; proposal: chitin
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDD"   # REQ_ArmorSet_Hide; proposal: hide / leather
+subskill = "leather"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024101"   # FZR_ArmorSet_Bonemold; proposal: bonemold
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE3"   # REQ_ArmorSet_Iron; proposal: iron
+subskill = "iron"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD7"   # REQ_ArmorSet_DwarvenHeavy; proposal: dwarven
+subskill = "dwarven"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDE"   # REQ_ArmorSet_Scale; proposal: steel (scaled)
+subskill = "steel"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD5"   # REQ_ArmorSet_Dragonplate; proposal: dragon
+subskill = "dragon"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBD6"   # REQ_ArmorSet_Dragonscale; proposal: steel (scaled)
+subskill = "steel"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024105"   # REQ_ArmorSet_Quicksilver; proposal: nordic / quicksilver
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x10AA1A"   # WeapMaterialSilver; proposal: silver
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x019822"   # DLC1WeapMaterialDragonbone; proposal: dragon
+subskill = "dragon"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024107"   # FZR_ArmorSet_StalhrimLight; proposal: stalhrim
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024103"   # REQ_ArmorSet_ChitinHeavy; proposal: chitin
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0C5C01"   # WeapMaterialDraugr; proposal: ancient nord (draugr)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE5"   # REQ_ArmorSet_OrcishHeavy; proposal: orcish
+subskill = "orcish"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0C5C02"   # WeapMaterialDraugrHoned; proposal: ancient nord (draugr)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD66"   # ccBGSSSE025_ArmorMaterialAmber; proposal: amber (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD65"   # ccBGSSSE025_ArmorMaterialMadness; proposal: madness (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE2"   # REQ_ArmorSet_ImperialHeavy; proposal: steel (imperial)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD6F"   # REQ_ArmorSet_DwarvenLight; proposal: dwarven
+subskill = "dwarven"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024106"   # FZR_ArmorSet_StalhrimHeavy; proposal: stalhrim
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE0"   # REQ_ArmorSet_ImperialLight; proposal: steel (imperial)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39C3"   # REQ_ArmorSet_Guard; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD64"   # ccBGSSSE025_ArmorMaterialDark; proposal: dark (CC)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "ccBGSSSE025-AdvDSGS.esm|0x21BD63"   # ccBGSSSE025_ArmorMaterialGolden; proposal: gold (jewelry?)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD3B02"   # REQ_ArmorSet_Vigilant; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x0009B9"   # REQ_ArmorSet_Forsworn; proposal: hide / bone (forsworn)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0C5C00"   # WeapMaterialImperial; proposal: steel (imperial)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39BE"   # REQ_ArmorSet_AncientNord; proposal: ancient nord (draugr)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD70"   # REQ_ArmorSet_NetchLeather; proposal: leather (netch?)
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDA"   # REQ_LEGACY_ArmorMaterialElvenGilded; proposal: elven
+subskill = "elven"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x01463E"   # REQ_ArmorSet_Vampire; proposal: leather / ? (vampire)
+subskill = "leather"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD9F"   # REQ_ArmorSet_Alikr; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD5E"   # REQ_ArmorSet_Chainmail; proposal: iron/steel
+subskill = "iron"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD3ADE"   # REQ_ArmorSet_Fur; proposal: hide / leather
+subskill = "leather"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x012CCD"   # REQ_ArmorSet_DawnguardHeavy; proposal: steel / leather (dawnguard)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD71"   # REQ_ArmorSet_SilverHand; proposal: silver
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x3B2D08"   # Trad_CC_ArmorSet_DaedricLight; proposal: daedric
+subskill = "daedric"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x0050C4"   # REQ_ArmorSet_DawnguardLight; proposal: steel / leather (dawnguard)
+subskill = "steel"
+
+[[material]]
+keyword  = "Skyrim.esm|0x10FD62"   # REQ_ArmorSet_Shrouded; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Update.esm|0x0009C0"   # REQ_ArmorSet_Akaviri; proposal: steel (akaviri)
+subskill = "steel"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x23EE93"   # Trad_002_ArmorSet_SpellKnight; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x0009BC"   # REQ_ArmorSet_ThievesGuild; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE4"   # REQ_LEGACY_ArmorMaterialIronBanded; proposal: iron
+subskill = "iron"
+
+[[material]]
+keyword  = "Big Tweaks.esp|0x000A6B"   # WeapMaterialSkyforgeSteel; proposal: steel
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDD9E"   # REQ_ArmorSet_OrcishLight; proposal: orcish
+subskill = "orcish"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0AC13A"   # REQ_LEGACY_ArmorMaterialStormcloak; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "Skyrim.esm|0x01E717"   # WeapMaterialWood; proposal: wood
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x10FD61"   # REQ_ArmorSet_Nightingale; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x012CCF"   # REQ_ArmorSet_FalmerHeavy; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0xAF0143"   # WAF_DLC2ArmorMaterialCultist; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39C5"   # REQ_ArmorSet_ImperialLegate; proposal: steel (imperial)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD3A3F"   # REQ_ArmorSet_Wolf; proposal: hide / leather
+subskill = "leather"
+
+[[material]]
+keyword  = "Big Tweaks.esp|0x00084F"   # REQ_ArmorSet_Ebony_Light; proposal: ebony
+subskill = "ebony"
+
+[[material]]
+keyword  = "Big Tweaks.esp|0x000AB0"   # REQ_ArmorSet_VampireHeavy; proposal: leather / ? (vampire)
+subskill = "leather"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x3B2D0E"   # Trad_ArmorSet_Vigilant_Corrupted; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x0009BE"   # REQ_ArmorSet_StormcloakOfficer; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39BF"   # REQ_ArmorSet_AncientFalmer; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x0009BD"   # REQ_ArmorSet_FalmerLight; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x024022"   # FZR_ArmorSet_Deathbrand; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Dragonborn.esm|0x03A328"   # FZR_ArmorSet_MoragTong; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBE1"   # REQ_LEGACY_ArmorMaterialImperialStudded; proposal: leather/iron
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x06BBDF"   # REQ_LEGACY_ArmorMaterialStudded; proposal: leather/iron
+subskill = "leather"
+
+[[material]]
+keyword  = "Update.esm|0x0009BF"   # REQ_ArmorSet_ThievesGuildMaster; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0C5C03"   # WeapMaterialFalmer; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Skyrim.esm|0x0C5C04"   # WeapMaterialFalmerHoned; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x18796E"   # Trad_001_ArmorSet_ImperialDragon; proposal: ?
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x18796D"   # Trad_001_ArmorSet_StormBear; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "Big Tweaks.esp|0x000866"   # REQ_ArmorSet_Greybeard; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39C1"   # REQ_ArmorSet_Skaal; proposal: hide / leather
+subskill = "leather"
+
+[[material]]
+keyword  = "Update.esm|0xAF0114"   # WAF_WeapMaterialSkyforge; proposal: steel
+subskill = "steel"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x253488"   # Trad_056_ArmorSet_Silver; proposal: silver
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x012CCE"   # REQ_NULL_DLC1ArmorMaterialFalmerHardened; proposal: falmer (chaurus)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x900014"   # USLEEPArmorMaterialBlackguard; proposal: iron/steel (faction)
+subskill = "iron"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39C0"   # REQ_ArmorSet_Executioner; proposal: ? (faction set: check COBJ)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0x0009BB"   # REQ_ArmorSet_PenitusOculatus; proposal: steel (imperial)
+subskill = "steel"
+
+[[material]]
+keyword  = "Requiem.esp|0xAD39C4"   # REQ_ArmorSet_AncientShrouded; proposal: leather (faction)
+subskill = "leather"
+
+[[material]]
+keyword  = "Update.esm|0x0009BA"   # REQ_NULL_ArmorMaterialMS02Forsworn; proposal: hide / bone (forsworn)
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Requiem.esp|0xADDDB5"   # REQ_ArmorSet_SummersetShadows; proposal: elven
+subskill = "elven"
+
+[[material]]
+keyword  = "Update.esm|0x900015"   # REQ_ArmorSet_Linwe; proposal: elven
+subskill = "elven"
+
+[[material]]
+keyword  = "Dawnguard.esm|0x00E299"   # DLC1LD_CraftingMaterialAetherium; proposal: dwarven
+subskill = "dwarven"
+
+[[material]]
+keyword  = "Update.esm|0xAF0121"   # WAF_WeapMaterialAdvanced; proposal: ?
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0xAF0209"   # WAF_TreatAsMaterialIron; proposal: iron
+subskill = "iron"
+
+[[material]]
+keyword  = "Trad_AE_CC_Collection_Requiem_Patch.esp|0x00AA02"   # WeapMaterialGoblin; proposal: ?
+subskill = "other-smithing"
+
+[[material]]
+keyword  = "Update.esm|0xAF0134"   # WAF_MaterialBonemold; proposal: bonemold
+subskill = "other-smithing"

@@ -1,0 +1,63 @@
+# Skill Practice: global settings of the SKSE plugin (prototype 1).
+# Installed as Data/SKSE/Plugins/SkillPractice/SkillPractice.toml; per-skill files in
+# Data/SKSE/Plugins/SkillPractice/skills/*.toml (repo: config/skills/). A main skill is managed by
+# the plugin only if it has a file there.
+# The MCM settings (Data/MCM/Settings/SkillPractice.ini) override the [debug] and [log] keys at
+# runtime (impl/mcm-config.md).
+# ALL NUMBERS ARE PLACEHOLDERS. Design references: design-v2.md section numbers.
+
+[xp]                         # impl/subskill-state.md
+zone_catch_up   = 3.0        # current < effective floor (§5.3)
+zone_recall     = 1.5        # effective floor <= current < potential
+zone_new        = 1.0        # current >= potential
+split_zone_gain = true       # Q-DYN-2 proposal: a gain that crosses a zone boundary is split
+floor_rate      = 0.3        # own floor XP = floor_rate × XP before the zone multiplier (§5.4)
+floor_cap       = 75         # own floor never above this level
+hard_cap        = 500        # technical level cap (§5.1)
+context_window_ms = 750      # impl/xp-capture.md: max age of a context event
+
+[decay]                      # impl/decay.md
+grace_hours         = 24     # idle meter U below this: no decay (§5.5)
+ramp_end_hours      = 72     # rate ramps linearly from 0 at grace_hours to full at ramp_end_hours
+idle_max_hours      = 72     # U never above this
+q                   = 0.3    # share of the reference pace that stops U from growing (Q-DYN-15, Q-ML-7)
+tick_seconds        = 1.0    # real seconds between decay ticks
+max_tick_game_hours = 0.5    # a game-time jump above this in one tick is not active time
+
+[main]                       # impl/main-skill-level.md
+write_main_skills = true     # write the computed level to the actor value base
+hysteresis_up     = 1.0      # written n becomes n+1 when F >= n + 1 (Q-ML-6 placeholder)
+hysteresis_down   = 0.2      # written n becomes n-1 when F < n - 0.2
+min_level         = 0
+max_level         = 300      # clamp of the written value (Q-DYN-8 open)
+
+[init]                       # impl/main-skill-level.md, start conversion (§4.4.4, Q-ML-9)
+floor_per_level = 2.0        # floor = clamp(floor_per_level × (main − floor_zero_at), 0, floor_cap)
+floor_zero_at   = 15
+
+[aim]                        # impl/spell-aim-inaccuracy.md
+missile_enabled      = true
+missile_sigma_max_deg = 6.0  # σ at form level 0
+missile_L0           = 75    # no noise from this level up
+beam_enabled         = true
+beam_amp_max_deg     = 4.0   # sway amplitude at form level 0, after t_full
+beam_L0              = 75
+beam_t_full_sec      = 3.0   # time of holding / charging until full amplitude
+beam_noise_hz        = 0.6   # speed of the smooth noise
+
+[ui]                         # impl/status-ui.md (PrismaUI)
+toggle_key = 0x41            # DX scan code of the panel hotkey (0x41 = F7)
+refresh_ms = 250             # snapshot interval while the panel is open
+inspector  = false           # Ultralight inspector for the view (debugging the page)
+
+[log]                        # impl/plugin-foundation.md
+level      = "info"          # trace | debug | info | warn | error
+xp_verbose = false           # one [xp] line per XP award
+
+[debug]                      # impl/mcm-config.md (Debug page)
+xp_mult             = 1      # 1, 10 or 100: multiplies raw XP of every managed sub-skill
+fixed_xp            = false  # "Make all XP equal to 100": awards from our events, raw = fixed_xp_value (impl/xp-capture.md)
+fixed_xp_value      = 100
+time_scale          = 1      # 1, 10, 100 or 1000: multiplies active time for decay and rust
+no_grace            = false  # decay and rust start at full rate as soon as U > 0
+vanilla_passthrough = false  # do not suppress vanilla XP of managed skills (comparison only)
