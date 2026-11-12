@@ -1,6 +1,6 @@
 # Spell inaccuracy: aim sway and projectile direction noise
 
-- **Status:** chosen per form: **beam → variant A** (aim sway), **missile → variant B**
+- **Status:** done (prototype implementation; R-26 runtime validation pending): **beam → variant A** (aim sway), **missile → variant B**
   (direction noise at launch; `missile` includes lobber projectiles, Q-MAG-1); details to confirm in R-26.
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md), *Accuracy* (Q-MAG-5);
   background: [`refs/aim-perturbation.md`](../refs/aim-perturbation.md) (options A and B there).
@@ -90,6 +90,19 @@ disable its aim support for player spells (R-26 check 2).
 - The debug panel shows `σ(L)` and the current sway amplitude ([`status-ui.md`](status-ui.md)).
 
 ## Config
+
+## Prototype notes
+
+- Launch uses Address Library 42928/44108 and a MinHook trampoline. The original
+  is always called. Only player SpellItem missiles in initialized managed schools
+  receive noise; explosion, flame, NPC, scroll and weapon projectiles do not.
+- Beam sway applies per-frame delta rotation through `TESObjectREFR::SetAngle`
+  (the pinned API has no SetRotationX/Z). It stops without undoing the final
+  disturbance. SmoothCam/TDM behaviour must be checked in first and third person.
+- Sine weights/frequency ratios are configurable. `aim.debug_missile_yaw_deg=10`
+  enables the fixed yaw probe for R-26; leave it at zero for normal gameplay.
+- The panel shows actual current beam amplitude and missile sigma. No aim
+  compatibility result is inferred from successful compilation.
 
 - per form (`missile`, `beam`): `L_0`;
 - B: `σ_max` (degrees);

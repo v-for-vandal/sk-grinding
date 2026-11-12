@@ -19,6 +19,7 @@ void Model::loadConfig(const std::string& root) {
     Model next;
     next.settings.values=convert(toml::parse_file(root+"/SkillPractice.toml"));
     int cap=int(next.settings.get("xp","hard_cap"));
+    if(next.settings.get("aim","missile_L0")<=0||next.settings.get("aim","beam_L0")<=0||next.settings.get("aim","beam_t_full_sec")<=0||next.settings.get("aim","beam_secondary_weight")<0)throw std::runtime_error("invalid aim settings");
     if(cap<1||cap>65534||next.settings.get("decay","q")<=0||next.settings.get("xp","zone_new")<=0||next.settings.get("xp","zone_recall")<=0||next.settings.get("xp","zone_catch_up")<=0||next.settings.get("main","hysteresis_up")<=0||next.settings.get("main","hysteresis_down")<0||next.settings.get("decay","tick_seconds")<=0||next.settings.get("decay","idle_max_hours")<next.settings.get("decay","ramp_end_hours"))throw std::runtime_error("invalid XP/decay configuration");
     std::set<std::string> ids,avs;
     std::vector<std::filesystem::path> files;

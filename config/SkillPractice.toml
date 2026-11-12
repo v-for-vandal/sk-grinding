@@ -44,6 +44,11 @@ beam_amp_max_deg     = 4.0   # sway amplitude at form level 0, after t_full
 beam_L0              = 75
 beam_t_full_sec      = 3.0   # time of holding / charging until full amplitude
 beam_noise_hz        = 0.6   # speed of the smooth noise
+beam_secondary_weight = 0.5 # second sine relative amplitude (prototype noise shape)
+beam_pitch_secondary_frequency = 1.73 # frequency ratios to beam_noise_hz
+beam_yaw_primary_frequency = 0.83
+beam_yaw_secondary_frequency = 1.31
+debug_missile_yaw_deg = 0.0 # R-26 check 1 only: set to 10 for a fixed offset; 0 uses normal noise
 
 [ui]                         # impl/status-ui.md (PrismaUI)
 toggle_key = 0x41            # DX scan code of the panel hotkey (0x41 = F7)

@@ -97,6 +97,7 @@ void Model::restore(const json& j) {
 }
 json Model::snapshot() const {
     json out={{"state",pendingInit?"pending":"running"},{"activeHours",activeHours},{"debug",settings.values["debug"]},{"skills",json::array()},{"equipped",json::array()}};
+    out["debug"]["write_main_skills"]=settings.flag("main","write_main_skills");
     double g=settings.get("decay","grace_hours"),e=settings.get("decay","ramp_end_hours");if(settings.flag("debug","no_grace"))g=e=0;
     for(auto& sk:skills){json a={{"av",sk.av},{"name",sk.av},{"F",sk.computed(settings.get("main","min_level"),settings.get("main","max_level"))},{"written",sk.written},{"base",sk.base},{"R",sk.rust},{"Umain",sk.idle},{"rustPerDay",sk.rustRate*ramp(sk.idle,g,e)},{"external",sk.external},{"pending",!sk.initialized},{"subs",json::array()}};
         for(auto& s:sk.subs){double c=s.current.value(s.curve),f=s.floor.value(s.curve),p=s.potential.value(s.curve);a["subs"].push_back({{"id",s.id},{"ownFloor",f},{"effFloor",f},{"current",c},{"potential",p},{"peak",s.peak.value(s.curve)},{"U",s.idle},{"decayPerDay",s.decay*ramp(s.idle,g,e)},{"zone",settings.get("xp",c<f?"zone_catch_up":c<p?"zone_recall":"zone_new")},{"worth",s.worth(std::max(c,s.peak.value(s.curve)-sk.rust))-s.worth(s.initial)},{"lastXP",s.lastXP}});}out["skills"].push_back(a);

@@ -25,6 +25,8 @@ void award(std::string_view,double,std::string_view);
 struct Classification {std::string school,form,direction,projectile;RE::ActorValue actorValue=RE::ActorValue::kNone;};
 Classification classify(RE::SpellItem*);
 std::string weapon(RE::TESObjectWEAP*);
+std::string weaponKeyword(RE::TESObjectWEAP*);
+double beamAmplitude();
 void resolveForms();
 void dumpWeapons();
 void dumpSpells();

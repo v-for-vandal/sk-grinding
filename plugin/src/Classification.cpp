@@ -29,6 +29,7 @@ std::string weapon(RE::TESObjectWEAP* w){
     if(!count){auto t=w->GetWeaponType();switch(t){case RE::WEAPON_TYPE::kBow:case RE::WEAPON_TYPE::kCrossbow:sub="archery-other";break;case RE::WEAPON_TYPE::kStaff:sub="";break;case RE::WEAPON_TYPE::kTwoHandSword:case RE::WEAPON_TYPE::kTwoHandAxe:sub="2h-other";break;default:sub="1h-other";break;}spdlog::warn("[class] fallback form={:08X} name={} sub={}",w->GetFormID(),w->GetName(),sub);}
     weapons[w->GetFormID()]=sub;return sub;
 }
+std::string weaponKeyword(RE::TESObjectWEAP* w){if(!w)return "unarmed";for(size_t i=0;i<keywords.size();++i)if(keywords[i]&&w->HasKeyword(keywords[i]))return std::string(sp::weaponClasses[i].keyword);return "fallback";}
 Classification classify(RE::SpellItem* spell){
     Classification c;if(!spell)return c;auto e=spell->GetCostliestEffectItem();auto m=e?e->baseEffect:nullptr;if(!m)return c;c.actorValue=m->data.associatedSkill;c.school=school(c.actorValue);if(c.school.empty())return c;
     auto& d=m->data;auto p=d.projectileBase;auto delivery=spell->GetDelivery();auto casting=spell->GetCastingType();

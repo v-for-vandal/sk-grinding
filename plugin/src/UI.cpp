@@ -1,4 +1,4 @@
-#include "Runtime.h"
+﻿#include "Runtime.h"
 #include "PrismaUI_API.h"
 #include "WeaponClasses.h"
 namespace runtime {
@@ -10,7 +10,7 @@ void send(){if(dom&&api&&view){auto data=snapshot().dump();api->InteropCall(view
 void onAction(const char* text){std::string copy=text?text:"";spdlog::debug("[ui] callback thread={} main={}",GetCurrentThreadId(),mainThread);if(GetCurrentThreadId()!=mainThread)SKSE::GetTaskInterface()->AddTask([copy]{action(copy.c_str());});else action(copy.c_str());}
 void ready(PrismaView v){view=v;dom=true;api->RegisterJSListener(view,"spAction",onAction);api->Hide(view);spdlog::info("[ui] DOM ready thread={}",GetCurrentThreadId());}
 void console(PrismaView,PRISMA_UI_API::ConsoleMessageLevel level,const char* msg){spdlog::info("[ui] js level={} {}",int(level),msg?msg:"");}
-void toggle(){if(!api||!dom)return;if(visible){closeUI();return;}if(RE::UI::GetSingleton()->IsMenuOpen(RE::MainMenu::MENU_NAME)||RE::UI::GetSingleton()->IsMenuOpen(RE::Console::MENU_NAME)||RE::UI::GetSingleton()->GameIsPaused())return;visible=true;send();api->Show(view);if(!api->Focus(view,false)){visible=false;api->Hide(view);spdlog::warn("[ui] focus failed");}else spdlog::info("[ui] opened");}
+void toggle(){if(!api||!dom)return;if(visible){closeUI();return;}if(RE::UI::GetSingleton()->IsMenuOpen(RE::MainMenu::MENU_NAME)||RE::UI::GetSingleton()->IsMenuOpen(RE::Console::MENU_NAME)||RE::UI::GetSingleton()->GameIsPaused()||RE::UI::GetSingleton()->IsItemMenuOpen()||RE::UI::GetSingleton()->IsApplicationMenuOpen()||RE::UI::GetSingleton()->IsModalMenuOpen())return;visible=true;send();api->Show(view);if(!api->Focus(view,false)){visible=false;api->Hide(view);spdlog::warn("[ui] focus failed");}else spdlog::info("[ui] opened");}
 class Input : public RE::BSTEventSink<RE::InputEvent*> {
     RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* events,RE::BSTEventSource<RE::InputEvent*>*) override {
         if(events)for(auto e=*events;e;e=e->next)if(auto b=e->AsButtonEvent();b&&b->GetDevice()==RE::INPUT_DEVICE::kKeyboard&&b->IsDown()&&b->GetIDCode()==static_cast<unsigned>(model.settings.get("ui","toggle_key")))toggle();return RE::BSEventNotifyControl::kContinue;
@@ -22,7 +22,7 @@ void setupUI(){auto v2=PRISMA_UI_API::RequestPluginAPI<PRISMA_UI_API::IVPrismaUI
 void refreshAim(float);
 void refreshUI(float dt){refreshAim(dt);if(!visible||!dom)return;elapsed+=dt;if(elapsed*1000>=model.settings.get("ui","refresh_ms")){elapsed=0;send();}}
 sp::json snapshot(){auto j=model.snapshot();j["debug"]["write_main_skills"]=model.settings.flag("main","write_main_skills");auto p=RE::PlayerCharacter::GetSingleton();if(!p)return j;
-    for(bool left:{false,true}){auto item=p->GetEquippedObject(left);sp::json e={{"hand",left?"left":"right"},{"kind","none"},{"name",item?item->GetName():"Unarmed"}};if(auto w=item?item->As<RE::TESObjectWEAP>():nullptr){e["kind"]="weapon";e["sub"]=weapon(w);}else if(auto s=item?item->As<RE::SpellItem>():nullptr){auto c=classify(s);e["kind"]="spell";e["form"]=c.form;e["direction"]=c.direction;e["projectile"]=c.projectile;auto sub=model.find(c.school+"/"+c.form);double level=sub?sub->current.value(sub->curve):0;e["formLevel"]=level;e["sigma"]=model.settings.get("aim","missile_sigma_max_deg")*std::max(0.,1-level/model.settings.get("aim","missile_L0"));e["sway"]=model.settings.get("aim","beam_amp_max_deg")*std::max(0.,1-level/model.settings.get("aim","beam_L0"));}else if(item&&item->As<RE::TESObjectARMO>())e["kind"]="shield";j["equipped"].push_back(e);
+    for(bool left:{false,true}){auto item=p->GetEquippedObject(left);sp::json e={{"hand",left?"left":"right"},{"kind","none"},{"name",item?item->GetName():"Unarmed"}};if(auto w=item?item->As<RE::TESObjectWEAP>():nullptr){e["kind"]="weapon";e["sub"]=weapon(w);e["class"]=weaponKeyword(w);}else if(auto s=item?item->As<RE::SpellItem>():nullptr){auto c=classify(s);e["kind"]="spell";e["form"]=c.form;e["direction"]=c.direction;e["projectile"]=c.projectile;auto sub=model.find(c.school+"/"+c.form);double level=sub?sub->current.value(sub->curve):0;e["formLevel"]=level;e["sigma"]=(c.form=="missile"&&model.settings.flag("aim","missile_enabled"))?model.settings.get("aim","missile_sigma_max_deg")*std::max(0.,1-level/model.settings.get("aim","missile_L0")):0;e["sway"]=c.form=="beam"?beamAmplitude():0;}else if(item&&item->As<RE::TESObjectARMO>())e["kind"]="shield";j["equipped"].push_back(e);
     }return j;
 }
 void action(const char* text){try{auto j=sp::json::parse(text);auto name=j.at("action").get<std::string>();spdlog::info("[ui] action={}",j.dump());
@@ -32,3 +32,4 @@ void action(const char* text){try{auto j=sp::json::parse(text);auto name=j.at("a
     send();
 }catch(const std::exception& e){spdlog::warn("[ui] invalid action: {}",e.what());}}
 }
+
