@@ -8,7 +8,19 @@ Startup hotfix 0.1.1: replace the previous MO2 mod from the rebuilt archive.
 Load hotfix 0.1.3 also replaces recursive SKSE task reposting with a queue
 drained by the player update. Expect `[load] complete`, then
 `[load] first player update: complete` and periodic `[health]` lines.
-Successful save loading is still pending runtime confirmation.
+Save loading and panel interaction are confirmed by the player and the
+2026-11-12 log (`first player update: complete` and subsequent health entries).
+Beam sway is player-confirmed; missile spread remains unresolved.
+The test session saved all 76 sub-skills and six main skills, but persistence
+after reload and individual XP awards still need verification.
+
+Diagnostics correction: MCM Helper writes a UTF-8 BOM to its user INI. Earlier
+builds skipped the first section header, so a leading `[Log]` section did not
+enable Debug or Verbose XP. The rebuilt archive strips the BOM before parsing.
+Reinstall the archive and restart the game; expect `[cfg] log.level` and
+`[cfg] log.xp_verbose` changes, followed by debug entries. Existing test actions
+need not all be repeated: first repeat one qualifying fixed-XP action to check
+that its `[xp]` record is present.
 Expect `[boot] SkillPractice 0.1.1`, `main-task initialization thread=...`,
 and `[ui] DOM ready thread=...` with the same thread ID. A file-view mock.json
 fetch error must no longer appear. First check that the main menu stays
@@ -34,9 +46,9 @@ The fix is built/tested locally; its in-game result still needs confirmation.
    keyword resolution and hook-owner lines. Missing optional form rules are
    skipped with a warning. A missing PrismaUI API is nonfatal to XP but prevents
    using the panel. Send the log if configuration or hooks fail.
-4. **Open the panel.** F7 opens it with a cursor; the game keeps running.
+4. **Open the panel.** F7 opens it with a cursor and pauses the game.
    F7, Escape or Close closes it. Open it outside other menus. Verify controls
-   return after closing. Sub-skills shows own/current floor, effective floor,
+   return and the game resumes after closing. Sub-skills shows own/current floor, effective floor,
    current, potential, peak, idle U, decay/day, zone, worth and last raw XP;
    each main skill shows computed/written level, base, rust and idle meter.
    Debug shows equipped classes and spell forms. Filter and column sorting work.

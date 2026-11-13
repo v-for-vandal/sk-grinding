@@ -111,6 +111,15 @@ disable its aim support for player spells (R-26 check 2).
 
 ## Test
 
+Runtime feedback (2026-11-12): the player confirmed beam sway, but missile
+impacts remained accurate. The follow-up build clears `LaunchData.autoAim` and
+`desiredTarget` only when applying missile noise, so engine aim assistance is
+not requested for those launches. This is a candidate fix, pending an in-game
+retest; TDM compatibility is still unconfirmed. Info-level diagnostics record
+the first 20 player launches (including their thread), spell classification,
+missing initialization, and every applied offset. The main-thread guard stays
+in place to avoid reading mutable skill state on a worker thread.
+
 - Fire 20 Firebolts (missile) at a wall at form level 0 and at `L_0`; the spread of impact points
   follows `σ`; none at `L_0`. Same with an arcing (lobber) missile spell.
 - Hold a Lightning Bolt (beam) at level 0: the crosshair wanders more the longer it is held and

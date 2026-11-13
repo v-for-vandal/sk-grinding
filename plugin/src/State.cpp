@@ -107,7 +107,11 @@ void readINI(const std::string& path) {
   std::ifstream in(path);
   if (!in) return;
   std::string section, line;
+  bool firstLine = true;
   while (std::getline(in, line)) {
+    // MCM Helper writes UTF-8 BOMs; do not lose the first section header.
+    if (firstLine && line.starts_with("\xEF\xBB\xBF")) line.erase(0, 3);
+    firstLine = false;
     auto clean = [](std::string v) {
       auto a = v.find_first_not_of(" \t\r");
       if (a == std::string::npos) return std::string();

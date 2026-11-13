@@ -64,7 +64,7 @@ Snapshot (JSON, one object):
 - Hotkey: our own `BSTEventSink<RE::InputEvent*>` on `BSInputDeviceManager`; key-down of
   `ui.toggle_key` (DX scan code, default F7 = `0x41`) toggles the panel. Ignored while a game menu
   other than ours is open, or in the console.
-- Open: send a snapshot, `Show`, `Focus(view, pauseGame = false)` (mouse cursor, game controls
+- Open: send a snapshot, `Show`, `Focus(view, pauseGame = true)` (mouse cursor, game paused and controls
   disabled while open). Close (the same key, `Esc` handled in JS → `spAction({action:"close"})`, or
   a *Close* button): `Unfocus`, `Hide`.
 - `ui.inspector = true` (config): `CreateInspectorView` + `SetInspectorVisibility` for the

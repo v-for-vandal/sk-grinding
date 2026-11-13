@@ -1,5 +1,6 @@
 ﻿#include <MinHook.h>
 
+#include <atomic>
 #include <numbers>
 #include <random>
 
@@ -15,11 +16,23 @@ double amplitudeDegrees = 0;
 bool swaying = false;
 RE::ProjectileHandle* launch(RE::ProjectileHandle* result,
                              RE::Projectile::LaunchData& data) noexcept {
+  static std::atomic<unsigned> samples{0};
+  if (data.shooter == RE::PlayerCharacter::GetSingleton() &&
+      samples.fetch_add(1, std::memory_order_relaxed) < 20) {
+    spdlog::info(
+        "[aim] player launch thread={} main={} spell={:08X} "
+        "autoAim={} target={:08X}",
+        GetCurrentThreadId(), mainThread,
+        data.spell ? data.spell->GetFormID() : 0, data.autoAim,
+        data.desiredTarget ? data.desiredTarget->GetFormID() : 0);
+  }
   if (GetCurrentThreadId() == mainThread &&
       data.shooter == RE::PlayerCharacter::GetSingleton() && data.spell &&
       model.settings.flag("aim", "missile_enabled")) {
     auto spell = data.spell->As<RE::SpellItem>();
     auto c = classify(spell);
+    spdlog::info("[aim] classified spell={:08X} school={} form={}",
+                 spell ? spell->GetFormID() : 0, c.school, c.form);
     if (c.form == "missile") {
       auto s = model.find(c.school + "/missile");
       auto sk = skill(c.actorValue);
@@ -36,12 +49,20 @@ RE::ProjectileHandle* launch(RE::ProjectileHandle* result,
                  z = fixed != 0 ? fixed * std::numbers::pi / 180 : noise(rng);
           data.angleX += float(x);
           data.angleZ += float(z);
-          spdlog::debug(
+          // Engine aim assistance can replace the perturbed launch direction.
+          const bool autoAim = data.autoAim;
+          const auto target =
+              data.desiredTarget ? data.desiredTarget->GetFormID() : 0;
+          data.autoAim = false;
+          data.desiredTarget = nullptr;
+          spdlog::info(
               "[aim] launch form={:08X} school={} sigma={} pitch={} yaw={} "
               "autoAim={} target={:08X}",
-              spell->GetFormID(), c.school, sigma, x, z, data.autoAim,
-              data.desiredTarget ? data.desiredTarget->GetFormID() : 0);
+              spell->GetFormID(), c.school, sigma, x, z, autoAim, target);
         }
+      } else {
+        spdlog::info("[aim] missile skipped: subskill={} initialized={}",
+                     s != nullptr, sk && sk->initialized);
       }
     }
   }

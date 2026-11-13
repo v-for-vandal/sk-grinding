@@ -49,7 +49,7 @@ void toggle() {
   visible = true;
   send();
   api->Show(view);
-  if (!api->Focus(view, false)) {
+  if (!api->Focus(view, true)) {
     visible = false;
     api->Hide(view);
     spdlog::warn("[ui] focus failed");
@@ -61,18 +61,23 @@ class Input : public RE::BSTEventSink<RE::InputEvent*> {
       RE::InputEvent* const* events,
       RE::BSTEventSource<RE::InputEvent*>*) override {
     if (events)
-      for (auto e = *events; e; e = e->next)
-        if (auto b = e->AsButtonEvent();
-            b && b->GetDevice() == RE::INPUT_DEVICE::kKeyboard && b->IsDown() &&
-            b->GetIDCode() ==
-                static_cast<unsigned>(model.settings.get("ui", "toggle_key")))
+      for (auto e = *events; e; e = e->next) {
+        auto b = e->AsButtonEvent();
+        if (!b || b->GetDevice() != RE::INPUT_DEVICE::kKeyboard || !b->IsDown())
+          continue;
+        if (visible && b->GetIDCode() == 0x01)  // Keyboard scan code: Escape.
+          closeUI();
+        else if (b->GetIDCode() ==
+                 static_cast<unsigned>(model.settings.get("ui", "toggle_key")))
           toggle();
+      }
     return RE::BSEventNotifyControl::kContinue;
   }
 };
 Input input;
 }  // namespace
 void closeUI() {
+  if (visible) spdlog::info("[ui] closed");
   if (api && view) {
     api->Unfocus(view);
     api->Hide(view);
