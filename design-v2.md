@@ -935,6 +935,14 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 
 ## 15. Research and tooling
 
+Installed-instance research (Windows, 2026-11-11):
+[`research/research-report.md`](research/research-report.md), with reproducible
+Mutagen tooling and extracted tables documented in [`research/README.md`](research/README.md).
+The inspected Default profile disables use-based skill advancement and awards
+character XP from kills/exploration as well as quests; the assumptions in §1 and
+the pacing proposal below must be read with those findings in mind. Runtime-only
+validation and gameplay telemetry remain explicitly open in that report.
+
 ### 15.1 Pacing baseline (answer to "how many hours in vanilla?")
 
 There is no reliable published data. Rough community estimates for vanilla (normal play, no

@@ -1,6 +1,6 @@
 # Plugin foundation: project, build, records, logging, package
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (prototype builds and packages; runtime boot checks pending).
 - **Design:** design-v2 §1 (SKSE plugin + small ESL + MCM glue), §14 (runtime, FormKeys,
   persistence), [`refs/frameworks.md`](../refs/frameworks.md) §5 (CommonLibSSE-NG, templates).
 - **Depends on:** nothing.
@@ -103,6 +103,28 @@ Scripts/Source/SkillPractice_MCMScript.psc
 Requirements: SKSE, Address Library, Keyword Item Distributor, OCF, SkyUI, MCM Helper (all in
 LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which LoreRim has). `Requiem - Magic Redone.esp` is used for sub-direction keywords
 (missing → those rules are skipped, logged).
+
+## Prototype notes
+
+- 0.1.3 load-hang fix: the 0.1.2 minidump shows worker thread 9768 in
+  `Events::ProcessEvent -> SKSE::TaskInterface::AddTask`, while the recorded
+  main thread is 25572. Moving startup alone did not eliminate recursive
+  reposting during save loading. Off-thread events now enter a mutex-protected
+  queue drained exclusively by the player's update on the recorded main thread.
+  A drain takes a finite batch outside the mutex; at most 4096 events are queued.
+  Load/revert clears deferred events. Lifecycle and first-update diagnostics
+  remain enabled. This change still requires an in-game confirmation.
+
+- 0.1.1 startup fix: SKSE DataLoaded is received on a loading thread in the
+  user's LoreRim log. Lifecycle initialization is now scheduled onto SKSE's main
+  task queue before recording the main-thread ID or registering event sinks.
+  Recording the loader ID previously made main-thread events requeue themselves.
+
+- CMake + vcpkg, pinned alandtse/ng submodule; build commands: `plugin/README.md`.
+- Generator targets .NET 10 because pinned Mutagen 0.54.4 supports .NET 9/10,
+  not .NET 8. This tool does not run inside Skyrim.
+- M0 Release DLL, pure-logic CTest and MO2 ZIP build successfully on this machine.
+  No game launch has been performed; keyword resolution remains a runtime check.
 
 ## Test
 

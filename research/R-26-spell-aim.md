@@ -1,6 +1,6 @@
 # R-26. Spell aim: launch noise and aim sway
 
-- **Status:** new (headers, LoreRim plugins, test DLL in game).
+- **Status:** prototype built; runtime checks pending.
 - **For:** [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md), variants A (beam) and
   B (missile form: missile and lobber projectiles); the same checks cover archery (Q-WPN-7).
 
@@ -15,6 +15,18 @@
 | 5 | How to detect "player is casting a beam now" and since when: magic caster state per hand, spell's projectile type, start / stop of the cast | headers (`ActorMagicCaster`, `MagicCaster::State`), test log | trigger and `t` for the cumulative sway |
 | 6 | Do SmoothCam and TDM (headtracking, directional camera) overwrite our rotation each frame? | test check 4 with them enabled (LoreRim default) | A as is, or apply the offset after them / to another value |
 | 7 | Does any other LoreRim SKSE plugin hook `Projectile::Launch` (projectile tweaks)? | search skse-plugins.tsv list and DLL strings | hook order / conflicts |
+
+## Prepared instrumentation (2026-11-12)
+
+- The pinned CommonLib declares Launch(ProjectileHandle*, LaunchData&) at
+  Address Library 42928/44108. Prototype uses a MinHook trampoline and logs
+  noise angles, autoAim and desiredTarget for player spell missiles.
+- `aim.debug_missile_yaw_deg=10` enables the fixed yaw probe; zero restores
+  normal noise. No TDM compatibility result is assumed.
+- Beam trigger uses charging/casting caster states. Deltas go through SetAngle
+  after player Update; start/stop and current panel amplitude aid checks 4–6.
+- Checklist steps 16–17 cover 1, 2, 4, 5, 6. Requiem bow reuse (3) and full
+  other-plugin hook audit (7) remain outside these prepared runtime checks.
 
 ## How to decide
 

@@ -1,6 +1,6 @@
 # Main skill level: formula, rust, writes, start conversion
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (prototype implementation; R-27 runtime validation pending).
 - **Design:** design-v2 §4.4 (whole section): §4.4.1 formula, §4.4.3 rust, §4.4.4 start and
   writes, §4.4.5 normalization.
 - **Depends on:** [`subskill-state.md`](subskill-state.md), [`decay.md`](decay.md) (active time,
@@ -116,6 +116,15 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 `[main]`, `[init]` in [`config/SkillPractice.toml`](../config/SkillPractice.toml); `[main]`,
 `[conversion]`, `[budget]`, `[reference_path]`, `[dynamics] rust_rate, pace_skill` in
 [`config/skills/*.toml`](../config/skills/).
+
+## Prototype notes
+
+- The pure formula, initialization and rust fields are implemented in Core;
+  player-only actor-value writes and external changes are handled in State.cpp.
+- The pinned library calls notifications `SendHUDMessage::ShowHUDMessage`.
+- New sub-skills absent from a co-save receive a floor and zero-contribution
+  baseline without resetting existing sub-skills. Removed IDs retain baselines.
+- No Legendary blocking, books/trainers, cross-links or perk changes are included.
 
 ## Test
 

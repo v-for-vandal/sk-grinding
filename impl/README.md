@@ -32,17 +32,17 @@ blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](
 |---|---|---|---|
 | [`block-stamina-cost.md`](block-stamina-cost.md): block stamina cost scaled by the shield / parry sub-skill | proposed | *player-hit-hook*, *subskill-state*, *effect-curve* | [R-23](../research/R-23-block-stamina.md) |
 | [`perk-requirements.md`](perk-requirements.md): sub-skill requirements on existing perks (purchase and effects), value edits | chosen | *subskill-state* | [R-25](../research/R-25-perk-condition-injection.md) |
-| [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md): inaccuracy of `missile` (launch noise; lobbers included) and `beam` (aim sway) spells | chosen | *subskill-state*, *spell-classifier*, *projectile-launch-hook* | [R-26](../research/R-26-spell-aim.md) |
+| [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md): inaccuracy of `missile` (launch noise; lobbers included) and `beam` (aim sway) spells | done (prototype; runtime pending) | *subskill-state*, *spell-classifier*, *projectile-launch-hook* | [R-26](../research/R-26-spell-aim.md) |
 | [`heal-xp.md`](heal-xp.md): healing XP (damage-source filter for healing others, combat multipliers, per-target budget, XP without our bonus) | chosen | *subskill-state*, *player-hit-hook*, *effect-curve*, per-target budget | — |
-| [`plugin-foundation.md`](plugin-foundation.md): project, build, ESL records, logging, package | chosen | — | R-21 |
-| [`subskill-state.md`](subskill-state.md): sub-skill registry, values, XP award, co-save | chosen | *plugin-foundation* | — |
-| [`main-skill-level.md`](main-skill-level.md): main level from sub-skills, rust, writes, start conversion | chosen | *subskill-state*, *decay* | [R-27](../research/R-27-new-game-init.md) |
-| [`decay.md`](decay.md): active game time, idle meter, sub-skill decay | chosen | *subskill-state* | — |
-| [`xp-capture.md`](xp-capture.md): vanilla use points → sub-skill XP, context, routing (prototype skills) | chosen | *subskill-state*, *weapon-class*, *spell-classifier*, *main-skill-level* | [R-17](../research/R-17-raw-use-points.md) |
-| [`weapon-class.md`](weapon-class.md): `SPO_WeapClass_*` keywords (KID) → weapon sub-skill | chosen | *plugin-foundation* | R-19, R-20 |
-| [`spell-classifier.md`](spell-classifier.md): spell form, school sub-direction, archetype | chosen | *plugin-foundation* | — |
-| [`status-ui.md`](status-ui.md): status and debug panel (PrismaUI) | chosen | *subskill-state*, *main-skill-level*, *decay* | [frameworks §6](../refs/frameworks.md) |
-| [`mcm-config.md`](mcm-config.md): config files, MCM Debug page | chosen | *plugin-foundation* | — |
+| [`plugin-foundation.md`](plugin-foundation.md): project, build, ESL records, logging, package | done (prototype; runtime pending) | — | R-21 |
+| [`subskill-state.md`](subskill-state.md): sub-skill registry, values, XP award, co-save | done (prototype; runtime pending) | *plugin-foundation* | — |
+| [`main-skill-level.md`](main-skill-level.md): main level from sub-skills, rust, writes, start conversion | done (prototype; runtime pending) | *subskill-state*, *decay* | [R-27](../research/R-27-new-game-init.md) |
+| [`decay.md`](decay.md): active game time, idle meter, sub-skill decay | done (prototype; runtime pending) | *subskill-state* | — |
+| [`xp-capture.md`](xp-capture.md): vanilla use points → sub-skill XP, context, routing (prototype skills) | done (prototype; runtime pending) | *subskill-state*, *weapon-class*, *spell-classifier*, *main-skill-level* | [R-17](../research/R-17-raw-use-points.md) |
+| [`weapon-class.md`](weapon-class.md): `SPO_WeapClass_*` keywords (KID) → weapon sub-skill | done (prototype; runtime pending) | *plugin-foundation* | R-19, R-20 |
+| [`spell-classifier.md`](spell-classifier.md): spell form, school sub-direction, archetype | done (prototype; runtime pending) | *plugin-foundation* | — |
+| [`status-ui.md`](status-ui.md): status and debug panel (PrismaUI) | done (prototype; runtime pending) | *subskill-state*, *main-skill-level*, *decay* | [frameworks §6](../refs/frameworks.md) |
+| [`mcm-config.md`](mcm-config.md): config files, MCM Debug page | done (prototype; runtime pending) | *plugin-foundation* | — |
 
 ## Planned blocks (not written yet)
 

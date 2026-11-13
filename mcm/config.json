@@ -1,0 +1,16 @@
+{
+  "modName": "SkillPractice",
+  "displayName": "Skill Practice",
+  "pages": [{"pageDisplayName":"Debug","cursorFillMode":"topToBottom","content":[
+    {"id":"iXpMult:Debug","text":"XP multiplier","type":"enum","help":"Testing: multiplies raw XP awarded to each sub-skill.","valueOptions":{"sourceType":"ModSettingInt","options":["×1","×10","×100"]}},
+    {"id":"bFixedXP:Debug","text":"Make all XP equal to 100","type":"toggle","help":"Testing: use our hit, block, bash, cast and craft events. Tempering is not covered. XP multiplier still applies.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"iTimeScale:Debug","text":"Forgetting speed","type":"enum","help":"Testing: multiplies active time for decay and rust; sleep and fast travel do not count.","valueOptions":{"sourceType":"ModSettingInt","options":["×1","×10","×100","×1000"]}},
+    {"id":"bNoGrace:Debug","text":"No grace period","type":"toggle","help":"Testing: decay and rust start at full rate immediately.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"bWriteMain:Debug","text":"Write main skills","type":"toggle","help":"Testing: write the computed main level to the player's base actor value.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"bPassthrough:Debug","text":"Vanilla XP passthrough","type":"toggle","help":"Testing comparison only: also call the original vanilla XP function.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"bMissile:Aim","text":"Missile launch noise","type":"toggle","help":"Testing: scatter player missile spells at low form proficiency.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"bBeam:Aim","text":"Beam aim sway","type":"toggle","help":"Testing: smooth aim disturbance while charging or casting a beam spell.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"bXpVerbose:Log","text":"Verbose XP log","type":"toggle","help":"Testing: write one [xp] log line for every sub-skill award.","valueOptions":{"sourceType":"ModSettingBool"}},
+    {"id":"iLevel:Log","text":"Log level","type":"enum","help":"Testing: use Debug when reporting a problem; Trace is very verbose.","valueOptions":{"sourceType":"ModSettingInt","options":["Trace","Debug","Info","Warn"]}}
+  ]}]
+}

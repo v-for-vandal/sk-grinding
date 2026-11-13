@@ -1,6 +1,6 @@
 # Spell classifier: form, school sub-direction, archetype
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (prototype implementation; LoreRim spell dump pending).
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md) (forms, Q-MAG-1; Q-MAG-2
   proposal: costliest effect only), [destruction](../skills/destruction/design.md),
   [restoration](../skills/restoration/design.md); Q-CAT-1 is open (see *Ids*).
@@ -59,6 +59,14 @@ Always `<school>/standard` in prototype 1 (R-7: archetype lists not made yet).
   projectile type in words.
 - Button *Dump player spells*: logs every spell the player knows, for all schools, with casting,
   delivery, projectile type, explosion yes/no, form and sub-direction.
+
+## Prototype notes
+
+- Pure rule precedence is tested in SpellRules.h; Classification.cpp supplies
+  the engine's costliest effect, delivery, casting type and projectile flags.
+- Keyword FormKeys resolve at DataLoaded and after config reload. Missing
+  keywords are logged and skipped. Spell classification is read live rather
+  than cached, so another plugin's post-load form edits are visible.
 
 ## Test
 

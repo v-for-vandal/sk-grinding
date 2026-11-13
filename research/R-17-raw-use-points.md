@@ -1,6 +1,6 @@
 # R-17. Raw skill-use points with `UseMult = 0`
 
-- **Status:** new (runtime; done in milestone 1 of [`plan/prototype-1.md`](../plan/prototype-1.md)).
+- **Status:** instrumented; runtime results pending (prototype 1 build ready).
 - **For:** [`impl/xp-capture.md`](../impl/xp-capture.md); design-v2 Q-XP-9, Q-ML-7 (pace),
   §15.1 (telemetry).
 
@@ -17,6 +17,17 @@ us about the source, is not known yet.
 | 3 | Order of `UseSkill` relative to `TESHitEvent`, the swing / bash animation events, `TESSpellCastEvent`, `ItemCrafted` | timestamps (µs) and a frame counter in the log | whether the pending queue of xp-capture is needed |
 | 4 | Does another loaded plugin already hook this vfunc (Experience, Precision, …)? | at install, log the module that owns the original pointer | hook order / chaining |
 | 5 | Raw points per action (weapon base damage? magicka cost? blocked damage?), for the pace estimate | the same log, 30 min of normal play | `base_mult`, `pace_sub`, `pace_skill` in `config/skills/*.toml` (Q-ML-7, Q-DYN-15) |
+
+## Prepared instrumentation (2026-11-12)
+
+- PlayerCharacter UseSkill vtable slot 0xF7, chained to its previous owner.
+- Log-only AddSkillExperience hook at Address Library 39413/40488. Pinned
+  CommonLib does not declare PlayerSkills::AdvanceSkill, so this is a named
+  substitution with incomplete path coverage, not a guessed address.
+- Player Update slot 0xAD supplies frame numbers; steady-clock microseconds
+  timestamp use, hit/block, animation, spell-cast, craft and menu events.
+- The user scenarios are steps 14–15 of `plan/prototype-1-testing.md`.
+  No runtime result, point interpretation or hook compatibility is confirmed yet.
 
 ## How to decide
 

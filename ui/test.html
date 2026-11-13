@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Panel checks</title></head><body><pre id="result">pending</pre><iframe src="index.html"></iframe><script>
+const result=document.getElementById('result');
+let tries=0;
+function test(){const frame=document.querySelector('iframe'),w=frame.contentWindow,d=w.document;if(!d.querySelector('tbody tr')){if(++tries<100)return setTimeout(test,50);throw Error('Mock did not render');}
+ const check=(value,label)=>{if(!value)throw Error(label);};
+ try{
+  check(d.querySelectorAll('details').length===6,'six main skills');
+  check(d.querySelectorAll('tbody tr').length===76,'76 sub-skills');
+  d.getElementById('filter').value='1h-sword';d.getElementById('filter').dispatchEvent(new Event('input'));
+  check(d.querySelectorAll('tbody tr').length===1,'filter');
+  d.getElementById('filter').value='';d.getElementById('filter').dispatchEvent(new Event('input'));
+  d.querySelector('th').click();check(d.querySelector('tbody tr td').textContent==='parry','descending sort');
+  d.querySelector('[data-tab="debug"]').click();check(!d.getElementById('debug').hidden,'debug tab');
+  const calls=[];w.spAction=text=>calls.push(JSON.parse(text));
+  d.getElementById('give').click();check(calls.at(-1).action==='giveXP','give XP bridge');
+  d.getElementById('reinit').click();check(calls.length===1,'reinit requires confirmation');
+  d.getElementById('sure').checked=true;d.getElementById('reinit').click();check(calls.at(-1).action==='reinitAll','confirmed reinit');
+  d.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));check(calls.at(-1).action==='close','Escape closes');
+  result.textContent='PASS: mock, six skills, 76 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
+ }catch(e){result.textContent='FAIL: '+e.message;result.dataset.status='fail';}
+}
+setTimeout(test,100);
+</script></body></html>
