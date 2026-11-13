@@ -49,6 +49,8 @@ void toggle() {
   visible = true;
   send();
   api->Show(view);
+  // The player reported NPCs moving/attacking while editing the panel. Let
+  // Prisma own the pause together with focus, so Unfocus releases both.
   if (!api->Focus(view, true)) {
     visible = false;
     api->Hide(view);
@@ -65,6 +67,8 @@ class Input : public RE::BSTEventSink<RE::InputEvent*> {
         auto b = e->AsButtonEvent();
         if (!b || b->GetDevice() != RE::INPUT_DEVICE::kKeyboard || !b->IsDown())
           continue;
+        // F7 reached this sink in game, but the DOM Escape handler did not.
+        // Handle Escape here too; keep it scoped to our visible panel.
         if (visible && b->GetIDCode() == 0x01)  // Keyboard scan code: Escape.
           closeUI();
         else if (b->GetIDCode() ==
@@ -117,6 +121,19 @@ sp::json snapshot() {
       model.settings.flag("main", "write_main_skills");
   auto p = RE::PlayerCharacter::GetSingleton();
   if (!p) return j;
+  // Pending new-game skills have no computed baseline yet. Display the live
+  // actor value, including race and Starting Skills bonuses, without freezing
+  // it into our state before character setup has finished.
+  // The new-character test showed Block 15 here versus 20 in the game while
+  // no [init] had occurred: this was a display default, not a lost bonus.
+  for (auto& row : j["skills"]) {
+    if (!row.at("pending").get<bool>()) continue;
+    const auto value = av(row.at("av").get<std::string>());
+    const auto actual = p->AsActorValueOwner()->GetBaseActorValue(value);
+    row["F"] = actual;
+    row["written"] = actual;
+    row["base"] = actual;
+  }
   for (bool left : {false, true}) {
     auto item = p->GetEquippedObject(left);
     sp::json e = {{"hand", left ? "left" : "right"},

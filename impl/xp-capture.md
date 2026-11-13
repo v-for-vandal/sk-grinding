@@ -154,7 +154,20 @@ of the prototype can then be tested in the same game session.
 
 - `PlayerCharacter::UseSkill` slot 0xF7 and player `Update` slot 0xAD chain
   existing vfunc owners. Context logs include steady-clock microseconds and the
-  update counter. Off-main-thread UseSkill calls pass through without changing state.
+  update counter. Since 0.1.4, player UseSkill calls for managed skills received
+  on workers enqueue their actor value, points, FormID and receipt time. The
+  player update consumes them on the main thread, resolves the FormID and runs
+  the same routing/suppression rules as synchronous calls. A published atomic
+  managed-skill mask avoids accessing model state on workers; unmanaged/NPC
+  calls still pass through immediately. Deferred calls log `[use] deferred`.
+  Queue overflow is logged and falls back to the original UseSkill call.
+- Block points with an explicit shield argument also wait until the next player
+  frame, since the observed bash UseSkill precedes TESHitEvent by under 2 ms.
+  Routing chooses the nearer bash/blocked context within 50 ms of receipt;
+  an old bash outside that interval cannot turn a later block into a bash.
+  Without a matching bash, normal shield/parry routing applies. This is a
+  timestamp correlation heuristic; simultaneous incoming/outgoing hits still
+  need runtime testing. Original points are not deduplicated.
 - The pinned CommonLib has no `PlayerSkills::AdvanceSkill` declaration or ID.
   The log-only second hook is `PlayerCharacter::AddSkillExperience`, Address
   Library 39413/40488, using MinHook. It always calls its original. This is a

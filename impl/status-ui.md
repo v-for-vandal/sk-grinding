@@ -72,6 +72,12 @@ Snapshot (JSON, one object):
 
 ## `Sub-skills` tab
 
+For a pending new-game skill, the runtime snapshot shows the player's current
+base actor value as the main level, written level and provisional base, rather
+than the uninitialized model default of 15. The pending flag remains set and
+sub-skill floors are not assigned until initialization. This includes race and
+Starting Skills major/minor bonuses applied before first practice.
+
 Header line: mod state (pending init / running), active game hours, `xp_mult`, `time_scale`,
 `no_grace`, `fixed_xp`, `write_main_skills`.
 

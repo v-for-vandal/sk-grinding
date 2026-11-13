@@ -85,6 +85,7 @@ void load(SKSE::SerializationInterface* in) {
 }
 void revert(SKSE::SerializationInterface*) {
   clearDeferredEvents();
+  resetAim();
   for (auto& sk : model.skills) {
     sk.initialized = false;
     sk.external = 0;
@@ -109,7 +110,9 @@ void readINI(const std::string& path) {
   std::string section, line;
   bool firstLine = true;
   while (std::getline(in, line)) {
-    // MCM Helper writes UTF-8 BOMs; do not lose the first section header.
+    // MCM Helper's user INI started with a UTF-8 BOM before [Log]. Without
+    // stripping it, that header was ignored: Debug/Verbose XP looked enabled
+    // in MCM but never reached the logger. Preserve the user's file as written.
     if (firstLine && line.starts_with("\xEF\xBB\xBF")) line.erase(0, 3);
     firstLine = false;
     auto clean = [](std::string v) {
@@ -221,6 +224,7 @@ void reload() {
                        sub.k);
     }
     resolveForms();
+    publishManagedSkills();
   } catch (const std::exception& e) {
     spdlog::error("[cfg] reload failed; previous configuration retained: {}",
                   e.what());

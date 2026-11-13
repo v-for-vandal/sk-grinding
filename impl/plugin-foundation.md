@@ -106,6 +106,12 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
 
 ## Prototype notes
 
+- 0.1.4 routes worker-thread managed skill awards through the bounded player
+  update queue, delays Block routing for hit context, and changes missile aim
+  to MissileProjectile/GrenadeProjectile first-update hooks. Pure queue tests
+  cover worker production, exactly-once main-thread delivery, overflow, clearing
+  and nested posting. Gameplay results require an in-game retest.
+
 - 0.1.3 load-hang fix: the 0.1.2 minidump shows worker thread 9768 in
   `Events::ProcessEvent -> SKSE::TaskInterface::AddTask`, while the recorded
   main thread is 25572. Moving startup alone did not eliminate recursive

@@ -4,8 +4,11 @@
 #include <regex>
 #include <set>
 #include <stdexcept>
+#include <thread>
 
 #include "Core.h"
+#include "DeferredQueue.h"
+#include "RuntimeMath.h"
 #include "SpellRules.h"
 #include "WeaponClasses.h"
 using namespace sp;
@@ -18,6 +21,57 @@ void near(double a, double b, double tolerance = 1e-5) {
                              std::to_string(a));
 }
 int main(int argc, char** argv) try {
+  // Regression for worker-thread spell XP: producers must not execute awards,
+  // duplicate them, or carry queued callbacks across a cleared load boundary.
+  DeferredQueue deferred;
+  const auto consumer = std::this_thread::get_id();
+  unsigned calls = 0;
+  std::thread producer([&] {
+    for (unsigned i = 0; i < 1000; ++i)
+      check(deferred.post([&] {
+        check(std::this_thread::get_id() == consumer,
+              "main-thread consumption");
+        ++calls;
+      }),
+            "worker event queued");
+  });
+  producer.join();
+  check(calls == 0, "worker did not mutate progress");
+  deferred.drain();
+  check(calls == 1000, "all worker awards delivered exactly once");
+  deferred.drain();
+  check(calls == 1000, "no duplicate awards");
+  deferred.post([&] { ++calls; });
+  deferred.clear();
+  deferred.drain();
+  check(calls == 1000, "revert discards old awards");
+  deferred.post([&] { deferred.post([&] { ++calls; }); });
+  deferred.drain();
+  check(calls == 1000, "posting during drain waits for next batch");
+  deferred.drain();
+  check(calls == 1001, "nested event delivered without deadlock");
+  for (unsigned i = 0; i < 4096; ++i)
+    check(deferred.post([] {}), "queue accepts capacity");
+  check(!deferred.post([] {}), "queue overflow is reported");
+  deferred.clear();
+  // Shield bash previously routed to light-shield before its hit event arrived;
+  // also cover the inverse order and a later ordinary block near an old bash.
+  check(isBashContext(100000, 100700, 0), "bash after use");
+  check(isBashContext(100700, 100000, 0), "bash before use");
+  check(!isBashContext(200000, 100000, 0), "stale bash ignored");
+  check(!isBashContext(100000, 99000, 100100), "closer block wins");
+  check(!isBashContext(100000, 0, 0), "no hit context is not bash");
+  // Missile inaccuracy must rotate the trajectory without changing speed.
+  auto straight = rotateVelocity(0, 100, 0, 0, 0);
+  near(straight[0], 0);
+  near(straight[1], 100);
+  near(straight[2], 0);
+  auto offset = rotateVelocity(0, 100, 0, 0, std::acos(-1.) / 18);
+  near(offset[0], 100 * std::sin(std::acos(-1.) / 18));
+  near(offset[1], 100 * std::cos(std::acos(-1.) / 18));
+  auto tilted = rotateVelocity(20, 80, -40, .2, -.3);
+  near(tilted[0] * tilted[0] + tilted[1] * tilted[1] + tilted[2] * tilted[2],
+       20 * 20 + 80 * 80 + 40 * 40);
   check(argc >= 2, "config path required");
   Model m;
   m.loadConfig(argv[1]);

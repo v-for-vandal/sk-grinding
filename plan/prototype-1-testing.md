@@ -4,6 +4,38 @@ Build: `dist/SkillPractice.zip` (MO2 archive). M0–M6 are implemented; M7
 concept-window XP is excluded. The C++/Papyrus builds, pure tests and browser
 checks pass. **Successful in-game validation is still pending.** Use a separate test save.
 
+## Focused retest for 0.1.4
+
+### 0.1.5: TDM Predictive follow-up
+
+Replace the archive and restart; verify `[boot] SkillPractice 0.1.5` and
+`aim=post-velocity`. In third person with target lock and Missile Aim Mode
+Predictive, compare Firebolt at destruction/missile current 0 and 75, leaving
+`debug_missile_yaw_deg=0`. Expect spread at 0, no added noise at 75. Repeat
+without lock-on to check the original free-aim case. Send the log: the velocity
+chain module and `[aim] post-velocity` record show the handler ordering and
+target retention. TDM Homing is outside this correction and may still undo it.
+
+Replace the MO2 mod from the rebuilt archive and restart. Expect
+`[boot] SkillPractice 0.1.4` and `aim=first-update` in the log. Leave Fixed XP
+off, XP multiplier at 1, Debug logging and Verbose XP on.
+
+1. Use Flames on a living enemy and Healing while injured. Worker Flames
+   `[use]` calls must be followed by `[use] deferred` on the main thread and
+   `[xp]` entries for destruction/flame, fire and standard. Healing must still
+   award restoration/self, help and standard.
+2. Perform separate shield bashes and ordinary blocks. A bash award routes to
+   bash plus half to the shield; a later ordinary block must not inherit bash.
+3. Equip Firebolt, set destruction/missile current to 0 on the test save, fire
+   at a distant wall repeatedly; repeat at 75. Expect `[aim] first-update`
+   and spread at 0, no spread at 75. Compare TDM lock-on on/off if flight is
+   corrected after the initial offset. Check NPC casts remain unchanged.
+4. On a new-game save before first practice, pending main levels must match
+   live game base values, including completed major/minor choices. This panel
+   correction does not initialize sub-skills early.
+
+## Full checklist
+
 Startup hotfix 0.1.1: replace the previous MO2 mod from the rebuilt archive.
 Load hotfix 0.1.3 also replaces recursive SKSE task reposting with a queue
 drained by the player update. Expect `[load] complete`, then
@@ -21,7 +53,7 @@ Reinstall the archive and restart the game; expect `[cfg] log.level` and
 `[cfg] log.xp_verbose` changes, followed by debug entries. Existing test actions
 need not all be repeated: first repeat one qualifying fixed-XP action to check
 that its `[xp]` record is present.
-Expect `[boot] SkillPractice 0.1.1`, `main-task initialization thread=...`,
+Expect `[boot] SkillPractice 0.1.4`, `main-task initialization thread=...`,
 and `[ui] DOM ready thread=...` with the same thread ID. A file-view mock.json
 fetch error must no longer appear. First check that the main menu stays
 responsive before loading a save. The old log captured a loader-thread ID as

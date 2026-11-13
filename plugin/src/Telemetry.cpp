@@ -1,9 +1,12 @@
 #include <MinHook.h>
 
+#include <atomic>
 #include <deque>
 #include <mutex>
 
+#include "DeferredQueue.h"
 #include "Runtime.h"
+#include "RuntimeMath.h"
 namespace runtime {
 std::uint64_t frame = 0;
 DWORD mainThread = 0;
@@ -19,24 +22,22 @@ struct Context {
   std::uint64_t time = 0;
   bool left = false, bash = false;
 };
-Context swing, hit, cast, craft, bashCtx;
-bool loaded = false, telemetryOnly = true;
+Context swing, hit, cast, craft, bashCtx, blockCtx;
+bool loaded = false;
+std::atomic<bool> telemetryOnly{true};
+// Workers must decide whether to intercept without traversing model.skills
+// while the main thread reloads config. Unmanaged skills still pass through.
+std::atomic<std::uint64_t> managedMask{0};
 bool firstLoadedUpdate = false;
 // A task submitted to SKSE can be dispatched on a different thread during load.
 // Never call a thread-checking event sink recursively through that task queue.
-std::mutex eventMutex;
-std::deque<std::function<void()>> eventQueue;
-void enqueueEvent(std::function<void()> event) {
-  std::lock_guard lock(eventMutex);
-  if (eventQueue.size() < 4096) eventQueue.push_back(std::move(event));
-}
-void drainEvents() {
-  std::deque<std::function<void()>> batch;
-  {
-    std::lock_guard lock(eventMutex);
-    batch.swap(eventQueue);
-  }
-  for (auto& event : batch) event();
+// The 0.1.2 hang dump showed ProcessEvent -> AddTask on a worker; finite
+// batches consumed by player Update replace that recursive reposting path.
+sp::DeferredQueue eventQueue;
+bool enqueueEvent(std::function<void()> event) {
+  if (eventQueue.post(std::move(event))) return true;
+  spdlog::warn("[queue] full; deferred event rejected");
+  return false;
 }
 double tickElapsed = 0;
 using UseFn = void (*)(RE::Actor*, RE::ActorValue, float, RE::TESForm*);
@@ -51,8 +52,8 @@ void advance(RE::PlayerCharacter* p, RE::ActorValue value, float points,
   spdlog::debug(
       "[use] path=AddSkillExperience t_us={} frame={} av={} pts={} arg={:08X} "
       "action={}",
-      stamp(), frame, int(value), points, object ? object->GetFormID() : 0,
-      kind);
+      stamp(), GetCurrentThreadId() == mainThread ? frame : 0, int(value),
+      points, object ? object->GetFormID() : 0, kind);
   originalAdvance(p, value, points, object, kind);
 }
 std::string owner(std::uintptr_t address) {
@@ -73,24 +74,15 @@ struct Pending {
   float points;
   RE::FormID arg;
   std::uint64_t time;
+  std::uint64_t frame;
 };
 std::deque<Pending> pending;
 void context(const char* name, const Context& c) {
   spdlog::debug("[ctx] t_us={} frame={} event={} form={:08X} left={} bash={}",
                 stamp(), frame, name, c.form, c.left, c.bash);
 }
-void use(RE::Actor* who, RE::ActorValue av, float points, RE::TESForm* arg) {
-  spdlog::debug(
-      "[use] t_us={} frame={} av={} pts={} arg={:08X} type={} name={} "
-      "thread={}",
-      stamp(), frame, int(av), points, arg ? arg->GetFormID() : 0,
-      arg ? int(arg->GetFormType()) : 0, arg ? arg->GetName() : "",
-      GetCurrentThreadId());
-  if (who != RE::PlayerCharacter::GetSingleton() || telemetryOnly ||
-      GetCurrentThreadId() != mainThread) {
-    originalUse(who, av, points, arg);
-    return;
-  }
+void processUse(RE::Actor* who, RE::ActorValue av, float points,
+                RE::TESForm* arg, std::uint64_t received) {
   auto sk = skill(av);
   if (!sk) {
     originalUse(who, av, points, arg);
@@ -106,30 +98,76 @@ void use(RE::Actor* who, RE::ActorValue av, float points, RE::TESForm* arg) {
     originalUse(who, av, points, arg);
     return;
   }
-  if (std::isfinite(points) && points > 0 &&
-      !model.settings.flag("debug", "fixed_xp")) {
-    if (arg)
-      route(av, points, arg, "use", fresh(bashCtx));
+  if (!model.settings.flag("debug", "fixed_xp")) {
+    if (arg && av != RE::ActorValue::kBlock)
+      route(av, points, arg, "use", false);
     else
-      pending.push_back({av, points, 0, stamp()});
+      pending.push_back(
+          {av, points, arg ? arg->GetFormID() : 0, received, frame});
   }
   if (model.settings.flag("debug", "vanilla_passthrough"))
     originalUse(who, av, points, arg);
 }
+void use(RE::Actor* who, RE::ActorValue av, float points, RE::TESForm* arg) {
+  spdlog::debug(
+      "[use] t_us={} frame={} av={} pts={} arg={:08X} type={} name={} "
+      "thread={}",
+      stamp(), GetCurrentThreadId() == mainThread ? frame : 0, int(av), points,
+      arg ? arg->GetFormID() : 0, arg ? int(arg->GetFormType()) : 0,
+      arg ? arg->GetName() : "", GetCurrentThreadId());
+  const auto index = static_cast<unsigned>(av);
+  if (who != RE::PlayerCharacter::GetSingleton() || telemetryOnly ||
+      index >= 64 || !(managedMask.load() & (std::uint64_t{1} << index))) {
+    originalUse(who, av, points, arg);
+    return;
+  }
+  const auto received = stamp();
+  if (GetCurrentThreadId() != mainThread) {
+    // Flames/Firebolt tests produced positive UseSkill points on workers,
+    // whereas Healing used the main thread. The old pass-through branch lost
+    // those magic awards from our progression. Carry only values/FormID to
+    // the consumer; do not retain the callback's raw form pointer or mutate
+    // skills here. Do not also call originalUse after a successful enqueue:
+    // processUse owns the suppression/passthrough decision exactly once.
+    const auto id = arg ? arg->GetFormID() : 0;
+    const bool queued = enqueueEvent([av, points, id, received] {
+      spdlog::debug(
+          "[use] deferred received_us={} av={} pts={} arg={:08X} thread={}",
+          received, int(av), points, id, GetCurrentThreadId());
+      processUse(RE::PlayerCharacter::GetSingleton(), av, points,
+                 id ? RE::TESForm::LookupByID(id) : nullptr, received);
+    });
+    // On overload, preserve the engine path rather than silently losing XP.
+    if (!queued) originalUse(who, av, points, arg);
+    return;
+  }
+  processUse(who, av, points, arg, received);
+}
 void drain(bool force = false) {
   auto now = stamp();
   for (auto it = pending.begin(); it != pending.end();) {
-    RE::TESForm* form = nullptr;
-    bool bash = fresh(bashCtx);
-    if (it->skill == RE::ActorValue::kSmithing && fresh(craft))
+    RE::TESForm* form = it->arg ? RE::TESForm::LookupByID(it->arg) : nullptr;
+    bool bash = false;
+    if (it->skill == RE::ActorValue::kBlock) {
+      // UseSkill can precede TESHitEvent. Wait until the following player frame
+      // and compare nearby hit contexts, rather than reusing any recent bash.
+      // The shield test logged 5 points before its bash flag arrived, sending
+      // the first award only to light-shield. Even an explicit shield argument
+      // cannot distinguish that bash from an ordinary blocked hit.
+      if (!force && frame <= it->frame) {
+        ++it;
+        continue;
+      }
+      bash = sp::isBashContext(it->time, bashCtx.time, blockCtx.time);
+    } else if (!form && it->skill == RE::ActorValue::kSmithing && fresh(craft))
       form = RE::TESForm::LookupByID(craft.form);
-    else if (it->skill == RE::ActorValue::kDestruction ||
-             it->skill == RE::ActorValue::kRestoration) {
+    else if (!form && (it->skill == RE::ActorValue::kDestruction ||
+                       it->skill == RE::ActorValue::kRestoration)) {
       if (fresh(cast)) {
         auto s = RE::TESForm::LookupByID<RE::SpellItem>(cast.form);
         if (s && classify(s).actorValue == it->skill) form = s;
       }
-    } else if (fresh(hit))
+    } else if (!form && fresh(hit))
       form = RE::TESForm::LookupByID(hit.form);
     if (form || force ||
         now - it->time >=
@@ -155,7 +193,7 @@ void update(RE::PlayerCharacter* player, float dt) {
   }
   ++frame;
   if (GetCurrentThreadId() != mainThread) return;
-  drainEvents();
+  eventQueue.drain();
   if (!loaded) return;
   if (!telemetryOnly) drain();
   auto ui = RE::UI::GetSingleton();
@@ -258,7 +296,8 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
     }
     if (e->target.get() == p &&
         e->flags.any(RE::TESHitEvent::Flag::kHitBlocked)) {
-      context("blocked", {e->source, stamp()});
+      blockCtx = {e->source, stamp()};
+      context("blocked", blockCtx);
       if (!telemetryOnly && model.settings.flag("debug", "fixed_xp"))
         route(RE::ActorValue::kBlock, 0, nullptr, "fixed");
     }
@@ -354,9 +393,14 @@ Events events;
 RE::TESForm* swingWeapon() {
   return fresh(swing) ? RE::TESForm::LookupByID(swing.form) : nullptr;
 }
-void clearDeferredEvents() {
-  std::lock_guard lock(eventMutex);
-  eventQueue.clear();
+void clearDeferredEvents() { eventQueue.clear(); }
+void publishManagedSkills() {
+  std::uint64_t mask = 0;
+  for (const auto& sk : model.skills) {
+    const auto index = static_cast<unsigned>(av(sk.av));
+    if (index < 64) mask |= std::uint64_t{1} << index;
+  }
+  managedMask.store(mask);
 }
 RE::SpellItem* recentSpell(RE::ActorValue value) {
   if (!fresh(cast)) return nullptr;
@@ -364,12 +408,9 @@ RE::SpellItem* recentSpell(RE::ActorValue value) {
   return s && classify(s).actorValue == value ? s : nullptr;
 }
 void resetContext() {
-  {
-    std::lock_guard lock(eventMutex);
-    eventQueue.clear();
-  }
+  eventQueue.clear();
   pending.clear();
-  swing = hit = cast = craft = bashCtx = {};
+  swing = hit = cast = craft = bashCtx = blockCtx = {};
   tickElapsed = 0;
   firstLoadedUpdate = false;
   loaded = true;
