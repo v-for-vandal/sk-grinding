@@ -46,6 +46,21 @@ ORD-RES-01 Restoration Mastery ................ —  (rank 2: Restoration 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree (decided)
+
+Only **ORD-RES-04 Spirit Tutors** is brought back (type A),
+as a **purchasable** perk; the perks after it in Ordinator's tree (ORD-RES-11, -21, -25, -28) are
+not. It hangs from the start node of the LoreRim tree, RES-01 Novice Restoration, which takes the
+place of Ordinator's start node ORD-RES-01. Requirements unchanged: Restoration ≥ 30.
+
+```
+RES-01 Novice Restoration ................ —
+└── ORD-RES-04 Spirit Tutors ............. Restoration 30
+```
+
+How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md); checks before building:
+[R-29](../../research/R-29-restored-ordinator-perks.md) (Restoration).
+
 ### ORD-RES-01 · Restoration Mastery
 
 - **ID:** `014357:Ordinator - Perks of Skyrim.esp` · `ORD_Res00_RestorationMastery_Perk_00` · type: A (Ordinator's own record)
@@ -107,7 +122,8 @@ ORD-RES-01 Restoration Mastery ................ —  (rank 2: Restoration 20)
 - **In game:** Two spirit tutors roam Skyrim. Find them and speak with them to receive a permanent blessing that makes Restoration spells 1% stronger per 20 points of Magicka. Each spirit tutor grants one blessing.
 - **Records:** ability *Spirit Tutors*: Spirit Tutors
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent RES-01 Novice Restoration.
+- **Sub-skill requirements:** none; Restoration ≥ 30 as in Ordinator, `has perk Restoration Mastery (ORD-RES-01)` becomes `has perk Novice Restoration (RES-01)`.
 
 ### ORD-RES-05 · Vigilant
 
@@ -313,6 +329,7 @@ ORD-RES-01 Restoration Mastery ................ —  (rank 2: Restoration 20)
 - **Requires:** Restoration ≥ 80 AND has perk Bastion Ward (ORD-RES-17)
 - **In game:** Casting a spell also raises a ward that increases armor rating by 100 and negates up to 100 points of spell damage and effects.
 - **Records:** ability *Mage Ward*: Ward - Mage (ValueModifier WardPower 100); Shield - Mage (PeakValueModifier DamageResist 100)
+- **How it works:** not a ward spell: a WardPower effect raised by casting any spell, no hand needed, works alongside other spells; no `MagicWard` keyword. Details and open checks: [R-28](../../research/R-28-mage-ward.md).
 - **Proposal (auto):** restoration/ward
 - **Sub-skill requirements:**
 

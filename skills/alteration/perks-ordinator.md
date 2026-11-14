@@ -37,6 +37,23 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree (decided)
+
+Purchasable perks brought back (type A). How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md);
+checks before building: [R-29](../../research/R-29-restored-ordinator-perks.md) (Alteration).
+Sub-skills: [`design.md`](design.md).
+
+```
+ALT-01 Novice Alteration .................... —
+└── ORD-ALT-06 Spellblade ................. Alteration 40, with-magic 75
+    └── ORD-ALT-13 Energy Roil ............ Alteration 70, with-magic 80   (changed: 100 armor, weapon in the other hand)
+        └── ORD-ALT-20 Rend Resistances ... Alteration 90, with-magic 100
+ALT-24 Metamagical Empowerment .............. Alteration 100
+└── ORD-ALT-21 Arcane Thesis .............. Alteration 100, one sub-direction 100 + another 80
+ALT-09 Master Alteration .................... Alteration 100
+└── ORD-ALT-17 Ritualist .................. Alteration 100, two sub-directions 90
+```
+
 ### ORD-ALT-01 · Alteration Mastery
 
 - **ID:** `0148FF:Ordinator - Perks of Skyrim.esp` · `ORD_Alt00_AlterationMastery_Perk_00` · type: A (Ordinator's own record)
@@ -113,7 +130,17 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
 - **In game:** Whenever you cast a spell with one hand, you deal 20% more attack damage for 4 seconds.
 - **Records:** ability *Spellblade*: Spellblade
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **How it works** (LoreRim dump): ability `ORD_Alt_Spellblade_Spell_Ab` (`01B58C`), one script
+  effect `ORD_Alt_Spellblade_Effect_Ab` on the player. The script reacts to a one-handed cast and
+  casts `ORD_Alt_Spellblade_Spell_Proc` (`01B589`, 4 s, effect with `ORD_Alt_Spellblade_Keyword`;
+  the +20 % attack damage comes from that effect's script or from an entry point that checks the
+  keyword, R-29 A1). With Energy Roil it
+  casts `ORD_Alt_EnergyRoil_Spell_Proc` instead, which carries the same Spellblade effect.
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent
+  ALT-01 Novice Alteration.
+- **Sub-skill requirements:** `with-magic >= 75`; Alteration ≥ 40 as in Ordinator;
+  `has perk ORD-ALT-01` → `has perk Novice Alteration (ALT-01)`.
+
 
 ### ORD-ALT-07 · Intuitive Magic
 
@@ -197,7 +224,22 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
 - **In game:** Whenever you cast a spell with one hand, reduces the armor of nearby enemies within 10 feet by 150 points for 4 seconds.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **How it works** (LoreRim dump): the perk has no records of its own; Spellblade's script checks
+  for it. On a one-handed cast it casts `ORD_Alt_EnergyRoil_Spell_Proc` (`01BB32`) on the player:
+  effect 1 `ORD_Alt_EnergyRoil_Effect_Proc` (`01BB30`): PeakValueModifier `DamageResist`,
+  magnitude **150**, area 10 ft, 4 s, condition `IsHostileToActor` (so: hostile actors around the
+  player lose 150 armor); effect 2 is the Spellblade effect (+20 % attack damage, 4 s).
+- **Resolution:** restored to the tree, purchasable, parent ORD-ALT-06 Spellblade (kept). Changes
+  (both possible without a script change, [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md)
+  *Changed effects*):
+  - magnitude of effect 1: 150 → **100**;
+  - only with a **one-handed weapon in the other hand**: a condition on effect 1 only (the
+    Spellblade effect 2 stays), one OR group run on the player: `GetEquippedItemType` Left or Right
+    `== 1 / 2 / 3 / 4` (sword, dagger, axe, mace). The casting hand holds the spell, so any match is
+    the other hand; fists (0), shield, torch, staff, spell do not count;
+  - the perk description (150 points, no weapon rule) must be updated too (R-29 A3).
+- **Sub-skill requirements:** `with-magic >= 80`; Alteration ≥ 70 and `has perk ORD-ALT-06` as in
+  Ordinator.
 
 ### ORD-ALT-14 · The Monarch
 
@@ -239,7 +281,22 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
   - spell magnitude −25% — when movement direction; item/spell: Destruction spell OR Restoration spell AND is in list
   - spell duration −25% — when movement direction; item/spell: Alteration spell OR Conjuration spell OR Illusion spell AND is in list
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Ritual spells:** spells with the vanilla keyword `RitualSpellEffect` (`0806E1:Skyrim.esm`):
+  the master-level spells cast with **both hands at once** (one spell held in both hands, the
+  caster stands still while charging). In Magic Redone these are the `REQ_<School>5_…_Ritual…`
+  spells, e.g. Alteration: Dragonhide, Ash Storm, Control Weather, Titanize, Etherealize, Jump
+  Mountains, Mark and Recall, Paralyzing Storm, Bend Time, Telekinetic Storm, Whirlwind Storm (205
+  magic effects in LoreRim carry the keyword; Apocalypse and Triumvirate add more). The perk's
+  "is in list" is a FormList of these spells.
+- **How it works:** no ability or spell in the LoreRim dump; the perk's entry points only give
+  −25 % magnitude (Destruction, Restoration) or duration (other schools) while moving. What lets
+  the player move while casting is not in the rendered records (an entry point or flag we do not
+  show): R-29 A6.
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent
+  **ALT-09 Master Alteration**.
+- **Sub-skill requirements:** `has perk Master Alteration (ALT-09)` replaces `has perk Geomancer
+  (ALT-17)`; Alteration ≥ 100 (Ordinator 80); `twoOf(alteration/kinetic, alteration/geomancy,
+  alteration/weather, alteration/improve) >= 90`.
 
 ### ORD-ALT-18 · Emergency Teleport
 
@@ -269,7 +326,12 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
 - **In game:** Whenever you attack with a weapon, reduces the magic resistance of nearby enemies within 10 feet by 15% for 4 seconds.
 - **Records:** ability *Rend Resistances*: Rend Resistances
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **How it works** (LoreRim dump): ability `ORD_Alt_RendResistances_Spell_Ab` (`187D2A`), a script
+  effect on the player; on a weapon attack it casts `ORD_Alt_RendResistances_Spell_Proc`
+  (`187D28`): PeakValueModifier `ResistMagic` 15, area 10 ft, 4 s, hostile actors only.
+- **Resolution:** restored to the tree, purchasable, parent ORD-ALT-13 Energy Roil (kept).
+- **Sub-skill requirements:** `with-magic >= 100`; Alteration ≥ 90 and `has perk ORD-ALT-13` as in
+  Ordinator.
 
 ### ORD-ALT-21 · Arcane Thesis
 
@@ -282,4 +344,13 @@ ORD-ALT-01 Alteration Mastery ................. —  (rank 2: Alteration 20)
   - spell duration +40% — when item/spell: Alteration spell OR Conjuration spell OR Illusion spell AND is in list
   - ability *Arcane Thesis*: Arcane Thesis
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **How it works** (LoreRim dump): abilities `ORD_Alt_ArcaneThesis_Spell_Ab` (script effect, on
+  while dual casting) and `…_Spell_AbNew`; the power `ORD_Alt_ArcaneThesis_Spell_Power_Learn`
+  (`09E33D`) masters the spell being dual cast, out of combat only; the perk's own entry points
+  give the mastered spell (a FormList) +20 % magnitude (Destruction, Restoration) or +40 % duration
+  (other schools).
+- **Resolution:** restored to the tree, purchasable, parent **ALT-24 Metamagical Empowerment**.
+- **Sub-skill requirements:** `has perk Metamagical Empowerment (ALT-24)` replaces
+  `ORD-ALT-07 OR ORD-ALT-12`; Alteration ≥ 100; `oneOf(alteration/kinetic, alteration/geomancy, alteration/weather, alteration/improve) >= 100 AND twoOf(…same…) >= 80` (one
+  Alteration sub-direction at 100 and another at 80 or more; `alteration/other`, forms and the
+  archetype do not count).
