@@ -60,7 +60,7 @@ described; check during research.
 
 | ID | Mechanic | Method | Status | Possible fix |
 |---|---|---|---|---|
-| G-N1 | Cross-links | Grind the cheapest/easiest sub-skill (e.g. `dagger`) to raise effective floors of all linked ones (all 1H ×1/2, all 2H ×1/4). | Partial — limited by `floorCap` 75 → linked floor ≤ 37; arguably harmless ("readiness", not skill) | Accept as intended |
+| G-N1 | Cross-links | Grind the cheapest/easiest sub-skill (e.g. `dagger`) to raise effective floors of all linked ones (all 1H ×1/2, all 2H ×1/4). | Partial — linked floor ≤ ½ × own floor of the source ≈ ⅓ × its current (no `floorCap` since 2026-11-14: dagger 200 → linked floors ≈ 66); arguably harmless ("readiness", not skill) | Accept as intended |
 | G-N2 | Zone multipliers | **Rotation exploit:** let sub-skills decay and retrain them in the ×1.5 "recall" zone; if main XP is computed after the zone multiplier, rotating weapons gives more main XP per action than sticking with one. | Solved — the main skill is computed from levels, so retraining returns it to the same value (design §4.4) | — |
 | G-N3 | Multi-sub-skill events | One action feeds several sub-skills (armor type + material; magic form + archetype + sub-direction; weapon + with-shield). If each counts fully towards the main skill, these main skills grow 2–3× faster. | Solved — Q-XP-1 (a): every sub-skill counts, and `k` is normalized per main skill against a reference path (design §4.1, §4.4.5) | — |
 | G-N4 | Armor materials | Rotate armor sets to keep many material sub-skills high (and their perks active). | Partial — decay limits it; only a real problem combined with G-N3 or G-N6 | — |
@@ -79,7 +79,7 @@ described; check during research.
 | G-N17 | Alchemy crafting | "Large XP below floor" — currently can never trigger (Q-ALC-1). If changed to "below potential", decay + mass crafting could farm it. | Open — Q-ALC-1 | DR |
 | G-N18 | Conjuration upkeep | Summons fight something harmless or endless (mudcrab, another summon, essential NPC) to collect "in combat" XP. | Partial — must be in combat | TW + PB on the summon's opponent; XP by damage dealt to valid targets |
 | G-N19 | Speech-thuum | Shout at nothing (cooldown limits the rate). | Partial — cooldown | shout must affect a hostile |
-| G-N20 | Alteration floor rule | Grind main Alteration with cheap buffs (G-V13) → raises floors of all magic sub-skills. | No — inherits G-V13 | fix G-V13; cap via `floorCap` |
+| G-N20 | Alteration floor rule | Grind main Alteration with cheap buffs (G-V13) → raises floors of all magic sub-skills. | No — inherits G-V13 | fix G-V13; bounded by `cAlt × 2 × Alteration` (100 → 40) |
 | G-N21 | Jewelry | Fast-growing `jewelry` from mass-crafted cheap rings → its perks. | Accepted by design — "every smith starts as a jeweller"; main gain capped (0→75 ⇒ Smithing 15→35); limited by Smithing bucket + DR | — |
 | G-N22 | Smithing materials | Craft one cheap item of every material to raise every material sub-skill. | Accepted — breadth is the intended way to grow Smithing; bounded by bucket and per-material fade `T` | — |
 | G-N23 | `bash` (with weapon) | Weapon bash spam on a weak target. | No — same as G-V9 | TW + PB |

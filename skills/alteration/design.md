@@ -30,8 +30,9 @@ rules are checked **in this order**, first match wins. Config:
 
 - The only exception to "no cross-links in magic": the **main Alteration level** raises the
   effective floor of **all magic sub-skills of all schools** (decided, Q-ALT-1):
-  `effectiveFloor(X) = max(…, cAlt × 2 × AlterationLevel)`, `cAlt = 0.2` (config), still capped
-  by `floorCap`: Alteration 100 → floor 40 for every magic sub-skill (decided, Q-ALT-1). The
+  `effectiveFloor(X) = max(…, cAlt × 2 × AlterationLevel)`, `cAlt = 0.2` (config): Alteration
+  100 → floor 40 for every magic sub-skill (decided, Q-ALT-1). It is bounded by the Alteration
+  level itself (own floors have no cap since 2026-11-14). The
   `× 2` maps the main-skill scale (0–100) to the sub-skill scale (0–200).
 - **Q-ALT-2.** Perk changes (Alteration): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:

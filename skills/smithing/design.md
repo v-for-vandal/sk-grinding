@@ -31,6 +31,9 @@
   config table below. The default tier can be derived from the perk the recipe requires (Steel,
   Elven, Advanced, Glass, Ebony, Daedric, Dragon Smithing…).
 - No cross-links within Smithing.
+- **Start split** (design-v2 §4.4.4): materials with `tier > 1` are excluded (`start_split =
+  false`): a starting character has not worked with steel, elven, …, daedric. The main Smithing
+  level at the start is split over `iron`, `leather`, the categories and `jewelry`.
 
 **Conversion into main Smithing** (model §4.4):
 

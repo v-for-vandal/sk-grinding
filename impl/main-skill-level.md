@@ -97,8 +97,31 @@ current = ownFloor = potential = peak = floor;  U = 0
 base = main;  L0_i = floor;  R = 0;  U_main = 0;  n = round(main);  initialized = true
 ```
 
-So the main level does not jump: `X = 0` and `F = base`. Q-ML-9 (which sub-skills get the floor)
-is open; prototype 1 uses its proposal: all non-concept sub-skills.
+So the main level does not jump: `X = 0` and `F = base`. Prototype 1 gives the floor to all
+non-concept sub-skills.
+
+**Design change (2026-11-14, not implemented): split of the main XP** (design-v2 §4.4.4).
+Replaces the mapping above; `[init] floor_per_level`, `floor_zero_at` go away.
+
+```
+X0 = mainXP(start_level → main)                     // [main] curve of the skill file, double
+S  = { i : k_i > 0 and start_split_i }               // start_split: per-sub-skill key, default true
+share = X0 / |S|; solve M_i(L_i) = share by bisection on the M_i table (fractional L)
+  saturation: if M_i(hard_cap) < share → L_i = hard_cap, recompute share over the rest
+current = ownFloor = potential = peak = L_i  (i ∈ S);  0 otherwise
+base = start_level;  L0_i = 0;  R = 0;  U_main = 0;  n = round(main)
+main ≤ start_level → all 0, base = main;  leftover after saturation → base = b with F(b, ΣM) = main
+```
+
+- Check after init: `F` equals `main` within 0.01; log it in the `[init]` block with `|S|` and
+  the levels given.
+- Shared sub-skills (not in `S`): forms `current = ownFloor = potential = peak =
+  max(0, 2 × (m − 15))`, `m` = highest base level among the magic schools (all five, managed or
+  not); archetypes 0. Initialized with the first school that is initialized; *Re-initialize
+  all* redoes them.
+- Existing co-saves keep their `base` / `L0_i` (the formula handles any `L0`); only a new init or
+  *Re-initialize all* uses the split.
+- Unit test: for every skill file and main ∈ {15, 20, 25, 40, 60, 100}, init then `F = main`.
 
 **When:**
 

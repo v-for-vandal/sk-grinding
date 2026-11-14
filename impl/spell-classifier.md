@@ -3,7 +3,8 @@
 - **Status:** done (prototype implementation; LoreRim spell dump pending).
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md) (forms, Q-MAG-1; Q-MAG-2
   proposal: costliest effect only), [destruction](../skills/destruction/design.md),
-  [restoration](../skills/restoration/design.md); Q-CAT-1 is open (see *Ids*).
+  [restoration](../skills/restoration/design.md); shared forms and archetypes (decided 2026-11-14,
+  see *Ids*).
 - **Depends on:** [`plugin-foundation.md`](plugin-foundation.md) (config).
 - **Research:** none; the dump button below checks the rules on the real spell list.
 
@@ -12,11 +13,20 @@
 For a `SpellItem` of a managed school, returns three sub-skill ids: form, sub-direction,
 archetype. Cached per spell.
 
-## Ids (prototype assumption for Q-CAT-1)
+## Ids
 
-One set of forms and one archetype per school: `<school>/<form>`, `<school>/<direction>`,
-`<school>/standard`, `<school>` = `destruction` / `restoration` (the skill of the award). This
-keeps "one parent per sub-skill" and is easy to change later; it is **not** a design decision.
+Prototype 1 (implemented): one set of forms and one archetype per school: `<school>/<form>`,
+`<school>/<direction>`, `<school>/standard`, `<school>` = `destruction` / `restoration` (the
+skill of the award).
+
+**Design change (2026-11-14, not implemented):** forms and archetypes are shared by all schools
+([magic](../skills/magic/design.md)): `form/<form>`, `<school>/<direction>`,
+`archetype/<archetype>` (`archetype/standard`). The classifier itself does not change, only the
+ids it returns. The shared sub-skills move out of `config/skills/destruction.toml` /
+`restoration.toml` into one file of shared sub-skills (`config/skills/shared.toml`: curve,
+decay, no `[main]`, no budget, `k = 0`); the `form` / `archetype` budgets of the school files are
+dropped and the reference paths use sub-directions only. Co-save: old per-school form records
+are dropped at load (prototype saves only; log `[state] dropped`).
 
 ## Form (costliest effect `spell->GetCostliestEffectItem()->baseEffect`)
 

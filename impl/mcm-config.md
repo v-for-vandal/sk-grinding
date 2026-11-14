@@ -59,6 +59,17 @@ of hidden controls still apply.
 | Verbose XP log | toggle | `[Log] bXpVerbose` | `log.xp_verbose` |
 | Log level | enum | `[Log] iLevel` | trace / debug / info / warn → `log.level` |
 
+**Design change (2026-11-14, not implemented): XP scale** (design-v2 §4.2.1). Shown always,
+not only in debug mode (a second page `XP`, or a group above *Debug*):
+
+| Control | Type | INI key | Values → config key |
+|---|---|---|---|
+| Mod-list preset | enum | `[XP] iPreset` | Vanilla / Requiem (default) → `xp.preset` |
+| XP rate: <Skill> (one per managed main skill) | slider 0.1–5, step 0.05, default 1 | `[XP] f<ActorValue>` | `xp.user.<ActorValue>` |
+
+Preset factors live in `config/xp-presets.toml` (`[vanilla]`, `[requiem]`, one key per actor
+value, missing = 1), not in MCM. Log the active preset and factors at load and on change.
+
 Each control has a help text (MCM Helper `help`) saying what it does and that it is for
 testing. Enum values are stored as an index; the DLL maps the index to the value.
 

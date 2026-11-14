@@ -31,6 +31,9 @@ sub-skills it belongs to, and gives them XP. For managed skills the vanilla awar
      conversion now ([`main-skill-level.md`](main-skill-level.md)) and continue; else call the
      original, return;
   4. route (below); call the original only if `debug.vanilla_passthrough`.
+- **Design change (2026-11-14, not implemented):** `raw` also gets `× preset[skill] ×
+  user[skill]` (design-v2 §4.2.1; presets in `config/xp-presets.toml`, MCM in
+  [`mcm-config.md`](mcm-config.md)). Log both factors in the `[xp]` line.
 - Raw XP for every sub-skill of the award: `raw = a_points × base_mult × debug.xp_mult`
   (`base_mult` from the skill file of `a_skill`). Each sub-skill gets the full `raw` (Q-XP-1 (a));
   factors below (bash) are applied on top.
@@ -113,6 +116,10 @@ the fallback of the skill below and log `[ctx] unresolved` at warn level.
 - The healing rules of [`heal-xp.md`](heal-xp.md) (combat multipliers, damage pool, budget) are
   **not** in prototype 1: Restoration gets the vanilla points.
 - Fallback: `<school>/other` and `<school>/standard` (no form).
+- **Design change (2026-11-14, not implemented):** forms and archetypes are shared
+  (`form/<form>`, `archetype/standard`, [`spell-classifier.md`](spell-classifier.md) *Ids*).
+  Rust and `U_main` of the school are still reduced once per award; the shared sub-skills have
+  no main skill, so they touch no `R`.
 
 **Concept sub-skills** (`dual-wield`, `with-shield`, `with-magic`): window rules of
 [weapons](../skills/weapons/design.md) (*Window rules*), milestone 7 of the plan (optional). Until

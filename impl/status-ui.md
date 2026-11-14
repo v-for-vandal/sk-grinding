@@ -105,6 +105,13 @@ colours and sizes are placeholders, CSS variables `--bar-*` in `style.css`):
   them *(verify: hover works in game)*. Re-evaluated after each snapshot, since the bars
   are rebuilt under a still cursor.
 
+- **Design change (2026-11-14, not implemented): pseudo-skill `magic`.** The shared
+  sub-skills (magic forms, archetypes; [magic](../skills/magic/design.md)) get their own block
+  after the schools, title *Magic*, built like a main skill block but with no level and no
+  next-level bar (it is not a skill: nothing to level). Snapshot: one entry in `skills` with
+  `"av": "magic"`, `"pseudo": true`, no `F` / `toNext` / `written` / `R`; the debug table shows
+  no main-skill line for it.
+
 Filter and *Hide untouched* apply here too.
 
 **Debug view** (table, debug mode + checkbox *Debug view*). Header line (debug mode only): mod state (pending init / running), active game hours, `xp_mult`, `time_scale`,

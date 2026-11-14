@@ -5,8 +5,9 @@
 Skeleton: only the school-specific part. Forms (`missile`, `beam`, `flame`, …), archetypes, XP per
 cast and accuracy are common to all schools and live in [`magic/design.md`](../magic/design.md).
 
-**Sub-skills (parent: Restoration):** forms and archetypes as in [magic](../magic/design.md), plus
-the school sub-directions below.
+**Sub-skills (parent: Restoration):** the school sub-directions below. The forms and archetypes are
+**shared** by all schools and have no parent ([magic](../magic/design.md)); a cast of this school
+feeds them too.
 
 **School sub-directions** (decided, Q-RES-1; from the perk tree and Magic Redone keywords, R-8):
 

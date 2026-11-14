@@ -82,9 +82,9 @@ of skills.
 | Term | Meaning |
 |---|---|
 | **Main skill** | One of the 18 vanilla skills (One-Handed, Smithing, …), i.e. the engine actor value. |
-| **Sub-skill** | A new, mod-defined proficiency (e.g. `sword`, `ebony-armor`, `missile`). Each sub-skill belongs to exactly one main skill (its *parent*). |
+| **Sub-skill** | A new, mod-defined proficiency (e.g. `sword`, `ebony-armor`, `missile`). Each sub-skill belongs to exactly one main skill (its *parent*), except **shared** sub-skills. |
 | **Current** | Present level of a sub-skill. Design scale **0–200**, technical cap `hardCap` = 500 (§5.1). Goes up with use, decays without use. Drives sub-skill perks. |
-| **Floor** | "Muscle memory". Current never decays below floor. Has two parts: **own floor** (earned by the sub-skill itself, capped at `floorCap` = 75) and **effective floor** (own floor raised by cross-links, see §6). |
+| **Floor** | "Muscle memory". Current never decays below floor. Has two parts: **own floor** (earned by the sub-skill itself, no cap, grows more slowly than current, §5.4) and **effective floor** (own floor raised by cross-links, see §6). |
 | **Potential** | Best level ever reached, additionally raised by books, trainers and other external sources. Below potential, current grows faster ("recalling"). Invariant: `potential ≥ current`. |
 | **Sub-skill XP** | Experience earned by a sub-skill from a gameplay event. |
 | **Main skill level** | Computed from sub-skill levels (§4.4), not accumulated. Vanilla XP is suppressed; the only source of main-skill growth is sub-skill progress. |
@@ -97,6 +97,7 @@ of skills.
 | **Effect curve** | Shared shape of continuous effects: penalty to 0 at a checkpoint, then a bonus saturating towards a limit (§5.7). |
 | **Effective level** | Level used by a sub-skill's continuous effects: `current × factor`, lowered by context penalties (`with-shield`, `dual-wield`, `with-magic`). Does not affect `current`, perks or the main skill (§5.7). |
 | **Concept sub-skill** | A sub-skill about a way of fighting or casting, not an item (`dual-wield`, `with-shield`, `with-magic`). `k = 0`: no main-skill contribution. |
+| **Shared sub-skill** | A sub-skill with no parent main skill, fed by several main skills: the magic forms and archetypes, fed by every school (decided, §16). Like a concept sub-skill it gives nothing to any main skill; it exists for effects and perks. |
 | **Zone multiplier** | XP multiplier that depends on where current is relative to floor and potential (§5.3). |
 
 ## 4. Core model: experience flow
@@ -134,6 +135,7 @@ of skills.
 ```
 gameplay event
   → determine affected sub-skills and raw XP for each           (per-skill rules, skills/)
+  → mod-list scale: raw × preset[skill] × user[skill]           (§4.2.1)
   → anti-grind modifiers                                       (§11)
   → trainer bonus (if active, ≤ +30%)                          (§10)
   → zone multiplier (×3 / ×1.5 / ×1)                           (§5.3)
@@ -145,6 +147,32 @@ gameplay event
     write it with hysteresis                                    (§4.4)
   → re-evaluate sub-skill perks (with hysteresis)              (§5.6)
 ```
+
+#### 4.2.1 Mod-list XP scale (decided 2026-11-14)
+
+Vanilla use points of several skills are proportional to **damage**: Block 1 per point of raw
+damage blocked, Heavy / Light Armor per point of damage received, the weapon skills by weapon
+damage ([`refs/vanilla-skill-xp.md`](refs/vanilla-skill-xp.md) §3, §7). Requiem, the gameplay
+overhaul of LoreRim, rescales armor and damage (AR in hundreds per piece, cap 800 AR), so the
+same action gives many times the vanilla points: in the first playtest two or three blocks took
+`block` from 20 to 25. Our XP numbers (curves, `pace_sub`, `pace_skill`, budgets) are
+calibrated on the vanilla scale, so raw XP is brought back to it **first**:
+
+- `raw = use points × base_mult × preset[skill] × user[skill]`, before anti-grind, zones, floor,
+  idle meters and rust: everything downstream sees vanilla-scale XP.
+- **Presets** (one per supported mod list / combat overhaul, named after the overhaul, not the
+  list): `Vanilla` (all 1) and `Requiem` (LoreRim and other Requiem lists; default). One factor
+  per main skill in a config file; skills whose points do not depend on damage (magic: magicka
+  cost; crafting; Sneak, …) keep 1 unless measured otherwise.
+- **User factor** per main skill (MCM slider, default 1) on top of the preset, for personal pace.
+- Debug `xp_mult` stays separate (testing only).
+- **Q-XP-10.** Requiem factors per skill. Proposal: measure raw use points per action in the
+  same situations in a vanilla and a LoreRim profile (`[xp]` log, R-17 hook), factor = vanilla /
+  Requiem (e.g. a blocked hit of a bandit of the same level). Placeholder until then: 0.1 for
+  Block, Heavy Armor, Light Armor; 1 for weapons (whether weapon points follow base damage or
+  damage dealt is unconfirmed) and everything else. A per-source factor (blocked damage vs bash)
+  only if one per skill is not enough.
+  - **A:**
 
 ### 4.3 Open questions
 
@@ -288,14 +316,37 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
 #### 4.4.4 Start, external sources, perks, writes
 
 - **Start.** At a new game, and when the mod is added to an existing save, the current main
-  skill levels are converted into **own floors** of all sub-skills of that skill; current and
-  potential start at the floor. The main skill level at that moment is stored as `base`, and the
-  initial sub-skill levels as `L_i^0` (formula in §4.4.1), so the main skill does not jump at
-  conversion and grows only from further practice.
-  - **Mapping (decided, Q-ML-9):** `floor = clamp(2 × (main − 15), 0, floorCap)` (sub-skills use
-    a 0–200 scale). A skill at the default 15 gives 0, so most sub-skills start from 0 and go
-    through the rise (§4.4.1); race bonuses (+5 / +10) give floors 10 / 20, still below
-    `T1 = 25`. Open: which sub-skills get it (Q-ML-9).
+  skill level is converted into sub-skill levels; own floor, current, potential and peak start
+  at that level.
+  - **Split of the main XP (decided 2026-11-14, replaces `floor = 2 × (main − 15)`).** The start
+    state must be what the formula would give if the player had trained these sub-skills from
+    0: `F(start state) = main` with `base = start_level` and `L_i^0 = 0`. The old mapping broke
+    this: main 25 put 9 One-Handed sub-skills at 20, and from 0 those give ≈ 40, not 25 (main 40:
+    9 × 50 → ≈ 113).
+    ```
+    X0  = mainXP(start_level → main)                 // main XP above the start level (15)
+    S   = sub-skills with k > 0 and not start-excluded
+    L_i : M_i(L_i) = X0 / |S|   for i ∈ S            // equal share of main XP, solved per sub-skill
+    L_i = 0                     otherwise
+    ```
+    - Each sub-skill gets an equal share of **main XP**, not an equal level: with different `k`,
+      `T`, `w` the levels differ a little. A sub-skill that saturates before its share
+      (`M_i(hardCap) < share`) gets `hardCap`, and the rest is split over the others.
+    - `main ≤ start_level`: all sub-skills at 0, `base = main`. If everything saturates, the
+      remainder stays in `base` (the level `b` with `F(b, Σ M_i) = main`).
+    - Consequence: many sub-skills → low start levels (One-Handed 25 → 9 sub-skills at ≈ 14;
+      One-Handed 60 → ≈ 28). That is the honest value of the main level spread over all weapons;
+      sub-skills that should not get a share are excluded instead.
+  - **Start exclusion (decided):** a per-sub-skill flag in the skill file (`start_split =
+    false`) keeps it out of the split; it starts at 0. Used for sub-skills a starting character
+    cannot have trained. Smithing: every material with `tier > 1` is excluded (only `iron`,
+    `leather`, the categories and `jewelry` get a share; [smithing](skills/smithing/design.md)).
+    Concept sub-skills are out anyway (`k = 0`).
+  - **Shared sub-skills** (magic forms and archetypes, §16) are not in any skill's split (`k =
+    0`, they move no main level, so the start state stays consistent whatever they get).
+    Decided: **forms** use the old mapping on the best school,
+    `L = max(0, 2 × (max_school main − 15))` (no cap), so a Destruction-50 mage does not start
+    with the worst spell accuracy; **archetypes** start at 0.
 - **External sources.** Quest rewards, `AdvanceSkill`/`IncrementSkill`, Oghma Infinium and
   similar raise **potential of all sub-skills** of that main skill (no cross-links), as in §4.1.
   Through faster "recall" practice this also raises the main skill sooner.
@@ -359,11 +410,6 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
 - **Q-ML-8.** Values of `r_skill` and the grace period per main skill, in levels per active
   game day (decided: crafting slow, weapons and armor faster; active time only).
   - **A:**
-- **Q-ML-9.** Start conversion (§4.4.4; the formula is decided): should all sub-skills of the
-  skill get the start floor, or only "basic" ones (e.g. `iron`, `steel` for Smithing; the weapon
-  types for One-Handed)? Proposal: all non-concept sub-skills (concept sub-skills start at 0).
-  Related: Q-OTH-1.
-  - **A:**
 - **Q-ML-10.** Sub-skills with a low fall `T` (Smithing placeholders: jewelry `T = 15`, iron and
   leather 25, steel 35) have their conversion peak well below `k` with `T1 = 25` (`gn` peak 0.35 /
   0.61 / 0.76). Normalization compensates group-wide `k` (jewelry has its own group), but inside
@@ -376,7 +422,7 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
 
 ### 5.1 Range and XP curve
 
-- **Design scale 0–200.** Perks, effect formulas, `floorCap`, conversion and pacing are
+- **Design scale 0–200.** Perks, effect formulas, `floorRate`, conversion and pacing are
   calibrated against 0–200. 200 is the "design max", the level a dedicated specialist reaches
   late in a long playthrough.
 - **No practical upper limit.** Above 200 the sub-skill keeps growing along the same curve. There
@@ -426,7 +472,7 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
   mid-game installation and uninstallation is still deferred (Q-OTH-1).
 - **Q-DYN-1.** ~~Starting values at new game?~~ Decided: main skill levels are converted into
   own floors of the sub-skills, at a new game and when the mod is added to an existing save
-  (§4.4.4). Mapping: Q-ML-9.
+  (§4.4.4). Mapping: split of the main XP (§4.4.4).
 
 ### 5.3 Zone multipliers (configurable)
 
@@ -444,9 +490,22 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
 
 - Own floor gains XP equal to `floorRate × (XP gained by current)`, `floorRate = 0.3`
   (configurable, per sub-skill override allowed; e.g. `speech-trading` uses a higher rate).
-- Own floor never decreases. Own floor is capped at `floorCap = 75` (configurable).
-- Note: because the XP curve is steep, 30% of the XP gives noticeably **less** than 30% of the
-  level (e.g. current 100 → own floor ≈ 55). That is expected; tune `floorRate` if needed.
+- Own floor never decreases and has **no cap** (decided 2026-11-14; the previous `floorCap = 75`
+  is dropped): it keeps growing with practice, more slowly than current, and stays `≤ current`.
+- How much slower follows from the XP curve. Level from XP on the sub-skill curve
+  `cost(L) = a·L^p + b` (§5.1):
+  ```
+  XP(L) = Σ_{l=0}^{L−1} cost(l) ≈ a·L^(p+1)/(p+1) + b·L
+  L(XP) ≈ ((p+1)·XP / a)^(1/(p+1))                     // b = 0; p = 1.95 → exponent 0.339
+  ```
+  With `b = 0`, a floor that got `floorRate` of the XP of current sits at a **fixed share** of
+  current's level: `ownFloor ≈ floorRate^(1/(p+1)) × current`. `floorRate = 0.3` → ≈ 0.66 ×
+  current (50 → 33, 100 → 66, 200 → 133); 0.5 × current needs `floorRate ≈ 0.13`. With an offset
+  `b > 0` (Smithing-like curves) the share is lower at low levels. This holds in the learning zone
+  (×1); in the ×1.5 / ×3 zones current grows faster than the floor (below).
+- Retraining after decay feeds the floor again (raw XP, any zone), so repeated relearning of the
+  same levels moves the floor towards potential. This is intended ("what you relearned many
+  times sticks") and costs real practice; the floor never passes current.
 - Floor XP is taken from the XP **before** the zone multiplier (decided, Q-DYN-3), so the ×3 / ×1.5
   zones speed up current but not the floor.
 - **Own floor grows in every zone** (decided, Q-DYN-3), at the normal `floorRate`, including while
@@ -847,8 +906,9 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   with a "reload config" button in MCM.
 
 **MCM pages (proposal):**
-1. General — toggles for optional mechanics (summon upkeep, control loss), global multipliers.
-2. Dynamics — zone multipliers, `floorRate`, `floorCap`, grace period, ramp length, hysteresis,
+1. General — toggles for optional mechanics (summon upkeep, control loss), global multipliers,
+   the mod-list XP preset and the per-skill XP factors (§4.2.1).
+2. Dynamics — zone multipliers, `floorRate`, grace period, ramp length, hysteresis,
    window length.
 3. Weapons / Armor / Magic / Other — coefficients of cross-links, slot weights, with-shield
    coefficients, trainer bonus cap, etc.
@@ -1053,20 +1113,19 @@ Researching Lorerim content does not require the game to run, only its **data fi
 | Heavy Armor | heavy-armor, materials, heavy-other | ~10 |
 | Light Armor | light-armor, clothing, materials, light-other | ~10 |
 | Smithing | materials, 6–7 categories incl. jewelry | ~20 |
-| Destruction, Restoration, Alteration, Illusion, Conjuration | forms (~10–15, shared), archetypes (R-7), sub-directions (~4–6 per school), conjuration specials | ~50 |
+| Destruction, Restoration, Alteration, Illusion, Conjuration | sub-directions (~4–6 per school), conjuration specials | ~30 |
+| (shared, no parent) | magic forms (10), magic archetypes (R-7) | ~15 |
 | Enchanting | enchanting-weapons, enchanting-armor, enchanting-other, wands-staffs | 4 |
 | Speech | intimidation, persuasion, trading, thuum | 4 |
 | Alchemy | poisons, potions | 2 |
 | Lockpicking, Pickpocket, Sneak | one each | 3 |
 | **Total** | | **~120–130** |
 
-- **Q-CAT-1.** Forms are shared across schools, but each sub-skill has exactly one parent main
-  skill (§3). Either a form sub-skill exists per school (`destruction/missile`,
-  `restoration/missile`, … — many more sub-skills) or form sub-skills have **no fixed parent**
-  and count towards the school of the spell being cast. The main level is computed from
-  sub-skill levels (§4.4.1), so a shared form would need a per-school part of its level (e.g. its
-  XP tracked per school). Which one? (Same question for archetypes.)
-  - **A:**
+- **Magic forms and archetypes are shared by all schools** (decided 2026-11-14, was Q-CAT-1):
+  one `form/missile`, one `archetype/standard`, …, fed by a cast of any school, instead of one
+  copy per school. They are **shared sub-skills** (§3): no parent main skill, `k = 0`, so a
+  school's main level comes from its sub-directions only. Details and the open alternative:
+  [magic](skills/magic/design.md), Q-MAG-8.
 
 ## 17. Other important questions
 

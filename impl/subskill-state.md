@@ -30,7 +30,7 @@ everything to the SKSE co-save. Player only.
 | Field | Type | Meaning |
 |---|---|---|
 | `current` | `LevelXP` | present level, decays (§5.5) |
-| `ownFloor` | `LevelXP` | grows with practice, never decreases, ≤ `floor_cap` |
+| `ownFloor` | `LevelXP` | grows with practice, never decreases, ≤ `floor_cap` (design: no cap since 2026-11-14, see step 4) |
 | `potential` | `LevelXP` | best level reached (later also books / trainers) |
 | `peak` | `LevelXP` | best level reached by practice; used by rust ([`main-skill-level.md`](main-skill-level.md)) |
 | `idle` | `float` | idle meter `U`, active game hours ([`decay.md`](decay.md)) |
@@ -65,6 +65,8 @@ in prototype 1):
 3. `current += raw × z` (per part, as above).
 4. `ownFloor += floor_rate × raw` (raw XP **before** the zone multiplier, every zone, §5.4);
    clamp to `floor_cap` (as a level: at `floor_cap` progress = 0) and to `≤ current`.
+   **Design change (2026-11-14, not implemented):** no `floor_cap` (design-v2 §5.4); remove the
+   key from `[xp]`, keep only the clamp to `≤ current`.
 5. `potential = max(potential, current)`; `peak = max(peak, current)`.
 6. Idle meter: `U = max(0, U − c_dec × raw)`, `c_dec = 1 / (q × pace_sub)` ([`decay.md`](decay.md)).
 7. Tell the main skill: rust and `U_main` are reduced **once per vanilla award**, not per
