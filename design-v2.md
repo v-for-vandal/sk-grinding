@@ -988,6 +988,8 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-25 | **New:** injecting conditions / values into existing perks from the DLL: CommonLib fields, gating of entry points and abilities, perks menu display, NPC exception, old saves. Details: [`research/R-25-perk-condition-injection.md`](research/R-25-perk-condition-injection.md) |
 | R-26 | **New:** spell aim: launch noise through `Projectile::Launch` (missile, lobber), aim sway for beams, TDM / SmoothCam interaction, how Requiem sways a bow without stamina. Details: [`research/R-26-spell-aim.md`](research/R-26-spell-aim.md) |
 | R-27 | **New:** when to run the start conversion on a new game in LoreRim (Alternate Perspective, Norden Starting Skills, SSL). Details: [`research/R-27-new-game-init.md`](research/R-27-new-game-init.md) |
+| R-28 | **New:** how Ordinator Mage Ward and engine wards work (WardPower, MagicWard keyword, ward XP). Details: [`research/R-28-mage-ward.md`](research/R-28-mage-ward.md) |
+| R-29 | **New:** Ordinator perks restored to LoreRim trees: records and scripts in LoreRim's Ordinator esp, runtime tree nodes, Smithing / Restoration / Alteration checks. Details: [`research/R-29-restored-ordinator-perks.md`](research/R-29-restored-ordinator-perks.md) |
 
 Original task list:
 

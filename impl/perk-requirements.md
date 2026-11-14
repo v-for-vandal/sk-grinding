@@ -75,7 +75,11 @@ Table per perk (perk FormKey or EditorID):
 - `requires_add`: requirement formula (→ one global);
 - `requires_replace`: `Block >= 75` → `Block >= 50` / drop;
 - `effects_gated`: true / false (Q-DYN-11; default true from the global setting);
-- `magnitudes`: entry point or effect → new value.
+- `magnitudes`: entry point or effect → new value;
+- for restored perks ([`perk-tree-nodes.md`](perk-tree-nodes.md)): `requires_replace` also swaps a
+  `HasPerk` item (Ordinator parent → LoreRim parent); `gated_spells` (spells cast by the perk's
+  scripts that get the gating condition); `effect_conditions_add` (extra conditions on a spell
+  effect).
 
 Global settings: `hysteresis` (§5.6), default `effects_gated` (true).
 

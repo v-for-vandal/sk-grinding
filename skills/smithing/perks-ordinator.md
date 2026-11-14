@@ -29,6 +29,31 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree (decided)
+
+The Dwarven Autocannon chain (ORD-SMI-02 and everything after it) is brought back as **purchasable**
+perks (type A). How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md); checks before
+building: [R-29](../../research/R-29-restored-ordinator-perks.md) (Smithing).
+ORD-SMI-02 hangs from **SMI-04 Dwarven Smithing** (the theme fits); the rest keeps Ordinator's
+parent links. `has perk Smithing Mastery (ORD-SMI-01)` becomes `has perk Dwarven Smithing (SMI-04)`
+(ORD-SMI-01 is not restored).
+
+Levels: ORD-SMI-02 rank 1 is set by hand; every other perk and rank gets
+Smithing = Ordinator's Smithing − 20 and `dwarven` = Ordinator's Smithing + 20.
+
+```
+SMI-04 Dwarven Smithing .................. Smithing 30 (book)
+└── ORD-SMI-02 Dwarven Autocannon ...... Smithing 20, dwarven 40   (rank 2: Smithing 30, dwarven 70)
+    ├── ORD-SMI-05 Electrobolt ......... Smithing 20, dwarven 60   (rank 2: Smithing 50, dwarven 90)
+    │   ├── ORD-SMI-11 Firing Line ..... Smithing 50, dwarven 90
+    │   └── ORD-SMI-12 Spin Up ......... Smithing 60, dwarven 100
+    └── ORD-SMI-08 Remote Control ...... Smithing 30, dwarven 70
+```
+
+SMI-04 itself is granted by a book (its own condition says Smithing ≥ 30), so in practice the chain
+opens when the player has read *The Art of Dwarven Blacksmithing*; the `Smithing ≥ 20` of the rank 1
+matters only if the book can be read below 30 (R-29 check S4).
+
 ### ORD-SMI-01 · Smithing Mastery
 
 - **ID:** `0566ED:Ordinator - Perks of Skyrim.esp` · `ORD_Smh00_SmithingMasteryNew_Perk_00_OrdASISExclude` · type: A (Ordinator's own record)
@@ -66,7 +91,8 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
   - spell magnitude +33% — when item/spell: ORD_Smh_DwarvenAutocannon_Keyword_Proc
   - spell duration +100% — when item/spell: ORD_Smh_DwarvenAutocannon_Keyword
 - **Proposal (auto):** smithing material: dwarven
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent SMI-04 Dwarven Smithing.
+- **Sub-skill requirements:** rank 1: Smithing ≥ 20 AND dwarven ≥ 40; rank 2: Smithing ≥ 30 AND dwarven ≥ 70 (Ordinator 50); `has perk ORD-SMI-01` → `has perk SMI-04`.
 
 ### ORD-SMI-03 · Advanced Workshop
 
@@ -111,7 +137,8 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
 - **In game:** Every fifth Dwarven Autocannon shot is an electromagnetic blast that moves slower than a regular shell but deals shock damage to Health and Magicka equal to 240% of your Smithing skill level.
 - **Records:** spell magnitude +200% — when item/spell: ORD_Smh_Electrobolt_Keyword
 - **Proposal (auto):** smithing material: dwarven
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree, purchasable, parent ORD-SMI-02.
+- **Sub-skill requirements:** rank 1: Smithing ≥ 20 AND dwarven ≥ 60 (Ordinator 40); rank 2: Smithing ≥ 50 AND dwarven ≥ 90 (Ordinator 70).
 
 ### ORD-SMI-06 · Recycle Materials
 
@@ -147,7 +174,8 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
 - **In game:** Your Dwarven Autocannon now fires regardless of the distance between it and you.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** smithing material: dwarven
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree, purchasable, parent ORD-SMI-02.
+- **Sub-skill requirements:** Smithing ≥ 30 AND dwarven ≥ 70 (Ordinator 50).
 
 ### ORD-SMI-09 · Sandstone Sheath
 
@@ -183,7 +211,8 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
 - **In game:** Your Dwarven Autocannon now deploys two cannons side by side.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** smithing material: dwarven
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree, purchasable, parent ORD-SMI-05.
+- **Sub-skill requirements:** Smithing ≥ 50 AND dwarven ≥ 90 (Ordinator 70).
 
 ### ORD-SMI-12 · Spin Up
 
@@ -193,7 +222,8 @@ ORD-SMI-01 Smithing Mastery ................... —  (rank 2: Smithing 20)
 - **In game:** Your Dwarven Autocannon gradually shoots faster over time, gaining 2% firing speed per shot, up to 200%.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** smithing material: dwarven
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree, purchasable, parent ORD-SMI-05.
+- **Sub-skill requirements:** Smithing ≥ 60 AND dwarven ≥ 100 (Ordinator 80).
 
 ### ORD-SMI-13 · Fuel the Inferno
 

@@ -46,8 +46,10 @@ Check in this order; the first rule that applies wins:
 
 From [`config/magic-directions.toml`](../config/magic-directions.toml): the keywords of the
 costliest effect (MGEF `HasKeyword`), rules in file order, first match wins; no match →
-`<school>/other`. Keywords resolved by FormKey at `kDataLoaded`; a keyword that does not resolve
-is logged and skipped.
+`<school>/other`. A rule may also list `effects` (MGEF FormKeys): it matches when the costliest
+effect is one of them (used for Alteration's Earth Cloak, whose keywords point elsewhere). Keywords
+and effects resolved by FormKey at `kDataLoaded`; one that does not resolve is logged and skipped.
+Alteration is not in prototype 1; its rules are in the file already.
 
 ## Archetype
 

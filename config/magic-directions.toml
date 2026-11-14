@@ -3,6 +3,8 @@
 # Rules are checked in order; the first rule with any matching keyword wins; no match -> <school>/other.
 # Destruction list: proposal of skills/destruction/design.md (Q-DES-1 open).
 # Restoration list: decided, skills/restoration/design.md (Q-RES-1).
+# Alteration list: decided, skills/alteration/design.md (order matters: weather, geomancy, kinetic, improve).
+# A rule may also list `effects` (MGEF FormKeys): the costliest effect is that MGEF -> the rule matches.
 
 [[destruction]]
 subskill = "destruction/blood"
@@ -48,3 +50,27 @@ keywords = ["Skyrim.esm|0x01CEB0",                   # MagicRestoreHealth
             "Requiem - Magic Redone.esp|0x005FBF",   # Nox_KW_Restoration_Cure
             "Requiem - Magic Redone.esp|0x006204",   # Nox_KW_Restoration_ResistMagic
             "Requiem - Magic Redone.esp|0x005D05"]   # Nox_KW_Restoration_FortifyAttributes
+
+[[alteration]]
+subskill = "alteration/weather"
+keywords = ["Requiem - Magic Redone.esp|0x005F3B",   # Nox_KW_Alteration_Wind
+            "Requiem - Magic Redone.esp|0x006014"]   # Nox_KW_Alteration_Perk_WeatherMagic
+[[alteration]]
+subskill = "alteration/geomancy"
+effects  = ["Requiem - Magic Redone.esp|0x005FC4"]   # REQ_Effect_Alteration3_Physical_CloakSelf (Earth Cloak)
+keywords = ["Requiem - Magic Redone.esp|0x005F94",   # Nox_KW_Physical_005
+            "Requiem - Magic Redone.esp|0x005F95",   # Nox_KW_Physical_010
+            "Requiem - Magic Redone.esp|0x005F96",   # Nox_KW_Physical_015
+            "Requiem - Magic Redone.esp|0x005F97",   # Nox_KW_Physical_020
+            "Requiem - Magic Redone.esp|0x005F98"]   # Nox_KW_Physical_025
+[[alteration]]
+subskill = "alteration/kinetic"
+keywords = ["Requiem - Magic Redone.esp|0x005C64",   # Nox_KW_Alteration_Telekinetic
+            "Requiem - Magic Redone.esp|0x006013",   # Nox_KW_Alteration_Perk_Kinetomancy
+            "Skyrim.esm|0x07F404"]                   # MagicTelekinesis
+[[alteration]]
+subskill = "alteration/improve"
+keywords = ["Skyrim.esm|0x01EA72",                   # MagicArmorSpell
+            "Requiem - Magic Redone.esp|0x005DAB",   # Nox_KW_Alteration_Transmutation
+            "Requiem - Magic Redone.esp|0x000851",   # Nox_KW_Alteration_Size
+            "Requiem - Magic Redone.esp|0x0061D3"]   # Nox_KW_Alteration_TransmuteDisintegration

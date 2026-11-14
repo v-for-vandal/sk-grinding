@@ -32,6 +32,7 @@ blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](
 |---|---|---|---|
 | [`block-stamina-cost.md`](block-stamina-cost.md): block stamina cost scaled by the shield / parry sub-skill | proposed | *player-hit-hook*, *subskill-state*, *effect-curve* | [R-23](../research/R-23-block-stamina.md) |
 | [`perk-requirements.md`](perk-requirements.md): sub-skill requirements on existing perks (purchase and effects), value edits | chosen | *subskill-state* | [R-25](../research/R-25-perk-condition-injection.md) |
+| [`perk-tree-nodes.md`](perk-tree-nodes.md): restored Ordinator perks as new nodes in LoreRim trees (nodes, conditions, changed effects) | proposed | *perk-requirements*, *plugin-foundation* | [R-29](../research/R-29-restored-ordinator-perks.md) |
 | [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md): inaccuracy of `missile` (launch noise; lobbers included) and `beam` (aim sway) spells | chosen | *subskill-state*, *spell-classifier*, *projectile-launch-hook* | [R-26](../research/R-26-spell-aim.md) |
 | [`heal-xp.md`](heal-xp.md): healing XP (damage-source filter for healing others, combat multipliers, per-target budget, XP without our bonus) | chosen | *subskill-state*, *player-hit-hook*, *effect-curve*, per-target budget | — |
 | [`plugin-foundation.md`](plugin-foundation.md): project, build, ESL records, logging, package | chosen | — | R-21 |
