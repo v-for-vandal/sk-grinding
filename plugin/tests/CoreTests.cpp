@@ -3,6 +3,7 @@
 #include <iostream>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 
 #include "Core.h"
@@ -55,6 +56,42 @@ int main(int argc, char** argv) try {
   for (auto& row : weaponClasses)
     check(names.contains(std::string(row.keyword)),
           "KID keyword table mismatch");
+  // WeaponClasses.h index i is the keyword with FormID 0x800 + i in the ESP.
+  std::ifstream generated(std::filesystem::path(argv[1]).parent_path() /
+                          "tools/esp-gen/keywords.json");
+  json esp;
+  generated >> esp;
+  check(esp.size() == weaponClasses.size(), "esp keyword count");
+  for (size_t i = 0; i < weaponClasses.size(); ++i) {
+    check(esp[i].at("editorID") == std::string(weaponClasses[i].keyword),
+          "WeaponClasses.h order differs from tools/esp-gen/keywords.json");
+    check(std::stoul(esp[i].at("localID").get<std::string>(), nullptr, 16) ==
+              0x800 + i,
+          "keyword FormID differs from 0x800 + index");
+  }
+  {
+    // A key missing in the user's SkillPractice.toml comes from the compiled
+    // defaults (runtime code reads every key with .at()).
+    auto dir = std::filesystem::temp_directory_path() / "sp-config-test";
+    std::filesystem::remove_all(dir);
+    std::filesystem::copy(argv[1], dir,
+                          std::filesystem::copy_options::recursive);
+    std::ifstream in(dir / "SkillPractice.toml");
+    std::string text((std::istreambuf_iterator<char>(in)), {}), line, cut;
+    in.close();
+    std::istringstream lines(text);
+    while (std::getline(lines, line))
+      if (!line.starts_with("context_window_ms")) cut += line + "\n";
+    std::ofstream(dir / "SkillPractice.toml") << cut;
+    Model partial;
+    partial.loadConfig(dir.string());
+    near(partial.settings.get("xp", "context_window_ms"),
+         m.settings.get("xp", "context_window_ms"));
+    check(partial.settings.values["configWarnings"].dump().find(
+              "xp.context_window_ms") != std::string::npos,
+          "missing key warning");
+    std::filesystem::remove_all(dir);
+  }
   SpellShape shape;
   using D = SpellShape::Delivery;
   shape.missile = true;

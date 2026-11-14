@@ -1,4 +1,4 @@
-﻿#include "PrismaUI_API.h"
+#include "PrismaUI_API.h"
 #include "Runtime.h"
 #include "WeaponClasses.h"
 namespace runtime {

@@ -12,7 +12,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
   spdlog::set_pattern("[%H:%M:%S.%e] [%l] %v");
   spdlog::flush_on(spdlog::level::warn);
   spdlog::flush_every(std::chrono::seconds(1));
-  spdlog::info("[boot] SkillPractice 0.1.3 runtime={}",
+  spdlog::info("[boot] SkillPractice 0.1.4 runtime={}",
                skse->RuntimeVersion().string());
   if (skse->RuntimeVersion() != REL::Version{1, 6, 1170, 0}) {
     spdlog::critical("[boot] prototype supports only runtime 1.6.1170");

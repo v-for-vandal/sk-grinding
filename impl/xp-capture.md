@@ -94,7 +94,7 @@ the fallback of the skill below and log `[ctx] unresolved` at warn level.
   class parent, bow → `bow-smithing`, crossbow → `crossbow-smithing`; ammo: arrow →
   `bow-smithing`, bolt → `crossbow-smithing`; armor: `heavy-armor-smithing` /
   `light-armor-smithing` by armor type, clothing → `clothing-smithing`; anything else: no
-  category.
+  category. Material keywords are read from weapons, armor and ammo (ammo since 0.1.4).
 - **Jewelry:** an armor item in the ring, amulet or circlet slot (biped slots 36, 35, 42) that is
   clothing (not light / heavy armor) → only `jewelry`, no material, no category (Q-SMI-7).
 - Prototype simplification: both sub-skills get `raw` (the vanilla points, i.e. LoreRim's
@@ -154,7 +154,11 @@ of the prototype can then be tested in the same game session.
 
 - `PlayerCharacter::UseSkill` slot 0xF7 and player `Update` slot 0xAD chain
   existing vfunc owners. Context logs include steady-clock microseconds and the
-  update counter. Off-main-thread UseSkill calls pass through without changing state.
+  update counter. A managed-skill UseSkill call on a worker thread is suppressed
+  and replayed on the main thread by the next player update (same FIFO as the
+  deferred context events); unmanaged skills still pass through at once. Before
+  0.1.4 such calls passed through, which leaked vanilla XP (seen as an external
+  change of the main skill).
 - The pinned CommonLib has no `PlayerSkills::AdvanceSkill` declaration or ID.
   The log-only second hook is `PlayerCharacter::AddSkillExperience`, Address
   Library 39413/40488, using MinHook. It always calls its original. This is a

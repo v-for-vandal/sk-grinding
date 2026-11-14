@@ -1,4 +1,4 @@
-﻿#include <unordered_map>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "Runtime.h"
@@ -9,6 +9,9 @@ namespace {
 std::array<RE::BGSKeyword*, 22> keywords{};
 std::unordered_map<RE::FormID, std::string> weapons;
 std::unordered_map<std::string, RE::BGSKeyword*> rules;
+// Per-spell result (spell-classifier.md: cached per spell); main thread only,
+// cleared on every resolveForms (config reload).
+std::unordered_map<RE::FormID, Classification> spells;
 RE::TESRace *werewolf = nullptr, *vampireLord = nullptr;
 RE::BGSKeyword *smelter = nullptr, *tanning = nullptr;
 RE::BGSKeyword* keyword(const std::string& key) {
@@ -20,6 +23,7 @@ bool has(RE::TESForm* item, RE::BGSKeyword* kw) {
   if (auto w = item->As<RE::TESObjectWEAP>()) return w->HasKeyword(kw);
   if (auto a = item->As<RE::TESObjectARMO>()) return a->HasKeyword(kw);
   if (auto e = item->As<RE::EffectSetting>()) return e->HasKeyword(kw);
+  if (auto m = item->As<RE::TESAmmo>()) return m->HasKeyword(kw);
   return false;
 }
 std::string school(RE::ActorValue av) {
@@ -31,6 +35,7 @@ std::string school(RE::ActorValue av) {
 void resolveForms() {
   weapons.clear();
   rules.clear();
+  spells.clear();
   auto dh = RE::TESDataHandler::GetSingleton();
   werewolf = dh->LookupForm<RE::TESRace>(0xCDD84, "Skyrim.esm");
   vampireLord = dh->LookupForm<RE::TESRace>(0x283A, "Dawnguard.esm");
@@ -114,9 +119,15 @@ std::string weaponKeyword(RE::TESObjectWEAP* w) {
       return std::string(sp::weaponClasses[i].keyword);
   return "fallback";
 }
+Classification classifyUncached(RE::SpellItem* spell);
 Classification classify(RE::SpellItem* spell) {
+  if (!spell) return {};
+  if (auto it = spells.find(spell->GetFormID()); it != spells.end())
+    return it->second;
+  return spells[spell->GetFormID()] = classifyUncached(spell);
+}
+Classification classifyUncached(RE::SpellItem* spell) {
   Classification c;
-  if (!spell) return c;
   auto e = spell->GetCostliestEffectItem();
   auto m = e ? e->baseEffect : nullptr;
   if (!m) return c;

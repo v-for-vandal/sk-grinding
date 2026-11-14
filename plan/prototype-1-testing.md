@@ -1,5 +1,8 @@
 ﻿# Prototype 1: in-game checklist
 
+0.1.4 (review fixes, built blind): build and check first as described in
+[`prototype-1-review.md`](prototype-1-review.md).
+
 Build: `dist/SkillPractice.zip` (MO2 archive). M0–M6 are implemented; M7
 concept-window XP is excluded. The C++/Papyrus builds, pure tests and browser
 checks pass. **Successful in-game validation is still pending.** Use a separate test save.

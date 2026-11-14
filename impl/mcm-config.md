@@ -68,6 +68,12 @@ testing. Enum values are stored as an index; the DLL maps the index to the value
   with zero warnings and errors against the MCM Helper public SDK.
 - Default INI values load first, then the MO2-visible user INI; enum indices
   are range checked. The final log level and all changes are logged.
+- Closing the journal re-reads only the two MCM INI files (0.1.4); the TOML files are re-read
+  at load, new game and by *Reload config*.
+- A key missing in the user's `SkillPractice.toml` is taken from the compiled copy and logged
+  as a `[cfg]` warning (runtime code reads every key with `.at()`, which would throw inside a
+  hook). Rows of `smithing-materials.toml` and the Destruction / Restoration rows of
+  `magic-directions.toml` are checked at load.
 - First-load TOML failures use compiled copies of the repository TOML files.
   Reload failures retain the previous complete configuration. Pure tests verify
   compiled defaults match repository files. Duplicate sub-skill entries are

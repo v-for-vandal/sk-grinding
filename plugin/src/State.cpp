@@ -8,6 +8,7 @@ namespace {
 constexpr std::uint32_t subsTag = 0x53554253, mainTag = 0x4D41494E,
                         timeTag = 0x54494D45, statTag = 0x53544154;
 bool restored = false, failedSave = false;
+std::atomic<std::uint64_t> managedMask{0};
 void ensureMCM() {
   auto q = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(
       0x816, "SkillPractice.esp");
@@ -186,6 +187,17 @@ sp::Skill* skill(RE::ActorValue value) {
     if (av(sk.av) == value) return &sk;
   return nullptr;
 }
+bool managed(RE::ActorValue value) {
+  auto i = int(value);
+  return i >= 0 && i < 64 &&
+         (managedMask.load(std::memory_order_acquire) >> i & 1);
+}
+void reloadINI() {
+  readINI("Data/MCM/Config/SkillPractice/settings.ini");
+  readINI("Data/MCM/Settings/SkillPractice.ini");
+  auto level = model.settings.values["log"]["level"].get<std::string>();
+  spdlog::set_level(spdlog::level::from_str(level));
+}
 void reload() {
   try {
     try {
@@ -199,10 +211,10 @@ void reload() {
     }
     for (auto& warning : model.settings.values["configWarnings"])
       spdlog::warn("[cfg] {}", warning.get<std::string>());
-    readINI("Data/MCM/Config/SkillPractice/settings.ini");
-    readINI("Data/MCM/Settings/SkillPractice.ini");
-    auto level = model.settings.values["log"]["level"].get<std::string>();
-    spdlog::set_level(spdlog::level::from_str(level));
+    std::uint64_t mask = 0;
+    for (auto& sk : model.skills) mask |= std::uint64_t{1} << int(av(sk.av));
+    managedMask.store(mask, std::memory_order_release);
+    reloadINI();
     for (auto& [group, values] : model.settings.values.items())
       for (auto& [key, value] : values.items())
         spdlog::debug("[cfg] {}.{}={}", group, key, value.dump());
@@ -232,8 +244,10 @@ bool ready(sp::Skill& sk) {
     if (!model.raceClosed) return false;
     auto p = RE::PlayerCharacter::GetSingleton();
     model.initialize(sk, p->AsActorValueOwner()->GetBaseActorValue(av(sk.av)));
+    double floor = 0;
+    for (auto& s : sk.subs) floor = std::max(floor, s.initial);
     spdlog::info("[init] skill={} base={} floor={} count={}", sk.av, sk.base,
-                 sk.subs.empty() ? 0 : sk.subs[0].initial, sk.subs.size());
+                 floor, sk.subs.size());
   }
   model.pendingInit = std::any_of(model.skills.begin(), model.skills.end(),
                                   [](auto& s) { return !s.initialized; });

@@ -53,6 +53,8 @@ is logged and skipped.
 
 Always `<school>/standard` in prototype 1 (R-7: archetype lists not made yet).
 
+Results are cached per spell FormID (main thread), cleared on every config reload.
+
 ## Debug
 
 - The debug panel shows, per hand, the equipped spell with its form, sub-direction and the
