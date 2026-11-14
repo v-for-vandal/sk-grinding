@@ -121,6 +121,10 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
 
 ## Prototype notes
 
+- UI simulator ([`tools/ui-sim/`](../tools/ui-sim/README.md)): the panel in a browser backed by
+  `PracticeSim` (the real `PracticeCore` model, no game), with simulated player actions, time,
+  settings and an aim-formula view. For panel work and balance; not a game check.
+
 - 0.1.1: mock fetching is restricted to HTTP(S) browser previews. In PrismaUI's
   file view, the native spAction binding may arrive after app.js executes; that
   interval must not start mock mode. File-startup regression checks this case.

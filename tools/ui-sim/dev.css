@@ -1,0 +1,20 @@
+/* UI simulator only (tools/ui-sim): not part of the mod's view. */
+body.sim { background: #2b2f2a; margin-right: calc(380px + 2vw); min-height: 100vh; }
+#sim-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 380px; overflow: auto;
+  background: #10151b; border-left: 2px solid #c7b98f; padding: 12px 14px; font-size: 14px;
+}
+#sim-panel h2 { margin: 0 0 4px; color: #f6d778; }
+#sim-panel h3 { margin: 14px 0 6px; font-size: 15px; color: #c7b98f; }
+#sim-panel button, #sim-panel input, #sim-panel select { padding: 4px 8px; font-size: 13px; }
+#sim-panel input[type=number] { width: 72px; }
+.sim-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.sim-group > span { display: block; margin-top: 6px; color: #9aa3ad; font-size: 12px; }
+.sim-note { color: #9aa3ad; font-size: 12px; margin: 4px 0; }
+.sim-error { color: #ff8a7a; }
+#sim-aim { display: block; max-width: 100%; border: 1px solid #454c54; margin-top: 6px; }
+#sim-log { font: 12px ui-monospace, monospace; color: #bcb7aa; }
+@media (max-width: 900px) {
+  body.sim { margin-right: 4vw; }
+  #sim-panel { position: static; width: auto; border-left: 0; border-top: 2px solid #c7b98f; }
+}

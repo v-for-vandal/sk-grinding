@@ -247,12 +247,30 @@ void route(RE::ActorValue value, float points, RE::TESForm* source,
   raw *= model.settings.get("debug", "xp_mult");
   auto p = RE::PlayerCharacter::GetSingleton();
   auto left = p->GetEquippedObject(true), right = p->GetEquippedObject(false);
+  // Each sub-skill gets its XP; rust of each parent skill falls once below.
+  std::vector<sp::Skill*> parents;
   auto give = [&](std::string_view id, double scale = 1.) {
     award(id, raw * scale, origin,
           origin == "fixed"
               ? model.settings.get("debug", "fixed_xp_value") * scale
-              : points * scale);
+              : points * scale,
+          false);
+    sp::Skill* parent = nullptr;
+    if (model.find(std::string(id), &parent) && parent &&
+        std::find(parents.begin(), parents.end(), parent) == parents.end())
+      parents.push_back(parent);
   };
+  struct Recover {
+    std::vector<sp::Skill*>& parents;
+    double raw;
+    bool done = false;
+    void run() {
+      if (done) return;
+      done = true;
+      for (auto parent : parents) model.recover(*parent, raw);
+    }
+    ~Recover() { run(); }  // early returns below (the next tick synchronizes)
+  } recoverOnce{parents, raw};
   if (value == RE::ActorValue::kOneHanded ||
       value == RE::ActorValue::kTwoHanded) {
     auto race = p->GetRace();
@@ -373,6 +391,7 @@ void route(RE::ActorValue value, float points, RE::TESForm* source,
       give(prefix + "/standard");
     }
   }
+  recoverOnce.run();
   synchronize();
 }
 }  // namespace runtime

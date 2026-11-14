@@ -283,9 +283,9 @@ void synchronize() {
       }
       double f = sk.computed(model.settings.get("main", "min_level"),
                              model.settings.get("main", "max_level")),
-             n = sk.written;
-      while (f >= n + model.settings.get("main", "hysteresis_up")) ++n;
-      while (f < n - model.settings.get("main", "hysteresis_down")) --n;
+             n = sp::hysteresis(f, sk.written,
+                                model.settings.get("main", "hysteresis_up"),
+                                model.settings.get("main", "hysteresis_down"));
       if (n != sk.written && model.settings.flag("main", "write_main_skills")) {
         owner->SetBaseActorValue(value, static_cast<float>(n));
         std::string msg =
@@ -299,7 +299,7 @@ void synchronize() {
     }
 }
 void award(std::string_view id, double raw, std::string_view origin,
-           double points) {
+           double points, bool recover) {
   sp::Skill* sk = nullptr;
   auto s = model.find(std::string(id), &sk);
   if (!s) {
@@ -312,7 +312,7 @@ void award(std::string_view id, double raw, std::string_view origin,
       "xp", before < s->floor.value(s->curve)       ? "zone_catch_up"
             : before < s->potential.value(s->curve) ? "zone_recall"
                                                     : "zone_new");
-  model.award(std::string(id), raw);
+  model.award(std::string(id), raw, recover);
   if (model.settings.flag("log", "xp_verbose"))
     spdlog::info(
         "[xp] t={} src={} skill={} sub={} pts={} raw={} z_start={} cur={}->{} "

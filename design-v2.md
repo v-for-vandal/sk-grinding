@@ -140,7 +140,8 @@ gameplay event
   → current XP += result; own floor XP += floorRate × result   (§5.4)
   → potential = max(potential, current)
   → peak XP = max(peak XP, current XP)
-  → main skill: reduce idle meter U_main and rust R by raw XP; recompute main level,
+  → main skill: reduce idle meter U_main and rust R by raw XP, once per award even when it
+    feeds several sub-skills; recompute main level,
     write it with hysteresis                                    (§4.4)
   → re-evaluate sub-skill perks (with hysteresis)              (§5.6)
 ```

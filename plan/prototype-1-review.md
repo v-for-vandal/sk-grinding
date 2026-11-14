@@ -24,6 +24,16 @@ was built with g++ and its tests pass. The game-side sources (`Telemetry.cpp`, `
 | R9 | A player update on a thread other than the recorded main thread is logged once as a warning (before: the plugin silently did nothing). | `Telemetry.cpp` | no such warning in a normal session. |
 | R10 | `classify()` is cached per spell FormID (cleared on config reload); the `[init]` line shows the highest start floor of the skill (before: the first sub-skill's, possibly a concept one at 0); UTF-8 BOMs removed from three sources. | `Classification.cpp`, `State.cpp` | `[spell]` dump unchanged compared with 0.1.3. |
 
+## 2a. New: UI simulator
+
+- `PracticeSim` (new CMake target) and [`tools/ui-sim/`](../tools/ui-sim/README.md) were built
+  and checked on Linux (g++, headless Firefox). On Windows: after the build, run
+  `python tools/ui-sim/serve.py`, open `http://127.0.0.1:8077/`, press *Sword hit* with
+  *Repeat* 100: One-Handed rises in the panel. Fix MSVC-only compile errors if any.
+- Optional for the panel author: a debug action / hotkey that calls
+  `api->Invoke(view, "location.reload()")` to pick up edited `app.js` / `style.css` in game
+  without a restart.
+
 ## 3. Open: for the Windows agent
 
 - **Missile noise has no effect** (player report 2026-11-12). Suspected cause: `Projectile::Launch`
@@ -42,13 +52,13 @@ was built with g++ and its tests pass. The game-side sources (`Telemetry.cpp`, `
   Record the result in [R-26](../research/R-26-spell-aim.md) and
   [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md).
 
-## 4. Waiting for a design decision (do not change)
+## 4. Decided after the review: rust once per award (done in 0.1.4, blind)
 
-- **Rust recovery per sub-skill award.** `Model::award` lowers `R` and `U_main` for every
-  sub-skill that gets XP. One spell cast feeds three sub-skills (form, direction, archetype), a
-  craft two, a shield bash 1.5 × raw, so for the same vanilla points rust recovers 3× / 2× /
-  1.5× faster than with a weapon hit. Alternative: lower it once per vanilla award (the raw of the
-  event). The owner decides; see [`impl/main-skill-level.md`](../impl/main-skill-level.md) *Rust*.
+- The owner decided: rust `R` and `U_main` fall **once per vanilla award**, by its raw, for each
+  parent main skill of the sub-skills it fed, not once per sub-skill. `Model::recover` (Core),
+  `route` collects the parents and calls it once (`Classification.cpp`). Pure test added.
+- Check in game: with *Forgetting speed* ×1000 and *No grace*, let Destruction rust, then cast
+  spells and compare how fast `R` falls in the panel with One-Handed for similar `[xp] raw`.
 
 ## 5. Noted, not changed
 

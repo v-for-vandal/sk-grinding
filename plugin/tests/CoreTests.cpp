@@ -222,6 +222,22 @@ int main(int argc, char** argv) try {
   double rusty = oh->rust;
   dynamics.award("1h-mace", 1000);
   check(oh->rust < rusty, "mace practice reduces OneHanded rust");
+  {
+    // One vanilla award feeding three sub-skills lowers rust once, by its raw.
+    auto once = dynamics, single = dynamics;
+    sp::Skill *a = nullptr, *b = nullptr;
+    once.find("1h-sword", &a);
+    single.find("1h-sword", &b);
+    double before = a->rust;
+    for (auto id : {"1h-sword", "1h-mace", "1h-dagger"})
+      once.award(id, 300, false);
+    near(a->rust, before);
+    once.recover(*a, 300);
+    single.award("1h-sword", 300);
+    near(a->rust, b->rust, 1e-12);
+    near(a->idle, b->idle, 1e-12);
+    check(a->rust < before, "recover lowers rust");
+  }
   auto split = dynamics, whole = dynamics;
   split.tick(10);
   split.tick(20);

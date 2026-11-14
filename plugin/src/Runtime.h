@@ -38,7 +38,8 @@ extern DWORD mainThread;
 RE::ActorValue av(std::string_view);
 sp::Skill* skill(RE::ActorValue);
 bool ready(sp::Skill&);
-void award(std::string_view, double, std::string_view, double points = -1);
+void award(std::string_view, double, std::string_view, double points = -1,
+           bool recover = true);
 struct Classification {
   std::string school, form, direction, projectile;
   RE::ActorValue actorValue = RE::ActorValue::kNone;
