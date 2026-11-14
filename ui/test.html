@@ -1,9 +1,12 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><title>Panel checks</title></head><body><pre id="result">pending</pre><iframe src="index.html"></iframe><script>
 const result=document.getElementById('result');
 let tries=0;
-function test(){const frame=document.querySelector('iframe'),w=frame.contentWindow,d=w.document;if(!d.querySelector('tbody tr')){if(++tries<100)return setTimeout(test,50);throw Error('Mock did not render');}
+function test(){const frame=document.querySelector('iframe'),w=frame.contentWindow,d=w.document;if(!d.querySelector('.bar-row')){if(++tries<100)return setTimeout(test,50);throw Error('Mock did not render');}
  const check=(value,label)=>{if(!value)throw Error(label);};
  try{
+  check(d.querySelectorAll('.bar-row').length===76,'76 bars');
+  check(!!d.getElementById('tableView').closest('label').offsetParent,'debug view checkbox shown in debug mode');
+  d.getElementById('tableView').click();
   check(d.querySelectorAll('details').length===6,'six main skills');
   check(d.querySelectorAll('tbody tr').length===76,'76 sub-skills');
   d.getElementById('filter').value='1h-sword';d.getElementById('filter').dispatchEvent(new Event('input'));
@@ -16,7 +19,9 @@ function test(){const frame=document.querySelector('iframe'),w=frame.contentWind
   d.getElementById('reinit').click();check(calls.length===1,'reinit requires confirmation');
   d.getElementById('sure').checked=true;d.getElementById('reinit').click();check(calls.at(-1).action==='reinitAll','confirmed reinit');
   d.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));check(calls.at(-1).action==='close','Escape closes');
-  result.textContent='PASS: mock, six skills, 76 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
+  d.getElementById('tableView').click();check(d.querySelectorAll('.bar-row').length===76&&d.getElementById('tables').hidden,'back to bars');
+  w.spUpdate({state:'running',debug:{},skills:[],equipped:[],debugMode:false});check(!d.getElementById('tableView').closest('label').offsetParent&&d.getElementById('debug').hidden,'debug mode off hides debug controls');
+  result.textContent='PASS: mock, bars, six skills, 76 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
  }catch(e){result.textContent='FAIL: '+e.message;result.dataset.status='fail';}
 }
 setTimeout(test,100);

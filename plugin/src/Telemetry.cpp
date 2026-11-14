@@ -247,11 +247,11 @@ void updateOnMain(float dt, bool probe) {
   }
   if (probe) {
     spdlog::info(
-        "[load] first player update: model complete; aim/UI begin paused={}",
+        "[load] first player update: model complete; aim begins paused={}",
         paused);
     spdlog::default_logger()->flush();
   }
-  if (!telemetryOnly) refreshUI(paused ? 0 : dt);
+  if (!telemetryOnly) refreshAim(paused ? 0 : dt);
   if (probe) {
     spdlog::info("[load] first player update: complete");
     spdlog::default_logger()->flush();

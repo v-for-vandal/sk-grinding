@@ -826,6 +826,10 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 - **Q-UI-2.** Fallback if PrismaUI turns out problematic in Lorerim (input focus, HUD, other
   DLLs): SKSE Menu Framework (ImGui, already installed) as plan B — ok?
   - **A:**
+- **Decided:** the panel pauses the game while it is open and shows a snapshot taken when it
+  opens and after each of its own actions; there is no live refresh. Simpler and cheaper
+  (Ultralight renders on the CPU); nothing else changes the values while the game is paused.
+  Details: [`impl/status-ui.md`](impl/status-ui.md) *Data flow*.
 - **Q-UI-3.** Notifications: show a message when a sub-skill perk activates/deactivates, when a
   sub-skill starts decaying, when it reaches a new level?
   - **A:**

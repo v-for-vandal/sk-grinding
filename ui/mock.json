@@ -1,5 +1,6 @@
 {
   "activeHours": 0.0,
+  "debugMode": true,
   "debug": {
     "fixed_xp": false,
     "fixed_xp_value": 100,

@@ -34,6 +34,23 @@ was built with g++ and its tests pass. The game-side sources (`Telemetry.cpp`, `
   `api->Invoke(view, "location.reload()")` to pick up edited `app.js` / `style.css` in game
   without a restart.
 
+## 2b. New: bar view and MCM debug mode
+
+- The panel now opens on a bar per sub-skill; the old table is the *Debug view*. MCM has one page
+  *Settings* with the toggle *Debug mode* (`[General] bDebugMode` → `ui.debug_mode`, snapshot
+  field `debugMode`); the other controls are in its group (`groupCondition: 1`,
+  `groupBehavior: "hide"`). Check in game: with Debug mode off, MCM shows only the toggle and the
+  panel shows no summary line, no tabs and no *Debug view* checkbox; on, everything is back
+  (after closing the Journal). If MCM Helper ignores `groupBehavior`, the controls are only
+  greyed out: acceptable, report it.
+- Bar tooltips are our own DOM element driven by `mousemove` (not `title`). Check in game that
+  hovering a bar part shows its text (*Drilled into the bones* / *Learned* / *Been there once*)
+  and that it stays while the panel refreshes.
+- `UI.cpp` (blind): no periodic refresh any more (decided, design-v2 §12.1): the snapshot is sent
+  on open and after each panel action; `refreshUI` is gone, the player update calls `refreshAim`
+  directly; `ui.refresh_ms` removed. Check: values change after *Give XP*; F7 close and reopen
+  shows changes made while the panel was closed.
+
 ## 3. Open: for the Windows agent
 
 - **Missile noise has no effect** (player report 2026-11-12). Suspected cause: `Projectile::Launch`

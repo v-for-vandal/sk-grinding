@@ -6,7 +6,8 @@ namespace {
 PRISMA_UI_API::IVPrismaUI1* api = nullptr;
 PrismaView view = 0;
 bool dom = false, visible = false;
-float elapsed = 0;
+// Snapshots are sent only when the panel opens and after an action from it; there is no
+// periodic refresh (decided, design-v2 §12.1: the game is paused while the panel is open).
 void send() {
   if (dom && api && view) {
     auto data = snapshot().dump();
@@ -100,16 +101,6 @@ void setupUI() {
   }
   RE::BSInputDeviceManager::GetSingleton()->AddEventSink(&input);
   spdlog::info("[boot] PrismaUI API V{} view={}", v2 ? 2 : 1, view);
-}
-void refreshAim(float);
-void refreshUI(float dt) {
-  refreshAim(dt);
-  if (!visible || !dom) return;
-  elapsed += dt;
-  if (elapsed * 1000 >= model.settings.get("ui", "refresh_ms")) {
-    elapsed = 0;
-    send();
-  }
 }
 sp::json snapshot() {
   auto j = model.snapshot();

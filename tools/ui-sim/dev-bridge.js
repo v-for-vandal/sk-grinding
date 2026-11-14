@@ -98,6 +98,7 @@
           h('label', {}, 'XP', select('sim-xp', [1, 10, 100], ['debug', 'xp_mult'])),
           h('label', {}, 'Time', select('sim-time', [1, 10, 100, 1000], ['debug', 'time_scale']))),
         h('div', {className: 'sim-row'},
+          check('sim-debugmode', 'Debug mode', ['ui', 'debug_mode']),
           check('sim-grace', 'No grace', ['debug', 'no_grace']),
           check('sim-write', 'Write main', ['main', 'write_main_skills']),
           check('sim-missile', 'Missile noise', ['aim', 'missile_enabled']),
@@ -131,6 +132,7 @@
     const d = last.sim.debugSettings, a = last.sim.aim;
     $('sim-xp').value = d.xp_mult;
     $('sim-time').value = d.time_scale;
+    $('sim-debugmode').checked = !!last.debugMode;
     $('sim-grace').checked = !!d.no_grace;
     $('sim-write').checked = !!last.debug.write_main_skills;
     $('sim-missile').checked = !!a.missile_enabled;

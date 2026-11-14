@@ -1,5 +1,6 @@
 #include "Core.h"
 
+#include <algorithm>
 #include <limits>
 #include <stdexcept>
 namespace sp {
@@ -316,16 +317,24 @@ json Model::snapshot() const {
               {"equipped", json::array()}};
   out["debug"]["write_main_skills"] =
       settings.flag("main", "write_main_skills");
+  out["debugMode"] = settings.flag("ui", "debug_mode");
   double g = settings.get("decay", "grace_hours"),
          e = settings.get("decay", "ramp_end_hours");
   if (settings.flag("debug", "no_grace")) g = e = 0;
   for (auto& sk : skills) {
+    double F = sk.computed(settings.get("main", "min_level"),
+                          settings.get("main", "max_level")),
+           up = settings.get("main", "hysteresis_up");
+    // Progress to the next written level: written n becomes n + 1 at F >= n + up.
+    double toNext = sk.written >= settings.get("main", "max_level")
+                        ? 1.
+                        : std::clamp((F - sk.written) / up, 0., 1.);
     json a = {{"av", sk.av},
               {"name", sk.av == "OneHanded"   ? "One-Handed"
                        : sk.av == "TwoHanded" ? "Two-Handed"
                                               : sk.av},
-              {"F", sk.computed(settings.get("main", "min_level"),
-                                settings.get("main", "max_level"))},
+              {"F", F},
+              {"toNext", toNext},
               {"X", sk.worthDelta()},
               {"written", sk.written},
               {"base", sk.base},

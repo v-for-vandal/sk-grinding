@@ -141,7 +141,9 @@ void readINI(const std::string& path) {
                      value.dump());
       old = value;
     };
-    if (section == "Debug") {
+    if (section == "General") {
+      if (key == "bDebugMode") set("ui", "debug_mode", v != 0);
+    } else if (section == "Debug") {
       if (key == "iXpMult") {
         constexpr int a[]{1, 10, 100};
         if (v >= 0 && v < 3) set("debug", "xp_mult", a[v]);

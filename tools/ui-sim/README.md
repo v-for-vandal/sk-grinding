@@ -28,7 +28,7 @@ only `toml++` and `nlohmann-json`, no CommonLib):
 ```
 # Windows: scripts/build-prototype.ps1 builds it (build/prototype/Release/PracticeSim.exe);
 # core only (no CommonLib, ESP, Papyrus): scripts/build-prototype.ps1 -CoreOnly
-# Linux / any CMake with toml++ and nlohmann-json found:
+# Linux / any CMake (toml++ and nlohmann-json: installed package, else fetched pinned):
 cmake -S plugin -B build/sim -DPRACTICE_PLUGIN=OFF && cmake --build build/sim --target PracticeSim
 ```
 

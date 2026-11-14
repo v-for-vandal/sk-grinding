@@ -22,7 +22,7 @@ void installGameplay();
 void clearDeferredEvents();
 void installAim();
 void setupUI();
-void refreshUI(float dt);
+void refreshAim(float dt);
 void closeUI();
 void reload();
 void reloadINI();

@@ -2,8 +2,28 @@ cmake_minimum_required(VERSION 3.25)
 project(SkillPractice VERSION 0.1.4 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-find_package(tomlplusplus CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+# Header-only dependencies: vcpkg on Windows (scripts/setup-build.ps1); where no
+# package is installed (e.g. a Linux machine building only the core, tests and
+# PracticeSim), CMake downloads the pinned release instead.
+include(FetchContent)
+find_package(tomlplusplus CONFIG QUIET)
+if(NOT tomlplusplus_FOUND)
+  message(STATUS "tomlplusplus not installed: fetching v3.4.0")
+  FetchContent_Declare(tomlplusplus
+    URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.4.0.tar.gz
+    URL_HASH SHA256=8517f65938a4faae9ccf8ebb36631a38c1cadfb5efa85d9a72e15b9e97d25155
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+  FetchContent_MakeAvailable(tomlplusplus)
+endif()
+find_package(nlohmann_json CONFIG QUIET)
+if(NOT nlohmann_json_FOUND)
+  message(STATUS "nlohmann_json not installed: fetching v3.11.3")
+  FetchContent_Declare(nlohmann_json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+    URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+  FetchContent_MakeAvailable(nlohmann_json)
+endif()
 add_library(PracticeCore STATIC src/Core.cpp src/Config.cpp)
 target_include_directories(PracticeCore PUBLIC src)
 file(GLOB_RECURSE DEFAULT_CONFIGS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../config/*.toml")
