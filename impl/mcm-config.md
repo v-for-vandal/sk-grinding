@@ -1,6 +1,6 @@
 # MCM and configuration
 
-- **Status:** chosen (prototype 1: Debug page only).
+- **Status:** done (Settings page with debug-mode group built; in-game MCM registration/controls pending).
 - **Design:** design-v2 §12.2 (MCM Helper + config file), §13 (Debug page), Q-UI-4 (format: TOML
   for the plugin's own files, prototype choice; JSON only where MCM Helper needs it).
 - **Depends on:** [`plugin-foundation.md`](plugin-foundation.md) (ESL quest, Papyrus build).
@@ -39,10 +39,15 @@
 - Under MO2 the user INI is written to the overwrite folder or the mod folder; reading
   `Data/MCM/Settings/SkillPractice.ini` through the virtual file system finds it either way.
 
-**Page `Debug`** (one page in prototype 1):
+**Page `Settings`** (one page in prototype 1). The first control is the toggle *Debug mode*
+(`groupControl: 1`); every other control (and the header *Debug* above them) has
+`groupCondition: 1` and `groupBehavior: "hide"` *(verify in game)*, so they are shown only in
+debug mode. Debug mode only changes what is shown (MCM controls, panel debug views); the values
+of hidden controls still apply.
 
 | Control | Type | INI key | Values → config key |
 |---|---|---|---|
+| Debug mode | toggle | `[General] bDebugMode` | `ui.debug_mode` ([`status-ui.md`](status-ui.md)) |
 | XP multiplier | enum | `[Debug] iXpMult` | ×1 / ×10 / ×100 → `debug.xp_mult` 1 / 10 / 100 |
 | Make all XP equal to 100 | toggle | `[Debug] bFixedXP` | `debug.fixed_xp` (value: `debug.fixed_xp_value`, TOML only); see [`xp-capture.md`](xp-capture.md) *Debug: fixed XP per action* |
 | Forgetting speed | enum | `[Debug] iTimeScale` | ×1 / ×10 / ×100 / ×1000 → `debug.time_scale` |
@@ -56,6 +61,28 @@
 
 Each control has a help text (MCM Helper `help`) saying what it does and that it is for
 testing. Enum values are stored as an index; the DLL maps the index to the value.
+
+## Prototype notes
+
+- Generator creates the start-enabled quest at SkillPractice.esp|0x816, its
+  PlayerRef alias and VMAD scripts; ESP read-back validates their presence.
+- To support an existing save without relying on SEQ generation, the DLL starts
+  this quest on post-load/new-game if it is neither running nor starting.
+- CK's compiler is copied locally under .tools, with a CLR 4 activation config;
+  the original compiler/game directory is untouched. Our empty script compiles
+  with zero warnings and errors against the MCM Helper public SDK.
+- Default INI values load first, then the MO2-visible user INI; enum indices
+  are range checked. The final log level and all changes are logged.
+- Closing the journal re-reads only the two MCM INI files (0.1.4); the TOML files are re-read
+  at load, new game and by *Reload config*.
+- A key missing in the user's `SkillPractice.toml` is taken from the compiled copy and logged
+  as a `[cfg]` warning (runtime code reads every key with `.at()`, which would throw inside a
+  hook). Rows of `smithing-materials.toml` and the Destruction / Restoration rows of
+  `magic-directions.toml` are checked at load.
+- First-load TOML failures use compiled copies of the repository TOML files.
+  Reload failures retain the previous complete configuration. Pure tests verify
+  compiled defaults match repository files. Duplicate sub-skill entries are
+  reported and skipped; unsupported main skills are rejected in this prototype.
 
 ## Test
 

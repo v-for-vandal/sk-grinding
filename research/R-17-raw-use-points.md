@@ -1,6 +1,6 @@
 # R-17. Raw skill-use points with `UseMult = 0`
 
-- **Status:** new (runtime; done in milestone 1 of [`plan/prototype-1.md`](../plan/prototype-1.md)).
+- **Status:** instrumented; runtime results pending (prototype 1 build ready).
 - **For:** [`impl/xp-capture.md`](../impl/xp-capture.md); design-v2 Q-XP-9, Q-ML-7 (pace),
   §15.1 (telemetry).
 
@@ -18,7 +18,41 @@ us about the source, is not known yet.
 | 4 | Does another loaded plugin already hook this vfunc (Experience, Precision, …)? | at install, log the module that owns the original pointer | hook order / chaining |
 | 5 | Raw points per action (weapon base damage? magicka cost? blocked damage?), for the pace estimate | the same log, 30 min of normal play | `base_mult`, `pace_sub`, `pace_skill` in `config/skills/*.toml` (Q-ML-7, Q-DYN-15) |
 
-## How to decide
+## Prepared instrumentation (2026-11-12)
+
+- PlayerCharacter UseSkill vtable slot 0xF7, chained to its previous owner.
+- Log-only AddSkillExperience hook at Address Library 39413/40488. Pinned
+  CommonLib does not declare PlayerSkills::AdvanceSkill, so this is a named
+  substitution with incomplete path coverage, not a guessed address.
+- Player Update slot 0xAD supplies frame numbers; steady-clock microseconds
+  timestamp use, hit/block, animation, spell-cast, craft and menu events.
+- The user scenarios are steps 14–15 of `plan/prototype-1-testing.md`.
+  No runtime result, point interpretation or hook compatibility is confirmed yet.
+
+## Received combat evidence (2026-11-14)
+
+- Normal mode, XP multiplier 1: Iron Sword of Chills reports 42 points per
+  observed award, routed as 264.6 raw XP (One-Handed base_mult 6.3).
+- Shield blocks report variable points; shield bash reports 5 points (40.5 raw
+  with Block base_mult 8.1). Bash hit context arrives after the first UseSkill
+  call, explaining its incorrect light-shield-only routing in the old build.
+- Healing reports about 1.40713 points per tick on the main thread, successfully
+  routed to Restoration self/help/standard. Its first-use base value was 0;
+  the source of that initial main value remains unverified.
+- Flames reports roughly 0.51-0.53 points per tick and Firebolt about 50.584
+  on observed hits. These managed skill callbacks run on workers and previously
+  bypassed our progression. Version 0.1.4 queues them for the main update.
+- Heavy Armor also reports points, but is outside the six managed skills.
+- Reading Warrior produced an external +1 Block, retained through the prototype
+  base adjustment, not sub-skill XP. Full book routing remains out of scope.
+- Sunbeam records hit events but no Restoration awards against the player's
+  living targets. Its main damage effect requires undead/ghost targets;
+  the separate living-target damage effect requires Scorching Light.
+- Complete copies of this session are in ignored `research/local/runtime/`
+  (`flames-2026-11-14.log`, `shield-bash-2026-11-14.log`,
+  `firebolt-book-2026-11-14.log`). Fix validation needs a new runtime log.
+
+## Decision criteria
 
 - Check 1 passes for the prototype skills → keep the vfunc hook.
 - Points are 0 for some action (e.g. lockpicking: SSL zeroes `fSkillUsageLockPick*`, see

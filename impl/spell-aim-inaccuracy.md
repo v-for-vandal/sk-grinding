@@ -1,6 +1,6 @@
 # Spell inaccuracy: aim sway and projectile direction noise
 
-- **Status:** chosen per form: **beam → variant A** (aim sway), **missile → variant B**
+- **Status:** done (prototype implementation; R-26 runtime validation pending): **beam → variant A** (aim sway), **missile → variant B**
   (direction noise at launch; `missile` includes lobber projectiles, Q-MAG-1); details to confirm in R-26.
 - **Design:** [`skills/magic/design.md`](../skills/magic/design.md), *Accuracy* (Q-MAG-5);
   background: [`refs/aim-perturbation.md`](../refs/aim-perturbation.md) (options A and B there).
@@ -89,6 +89,42 @@ disable its aim support for player spells (R-26 check 2).
   0 from level 75 (placeholders).
 - The debug panel shows `σ(L)` and the current sway amplitude ([`status-ui.md`](status-ui.md)).
 
+## Prototype notes
+
+- Since 0.1.5, missile noise chains GetLinearVelocity (vslot 0x86) on
+  MissileProjectile and GrenadeProjectile, calls the previous handler first,
+  then applies the one-shot offset. This replaces 0.1.4's pre-UpdateImpl
+  (0xAB) offset, which TDM Predictive could overwrite. The launch detour stays
+  removed.
+- On the main thread, publish an immutable map of equipped/casting missile
+  spells to sigma/fixed-yaw parameters. Projectile workers read that snapshot,
+  never mutable progression/config state. Pending skills use the provisional
+  start level derived from the live main base value without initializing them.
+- On an early velocity query (livingTime <= 0.1 s), with 3D loaded and
+  nonzero velocity after the previous handler, rotate the
+  velocity and reference angles once, preserving speed. Native handles with
+  generation bits guard against repeated perturbation; old entries expire and
+  revert clears the cache. Each projectile draws independent Gaussian noise.
+  Preserve desiredTarget: TDM Predictive uses it to avoid repeating its
+  initial prediction. Clear AutoAim/AlwaysHit flags only when noise is applied.
+  Update the output velocity as well as runtime velocity, since TDM may
+  modify runtime velocity after its own preceding getter populated the output.
+  NPC, scroll, weapon, flame
+  and explosion-form projectiles are excluded by shooter/spell classification.
+- `[aim] post-velocity` records spell/projectile, sigma, offsets, target handles
+  before/after the previous handler, and pre-handler/aimed/final velocity.
+  Boot logs identify the preceding handler's module. Homing remains unsupported:
+  it can overwrite a one-shot offset on subsequent queries.
+  A hook log or a successful build does not prove that TDM leaves the velocity
+  unchanged; check actual impact spread in game.
+- Beam sway applies per-frame delta rotation through `TESObjectREFR::SetAngle`
+  (the pinned API has no SetRotationX/Z). It stops without undoing the final
+  disturbance. SmoothCam/TDM behaviour must be checked in first and third person.
+- Sine weights/frequency ratios are configurable. `aim.debug_missile_yaw_deg=10`
+  enables the fixed yaw probe for R-26; leave it at zero for normal gameplay.
+- The panel shows actual current beam amplitude and missile sigma. No aim
+  compatibility result is inferred from successful compilation.
+
 ## Config
 
 - per form (`missile`, `beam`): `L_0`;
@@ -97,6 +133,15 @@ disable its aim support for player spells (R-26 check 2).
 - values are placeholders, not decided.
 
 ## Test
+
+Runtime feedback: beam sway is player-confirmed. The initial launch-angle
+implementation, including the later autoAim clearing attempt, did not spread
+Firebolt impacts. The 2026-11-14 log contains cast/hit events and worker-thread
+UseSkill calls for Firebolt, but no launch-hook entries for it. Version 0.1.4
+therefore selected the first-update fallback. The player confirmed spread
+and worker XP with that build, but reported correction back to the target in
+TDM Predictive. Version 0.1.5 applies noise after GetLinearVelocity and retains
+desiredTarget; its Predictive compatibility result is pending.
 
 - Fire 20 Firebolts (missile) at a wall at form level 0 and at `L_0`; the spread of impact points
   follows `σ`; none at `L_0`. Same with an arcing (lobber) missile spell.

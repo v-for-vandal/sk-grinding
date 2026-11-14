@@ -1,6 +1,6 @@
 # Main skill level: formula, rust, writes, start conversion
 
-- **Status:** chosen (prototype 1).
+- **Status:** done (prototype implementation; R-27 runtime validation pending).
 - **Design:** design-v2 §4.4 (whole section): §4.4.1 formula, §4.4.3 rust, §4.4.4 start and
   writes, §4.4.5 normalization.
 - **Depends on:** [`subskill-state.md`](subskill-state.md), [`decay.md`](decay.md) (active time,
@@ -59,9 +59,13 @@ config ([`decay.md`](decay.md) for the ramp and the time source):
 
 - tick (`dt` active hours, already × `debug.time_scale`): `U_main += dt` (≤ `idle_max_hours`);
   `R += r × ∫ ramp(U_main) dt` (same closed form as sub-skill decay);
-- XP award to any sub-skill of the skill (`raw`, before zone multipliers):
-  `R = max(0, R − c × raw)` with `c = r / (q × pace_skill)`, and
-  `U_main = max(0, U_main − raw / (q × pace_skill))`;
+- once per vanilla award (one engine skill use), for every main skill that is the parent of a
+  sub-skill the award fed, with the award's `raw` (before zone multipliers and before per-sub-skill
+  factors such as the bash shield share): `R = max(0, R − c × raw)` with
+  `c = r / (q × pace_skill)`, and `U_main = max(0, U_main − raw / (q × pace_skill))`. **Not once
+  per sub-skill** (decided): a spell feeds three sub-skills and a craft two, which would make rust
+  recover 3× / 2× faster than with a weapon hit for the same vanilla points. A debug *Give XP*
+  to one sub-skill counts as one award;
 - prototype cap: `R ≤ max_i(peak_i − effectiveFloor_i)` (beyond that it changes nothing and
   would only slow down the recovery);
 - cross-links do not touch `R` (§4.4.3); none exist in prototype 1 anyway.
@@ -116,6 +120,15 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 `[main]`, `[init]` in [`config/SkillPractice.toml`](../config/SkillPractice.toml); `[main]`,
 `[conversion]`, `[budget]`, `[reference_path]`, `[dynamics] rust_rate, pace_skill` in
 [`config/skills/*.toml`](../config/skills/).
+
+## Prototype notes
+
+- The pure formula, initialization and rust fields are implemented in Core;
+  player-only actor-value writes and external changes are handled in State.cpp.
+- The pinned library calls notifications `SendHUDMessage::ShowHUDMessage`.
+- New sub-skills absent from a co-save receive a floor and zero-contribution
+  baseline without resetting existing sub-skills. Removed IDs retain baselines.
+- No Legendary blocking, books/trainers, cross-links or perk changes are included.
 
 ## Test
 

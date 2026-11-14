@@ -1,0 +1,90 @@
+[
+  {
+    "editorID": "SPO_WeapClass_1H_Dagger",
+    "localID": "0x000800"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Mace",
+    "localID": "0x000801"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Other",
+    "localID": "0x000802"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Scythe",
+    "localID": "0x000803"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_ShortSword",
+    "localID": "0x000804"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Spear",
+    "localID": "0x000805"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Sword",
+    "localID": "0x000806"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_Unarmed",
+    "localID": "0x000807"
+  },
+  {
+    "editorID": "SPO_WeapClass_1H_WarAxe",
+    "localID": "0x000808"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Battleaxe",
+    "localID": "0x000809"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Other",
+    "localID": "0x00080A"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Polearm",
+    "localID": "0x00080B"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Quarterstaff",
+    "localID": "0x00080C"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Scythe",
+    "localID": "0x00080D"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Sword",
+    "localID": "0x00080E"
+  },
+  {
+    "editorID": "SPO_WeapClass_2H_Warhammer",
+    "localID": "0x00080F"
+  },
+  {
+    "editorID": "SPO_WeapClass_Archery_HeavyBow",
+    "localID": "0x000810"
+  },
+  {
+    "editorID": "SPO_WeapClass_Archery_HeavyCrossbow",
+    "localID": "0x000811"
+  },
+  {
+    "editorID": "SPO_WeapClass_Archery_LightBow",
+    "localID": "0x000812"
+  },
+  {
+    "editorID": "SPO_WeapClass_Archery_LightCrossbow",
+    "localID": "0x000813"
+  },
+  {
+    "editorID": "SPO_WeapClass_Archery_Other",
+    "localID": "0x000814"
+  },
+  {
+    "editorID": "SPO_WeapClass_Casting",
+    "localID": "0x000815"
+  }
+]

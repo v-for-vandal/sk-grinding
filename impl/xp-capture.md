@@ -1,6 +1,6 @@
 # XP capture: vanilla use points → sub-skill XP
 
-- **Status:** chosen for prototype 1 (the hook point is confirmed by R-17 in milestone 1).
+- **Status:** done (prototype implementation; R-17 runtime results pending).
 - **Design:** design-v2 §4.1 (vanilla XP suppressed), §4.2 (pipeline), Q-XP-9 (raw use points),
   Q-XP-1 (a) (several sub-skills per event); per-skill rules:
   [weapons](../skills/weapons/design.md), [block](../skills/block/design.md),
@@ -94,7 +94,7 @@ the fallback of the skill below and log `[ctx] unresolved` at warn level.
   class parent, bow → `bow-smithing`, crossbow → `crossbow-smithing`; ammo: arrow →
   `bow-smithing`, bolt → `crossbow-smithing`; armor: `heavy-armor-smithing` /
   `light-armor-smithing` by armor type, clothing → `clothing-smithing`; anything else: no
-  category.
+  category. Material keywords are read from weapons, armor and ammo (ammo since 0.1.4).
 - **Jewelry:** an armor item in the ring, amulet or circlet slot (biped slots 36, 35, 42) that is
   clothing (not light / heavy armor) → only `jewelry`, no material, no category (Q-SMI-7).
 - Prototype simplification: both sub-skills get `raw` (the vanilla points, i.e. LoreRim's
@@ -149,6 +149,33 @@ of the prototype can then be tested in the same game session.
   [`config/SkillPractice.toml`](../config/SkillPractice.toml).
 - `[dynamics] base_mult`, `[routing]` in [`config/skills/*.toml`](../config/skills/).
 - [`config/smithing-materials.toml`](../config/smithing-materials.toml).
+
+## Prototype notes
+
+- `PlayerCharacter::UseSkill` slot 0xF7 and player `Update` slot 0xAD chain
+  existing vfunc owners. Context logs include steady-clock microseconds and the
+  update counter. Since 0.1.4, player UseSkill calls for managed skills received
+  on workers enqueue their actor value, points, FormID and receipt time. The
+  player update consumes them on the main thread, resolves the FormID and runs
+  the same routing/suppression rules as synchronous calls. A published atomic
+  managed-skill mask avoids accessing model state on workers; unmanaged/NPC
+  calls still pass through immediately. Deferred calls log `[use] deferred`.
+  Queue overflow is logged and falls back to the original UseSkill call.
+- Block points with an explicit shield argument also wait until the next player
+  frame, since the observed bash UseSkill precedes TESHitEvent by under 2 ms.
+  Routing chooses the nearer bash/blocked context within 50 ms of receipt;
+  an old bash outside that interval cannot turn a later block into a bash.
+  Without a matching bash, normal shield/parry routing applies. This is a
+  timestamp correlation heuristic; simultaneous incoming/outgoing hits still
+  need runtime testing. Original points are not deduplicated.
+- The pinned CommonLib has no `PlayerSkills::AdvanceSkill` declaration or ID.
+  The log-only second hook is `PlayerCharacter::AddSkillExperience`, Address
+  Library 39413/40488, using MinHook. It always calls its original. This is a
+  deliberate telemetry substitution, not proof of complete engine-path coverage.
+- The pending queue waits for context up to the configured window. Selected
+  SmithingMenu / ConstructibleObjectMenu recipes supply the tempering fallback.
+- The six-skill implementation, UI and serialization share one runtime lifecycle;
+  these integration sources are introduced with M1 and validated further in M2–M6.
 
 ## Test
 

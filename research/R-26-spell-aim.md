@@ -1,6 +1,6 @@
 # R-26. Spell aim: launch noise and aim sway
 
-- **Status:** new (headers, LoreRim plugins, test DLL in game).
+- **Status:** prototype built; runtime checks pending.
 - **For:** [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md), variants A (beam) and
   B (missile form: missile and lobber projectiles); the same checks cover archery (Q-WPN-7).
 
@@ -16,7 +16,43 @@
 | 6 | Do SmoothCam and TDM (headtracking, directional camera) overwrite our rotation each frame? | test check 4 with them enabled (LoreRim default) | A as is, or apply the offset after them / to another value |
 | 7 | Does any other LoreRim SKSE plugin hook `Projectile::Launch` (projectile tweaks)? | search skse-plugins.tsv list and DLL strings | hook order / conflicts |
 
+## Prepared instrumentation (2026-11-12)
+
+- The pinned CommonLib declares Launch(ProjectileHandle*, LaunchData&) at
+  Address Library 42928/44108. Prototype uses a MinHook trampoline and logs
+  noise angles, autoAim and desiredTarget for player spell missiles.
+- `aim.debug_missile_yaw_deg=10` enables the fixed yaw probe; zero restores
+  normal noise. No TDM compatibility result is assumed.
+- Beam trigger uses charging/casting caster states. Deltas go through SetAngle
+  after player Update; start/stop and current panel amplitude aid checks 4–6.
+- Checklist steps 16–17 cover 1, 2, 4, 5, 6. Requiem bow reuse (3) and full
+  other-plugin hook audit (7) remain outside these prepared runtime checks.
+
 ## How to decide
+
+TDM follow-up (0.1.5): the player confirmed spread in Free Aim, but observed
+flight correction with lock-on in Predictive. Public upstream
+[`ProjectileAimSupport`](https://github.com/ersh1/TrueDirectionalMovement/blob/master/src/Hooks.cpp)
+predicts when desiredTarget is absent, records that target, and skips later
+predictions when it is present. Its GetLinearVelocity wrapper calls its prior
+handler then aim support. The installed mod identifies itself as 2.2.5;
+upstream master is explanatory evidence, not a verified matching binary.
+Our 0.1.4 UpdateImpl hook applied noise before that correction and cleared the
+target marker, allowing another prediction. Version 0.1.5 instead chains
+GetLinearVelocity after the previous handler, preserves desiredTarget, and
+synchronizes output/runtime velocity. Boot module ownership and before/after
+velocity/target diagnostics are included to validate this on the installed DLL.
+Predictive compatibility remains pending. Homing continuously corrects flight
+and is not fixed by retaining a target or applying noise only once.
+
+Runtime follow-up (2026-11-14): the player confirms beam sway. Firebolt casts
+and hits are recorded, but no corresponding launch-hook diagnostic appears,
+and impacts remain accurate. Version 0.1.4 removes that detour and uses the
+documented first-update fallback on MissileProjectile/GrenadeProjectile (slot
+0xAB). It rotates velocity/angles once and clears auto-aim/target fields;
+workers read an immutable main-thread snapshot of noise parameters. Look for
+`[aim] first-update` in the retest. Spread, lobbers, and TDM lock-on compatibility
+remain unconfirmed until that retest; the compiled result is not runtime proof.
 
 - Missile / lobber: **B** if check 1 passes; check 2 tells how to deal with TDM.
 - Beam: **A** if checks 4, 5, 6 pass; reuse the bow mechanism if check 3 finds one.
