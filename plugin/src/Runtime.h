@@ -1,6 +1,19 @@
 #pragma once
+#include <atomic>
+
 #include "Core.h"
 namespace runtime {
+// Game hooks must never let a C++ exception escape into engine code.
+template <class F>
+void guarded(const char* where, F&& f) noexcept {
+  try {
+    f();
+  } catch (const std::exception& e) {
+    static std::atomic<unsigned> count{0};
+    if (count.fetch_add(1, std::memory_order_relaxed) < 50)
+      spdlog::error("[boot] exception in {}: {}", where, e.what());
+  }
+}
 extern sp::Model model;
 void start();
 void message(SKSE::MessagingInterface::Message*);
@@ -11,9 +24,12 @@ void publishManagedSkills();
 void installAim();
 void resetAim();
 void setupUI();
-void refreshUI(float dt);
+void refreshAim(float dt);
 void closeUI();
 void reload();
+void reloadINI();
+// Managed actor values as a bit mask; safe to read from any thread.
+bool managed(RE::ActorValue);
 void synchronize();
 void initialize(bool force = false);
 void action(const char*);
@@ -24,7 +40,8 @@ extern DWORD mainThread;
 RE::ActorValue av(std::string_view);
 sp::Skill* skill(RE::ActorValue);
 bool ready(sp::Skill&);
-void award(std::string_view, double, std::string_view, double points = -1);
+void award(std::string_view, double, std::string_view, double points = -1,
+           bool recover = true);
 struct Classification {
   std::string school, form, direction, projectile;
   RE::ActorValue actorValue = RE::ActorValue::kNone;

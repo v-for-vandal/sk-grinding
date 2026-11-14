@@ -1,4 +1,4 @@
-﻿#include <unordered_map>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "Runtime.h"
@@ -9,6 +9,9 @@ namespace {
 std::array<RE::BGSKeyword*, 22> keywords{};
 std::unordered_map<RE::FormID, std::string> weapons;
 std::unordered_map<std::string, RE::BGSKeyword*> rules;
+// Per-spell result (spell-classifier.md: cached per spell); main thread only,
+// cleared on every resolveForms (config reload).
+std::unordered_map<RE::FormID, Classification> spells;
 RE::TESRace *werewolf = nullptr, *vampireLord = nullptr;
 RE::BGSKeyword *smelter = nullptr, *tanning = nullptr;
 RE::BGSKeyword* keyword(const std::string& key) {
@@ -20,6 +23,9 @@ bool has(RE::TESForm* item, RE::BGSKeyword* kw) {
   if (auto w = item->As<RE::TESObjectWEAP>()) return w->HasKeyword(kw);
   if (auto a = item->As<RE::TESObjectARMO>()) return a->HasKeyword(kw);
   if (auto e = item->As<RE::EffectSetting>()) return e->HasKeyword(kw);
+  // Multi-runtime CommonLib exposes ammo's conditional keyword base through
+  // an accessor; direct HasKeyword failed to compile on this Windows target.
+  if (auto m = item->As<RE::TESAmmo>()) return m->AsKeywordForm()->HasKeyword(kw);
   return false;
 }
 std::string school(RE::ActorValue av) {
@@ -31,6 +37,7 @@ std::string school(RE::ActorValue av) {
 void resolveForms() {
   weapons.clear();
   rules.clear();
+  spells.clear();
   auto dh = RE::TESDataHandler::GetSingleton();
   werewolf = dh->LookupForm<RE::TESRace>(0xCDD84, "Skyrim.esm");
   vampireLord = dh->LookupForm<RE::TESRace>(0x283A, "Dawnguard.esm");
@@ -114,9 +121,15 @@ std::string weaponKeyword(RE::TESObjectWEAP* w) {
       return std::string(sp::weaponClasses[i].keyword);
   return "fallback";
 }
+Classification classifyUncached(RE::SpellItem* spell);
 Classification classify(RE::SpellItem* spell) {
+  if (!spell) return {};
+  if (auto it = spells.find(spell->GetFormID()); it != spells.end())
+    return it->second;
+  return spells[spell->GetFormID()] = classifyUncached(spell);
+}
+Classification classifyUncached(RE::SpellItem* spell) {
   Classification c;
-  if (!spell) return c;
   auto e = spell->GetCostliestEffectItem();
   auto m = e ? e->baseEffect : nullptr;
   if (!m) return c;
@@ -236,12 +249,30 @@ void route(RE::ActorValue value, float points, RE::TESForm* source,
   raw *= model.settings.get("debug", "xp_mult");
   auto p = RE::PlayerCharacter::GetSingleton();
   auto left = p->GetEquippedObject(true), right = p->GetEquippedObject(false);
+  // Each sub-skill gets its XP; rust of each parent skill falls once below.
+  std::vector<sp::Skill*> parents;
   auto give = [&](std::string_view id, double scale = 1.) {
     award(id, raw * scale, origin,
           origin == "fixed"
               ? model.settings.get("debug", "fixed_xp_value") * scale
-              : points * scale);
+              : points * scale,
+          false);
+    sp::Skill* parent = nullptr;
+    if (model.find(std::string(id), &parent) && parent &&
+        std::find(parents.begin(), parents.end(), parent) == parents.end())
+      parents.push_back(parent);
   };
+  struct Recover {
+    std::vector<sp::Skill*>& parents;
+    double raw;
+    bool done = false;
+    void run() {
+      if (done) return;
+      done = true;
+      for (auto parent : parents) model.recover(*parent, raw);
+    }
+    ~Recover() { run(); }  // early returns below (the next tick synchronizes)
+  } recoverOnce{parents, raw};
   if (value == RE::ActorValue::kOneHanded ||
       value == RE::ActorValue::kTwoHanded) {
     auto race = p->GetRace();
@@ -362,6 +393,7 @@ void route(RE::ActorValue value, float points, RE::TESForm* source,
       give(prefix + "/standard");
     }
   }
+  recoverOnce.run();
   synchronize();
 }
 }  // namespace runtime

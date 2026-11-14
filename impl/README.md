@@ -42,7 +42,7 @@ blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](
 | [`weapon-class.md`](weapon-class.md): `SPO_WeapClass_*` keywords (KID) → weapon sub-skill | done (prototype; runtime pending) | *plugin-foundation* | R-19, R-20 |
 | [`spell-classifier.md`](spell-classifier.md): spell form, school sub-direction, archetype | done (prototype; runtime pending) | *plugin-foundation* | — |
 | [`status-ui.md`](status-ui.md): status and debug panel (PrismaUI) | done (prototype; runtime pending) | *subskill-state*, *main-skill-level*, *decay* | [frameworks §6](../refs/frameworks.md) |
-| [`mcm-config.md`](mcm-config.md): config files, MCM Debug page | done (prototype; runtime pending) | *plugin-foundation* | — |
+| [`mcm-config.md`](mcm-config.md): config files, MCM page (debug mode) | done (prototype; runtime pending) | *plugin-foundation* | — |
 
 ## Planned blocks (not written yet)
 

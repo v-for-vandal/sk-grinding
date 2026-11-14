@@ -35,6 +35,33 @@ Curve curve(const json& j, Curve c = {}) {
     throw std::runtime_error("invalid curve");
   return c;
 }
+// Keys of `defaults` missing in `user`, as dotted paths (only tables recurse).
+void missing(const json& defaults, const json& user, const std::string& prefix,
+             std::vector<std::string>& out) {
+  for (auto& [key, value] : defaults.items()) {
+    auto path = prefix.empty() ? key : prefix + "." + key;
+    if (!user.is_object() || !user.contains(key))
+      out.push_back(path);
+    else if (value.is_object())
+      missing(value, user.at(key), path, out);
+  }
+}
+void requireRows(const json& file, const char* table, const char* list,
+                 const char* name) {
+  if (!file.contains(table)) return;
+  if (!file.at(table).is_array())
+    throw std::runtime_error(std::string(name) + ": [[" + table +
+                             "]] is not an array of tables");
+  for (auto& row : file.at(table)) {
+    if (!row.contains("subskill") || !row.at("subskill").is_string() ||
+        !row.contains(list))
+      throw std::runtime_error(std::string(name) + ": row without subskill/" +
+                               list);
+    if (std::string_view(list) == "keyword" ? !row.at(list).is_string()
+                                            : !row.at(list).is_array())
+      throw std::runtime_error(std::string(name) + ": bad " + list);
+  }
+}
 }  // namespace
 void Model::loadConfig(const std::string& root, bool builtIn) {
   Model next;
@@ -42,8 +69,23 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
     return convert(builtIn ? toml::parse(defaults.at(name), name)
                            : toml::parse_file(root + "/" + name));
   };
-  next.settings.values = parse("SkillPractice.toml");
+  // Runtime code reads settings with .at(): a key missing in the user's file
+  // must not throw later inside a game hook. Fill it from the compiled copy.
+  auto settings = parse("SkillPractice.toml");
+  std::vector<std::string> absent;
+  if (!builtIn) {
+    auto compiled =
+        convert(toml::parse(std::string_view(defaults.at("SkillPractice.toml")),
+                              std::string_view("defaults")));
+    missing(compiled, settings, "", absent);
+    compiled.merge_patch(settings);
+    settings = std::move(compiled);
+  }
+  next.settings.values = std::move(settings);
   next.settings.values["configWarnings"] = json::array();
+  for (auto& key : absent)
+    next.settings.values["configWarnings"].push_back(
+        "SkillPractice.toml: missing " + key + ", using built-in default");
   int cap = int(next.settings.get("xp", "hard_cap"));
   if (next.settings.get("aim", "missile_L0") <= 0 ||
       next.settings.get("aim", "beam_L0") <= 0 ||
@@ -141,6 +183,11 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
   if (next.skills.empty()) throw std::runtime_error("no skill configurations");
   next.settings.values["materials"] = parse("smithing-materials.toml");
   next.settings.values["directions"] = parse("magic-directions.toml");
+  requireRows(next.settings.values["materials"], "material", "keyword",
+              "smithing-materials.toml");
+  for (auto school : {"destruction", "restoration"})  // read at runtime
+    requireRows(next.settings.values["directions"], school, "keywords",
+                "magic-directions.toml");
   if (!skills.empty()) next.restore(save());
   *this = std::move(next);
 }

@@ -59,9 +59,13 @@ config ([`decay.md`](decay.md) for the ramp and the time source):
 
 - tick (`dt` active hours, already × `debug.time_scale`): `U_main += dt` (≤ `idle_max_hours`);
   `R += r × ∫ ramp(U_main) dt` (same closed form as sub-skill decay);
-- XP award to any sub-skill of the skill (`raw`, before zone multipliers):
-  `R = max(0, R − c × raw)` with `c = r / (q × pace_skill)`, and
-  `U_main = max(0, U_main − raw / (q × pace_skill))`;
+- once per vanilla award (one engine skill use), for every main skill that is the parent of a
+  sub-skill the award fed, with the award's `raw` (before zone multipliers and before per-sub-skill
+  factors such as the bash shield share): `R = max(0, R − c × raw)` with
+  `c = r / (q × pace_skill)`, and `U_main = max(0, U_main − raw / (q × pace_skill))`. **Not once
+  per sub-skill** (decided): a spell feeds three sub-skills and a craft two, which would make rust
+  recover 3× / 2× faster than with a weapon hit for the same vanilla points. A debug *Give XP*
+  to one sub-skill counts as one award;
 - prototype cap: `R ≤ max_i(peak_i − effectiveFloor_i)` (beyond that it changes nothing and
   would only slow down the recovery);
 - cross-links do not touch `R` (§4.4.3); none exist in prototype 1 anyway.

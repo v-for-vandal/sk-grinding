@@ -67,8 +67,9 @@ in prototype 1):
    clamp to `floor_cap` (as a level: at `floor_cap` progress = 0) and to `≤ current`.
 5. `potential = max(potential, current)`; `peak = max(peak, current)`.
 6. Idle meter: `U = max(0, U − c_dec × raw)`, `c_dec = 1 / (q × pace_sub)` ([`decay.md`](decay.md)).
-7. Tell the main skill: `onSubSkillXP(main, raw)` reduces rust and `U_main`, then recomputes the
-   main level ([`main-skill-level.md`](main-skill-level.md)).
+7. Tell the main skill: rust and `U_main` are reduced **once per vanilla award**, not per
+   sub-skill (the router calls `Model::recover` after all sub-skills of the award); then the main
+   level is recomputed ([`main-skill-level.md`](main-skill-level.md)).
 8. Log one `[xp]` line if `xp_verbose` ([`plugin-foundation.md`](plugin-foundation.md)): id, raw,
    zone multiplier(s), level before → after (as floats), floor, potential, peak, U, source.
 

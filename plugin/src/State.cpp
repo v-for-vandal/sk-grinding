@@ -8,6 +8,7 @@ namespace {
 constexpr std::uint32_t subsTag = 0x53554253, mainTag = 0x4D41494E,
                         timeTag = 0x54494D45, statTag = 0x53544154;
 bool restored = false, failedSave = false;
+std::atomic<std::uint64_t> managedMask{0};
 void ensureMCM() {
   auto q = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(
       0x816, "SkillPractice.esp");
@@ -143,7 +144,9 @@ void readINI(const std::string& path) {
                      value.dump());
       old = value;
     };
-    if (section == "Debug") {
+    if (section == "General") {
+      if (key == "bDebugMode") set("ui", "debug_mode", v != 0);
+    } else if (section == "Debug") {
       if (key == "iXpMult") {
         constexpr int a[]{1, 10, 100};
         if (v >= 0 && v < 3) set("debug", "xp_mult", a[v]);
@@ -189,6 +192,17 @@ sp::Skill* skill(RE::ActorValue value) {
     if (av(sk.av) == value) return &sk;
   return nullptr;
 }
+bool managed(RE::ActorValue value) {
+  auto i = int(value);
+  return i >= 0 && i < 64 &&
+         (managedMask.load(std::memory_order_acquire) >> i & 1);
+}
+void reloadINI() {
+  readINI("Data/MCM/Config/SkillPractice/settings.ini");
+  readINI("Data/MCM/Settings/SkillPractice.ini");
+  auto level = model.settings.values["log"]["level"].get<std::string>();
+  spdlog::set_level(spdlog::level::from_str(level));
+}
 void reload() {
   try {
     try {
@@ -202,10 +216,10 @@ void reload() {
     }
     for (auto& warning : model.settings.values["configWarnings"])
       spdlog::warn("[cfg] {}", warning.get<std::string>());
-    readINI("Data/MCM/Config/SkillPractice/settings.ini");
-    readINI("Data/MCM/Settings/SkillPractice.ini");
-    auto level = model.settings.values["log"]["level"].get<std::string>();
-    spdlog::set_level(spdlog::level::from_str(level));
+    std::uint64_t mask = 0;
+    for (auto& sk : model.skills) mask |= std::uint64_t{1} << int(av(sk.av));
+    managedMask.store(mask, std::memory_order_release);
+    reloadINI();
     for (auto& [group, values] : model.settings.values.items())
       for (auto& [key, value] : values.items())
         spdlog::debug("[cfg] {}.{}={}", group, key, value.dump());
@@ -236,8 +250,10 @@ bool ready(sp::Skill& sk) {
     if (!model.raceClosed) return false;
     auto p = RE::PlayerCharacter::GetSingleton();
     model.initialize(sk, p->AsActorValueOwner()->GetBaseActorValue(av(sk.av)));
+    double floor = 0;
+    for (auto& s : sk.subs) floor = std::max(floor, s.initial);
     spdlog::info("[init] skill={} base={} floor={} count={}", sk.av, sk.base,
-                 sk.subs.empty() ? 0 : sk.subs[0].initial, sk.subs.size());
+                 floor, sk.subs.size());
   }
   model.pendingInit = std::any_of(model.skills.begin(), model.skills.end(),
                                   [](auto& s) { return !s.initialized; });
@@ -273,9 +289,9 @@ void synchronize() {
       }
       double f = sk.computed(model.settings.get("main", "min_level"),
                              model.settings.get("main", "max_level")),
-             n = sk.written;
-      while (f >= n + model.settings.get("main", "hysteresis_up")) ++n;
-      while (f < n - model.settings.get("main", "hysteresis_down")) --n;
+             n = sp::hysteresis(f, sk.written,
+                                model.settings.get("main", "hysteresis_up"),
+                                model.settings.get("main", "hysteresis_down"));
       if (n != sk.written && model.settings.flag("main", "write_main_skills")) {
         owner->SetBaseActorValue(value, static_cast<float>(n));
         std::string msg =
@@ -289,7 +305,7 @@ void synchronize() {
     }
 }
 void award(std::string_view id, double raw, std::string_view origin,
-           double points) {
+           double points, bool recover) {
   sp::Skill* sk = nullptr;
   auto s = model.find(std::string(id), &sk);
   if (!s) {
@@ -302,7 +318,7 @@ void award(std::string_view id, double raw, std::string_view origin,
       "xp", before < s->floor.value(s->curve)       ? "zone_catch_up"
             : before < s->potential.value(s->curve) ? "zone_recall"
                                                     : "zone_new");
-  model.award(std::string(id), raw);
+  model.award(std::string(id), raw, recover);
   if (model.settings.flag("log", "xp_verbose"))
     spdlog::info(
         "[xp] t={} src={} skill={} sub={} pts={} raw={} z_start={} cur={}->{} "

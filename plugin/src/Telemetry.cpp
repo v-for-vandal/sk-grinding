@@ -134,14 +134,16 @@ void use(RE::Actor* who, RE::ActorValue av, float points, RE::TESForm* arg) {
       spdlog::debug(
           "[use] deferred received_us={} av={} pts={} arg={:08X} thread={}",
           received, int(av), points, id, GetCurrentThreadId());
-      processUse(RE::PlayerCharacter::GetSingleton(), av, points,
-                 id ? RE::TESForm::LookupByID(id) : nullptr, received);
+      guarded("deferred UseSkill", [&] {
+        processUse(RE::PlayerCharacter::GetSingleton(), av, points,
+                   id ? RE::TESForm::LookupByID(id) : nullptr, received);
+      });
     });
     // On overload, preserve the engine path rather than silently losing XP.
     if (!queued) originalUse(who, av, points, arg);
     return;
   }
-  processUse(who, av, points, arg, received);
+  guarded("UseSkill", [&] { processUse(who, av, points, arg, received); });
 }
 void drain(bool force = false) {
   auto now = stamp();
@@ -178,6 +180,7 @@ void drain(bool force = false) {
       ++it;
   }
 }
+void updateOnMain(float, bool);
 void update(RE::PlayerCharacter* player, float dt) {
   const bool probe =
       loaded && !firstLoadedUpdate && GetCurrentThreadId() == mainThread;
@@ -192,7 +195,18 @@ void update(RE::PlayerCharacter* player, float dt) {
     spdlog::default_logger()->flush();
   }
   ++frame;
-  if (GetCurrentThreadId() != mainThread) return;
+  if (GetCurrentThreadId() != mainThread) {
+    static std::atomic<bool> warned{false};
+    if (!warned.exchange(true))
+      spdlog::warn(
+          "[boot] player update on thread={} but main thread={}; this update "
+          "is ignored",
+          GetCurrentThreadId(), mainThread);
+    return;
+  }
+  guarded("PlayerUpdate", [&] { updateOnMain(dt, probe); });
+}
+void updateOnMain(float dt, bool probe) {
   eventQueue.drain();
   if (!loaded) return;
   if (!telemetryOnly) drain();
@@ -251,11 +265,11 @@ void update(RE::PlayerCharacter* player, float dt) {
   }
   if (probe) {
     spdlog::info(
-        "[load] first player update: model complete; aim/UI begin paused={}",
+        "[load] first player update: model complete; aim begins paused={}",
         paused);
     spdlog::default_logger()->flush();
   }
-  if (!telemetryOnly) refreshUI(paused ? 0 : dt);
+  if (!telemetryOnly) refreshAim(paused ? 0 : dt);
   if (probe) {
     spdlog::info("[load] first player update: complete");
     spdlog::default_logger()->flush();
@@ -273,35 +287,37 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
       enqueueEvent([this, copy] { ProcessEvent(&copy, nullptr); });
       return RE::BSEventNotifyControl::kContinue;
     }
-    if (!e) return RE::BSEventNotifyControl::kContinue;
-    auto p = RE::PlayerCharacter::GetSingleton();
-    bool isBash = e->flags.any(RE::TESHitEvent::Flag::kBashAttack);
-    if (e->cause.get() == p) {
-      hit = {e->source, stamp(), false, isBash};
-      context("hit", hit);
-      if (isBash) bashCtx = hit;
-      if (!telemetryOnly && model.settings.flag("debug", "fixed_xp")) {
-        auto f = RE::TESForm::LookupByID(e->source);
-        auto w = f ? f->As<RE::TESObjectWEAP>() : nullptr;
-        if (isBash)
-          route(RE::ActorValue::kBlock, 0, f, "fixed", true);
-        else if (!f || w) {
-          auto sub = weapon(w);
-          if (sub.starts_with("1h-"))
-            route(RE::ActorValue::kOneHanded, 0, f, "fixed");
-          else if (sub.starts_with("2h-"))
-            route(RE::ActorValue::kTwoHanded, 0, f, "fixed");
+    guarded("event", [&] {
+      if (!e) return;
+      auto p = RE::PlayerCharacter::GetSingleton();
+      bool isBash = e->flags.any(RE::TESHitEvent::Flag::kBashAttack);
+      if (e->cause.get() == p) {
+        hit = {e->source, stamp(), false, isBash};
+        context("hit", hit);
+        if (isBash) bashCtx = hit;
+        if (!telemetryOnly && model.settings.flag("debug", "fixed_xp")) {
+          auto f = RE::TESForm::LookupByID(e->source);
+          auto w = f ? f->As<RE::TESObjectWEAP>() : nullptr;
+          if (isBash)
+            route(RE::ActorValue::kBlock, 0, f, "fixed", true);
+          else if (!f || w) {
+            auto sub = weapon(w);
+            if (sub.starts_with("1h-"))
+              route(RE::ActorValue::kOneHanded, 0, f, "fixed");
+            else if (sub.starts_with("2h-"))
+              route(RE::ActorValue::kTwoHanded, 0, f, "fixed");
+          }
         }
       }
-    }
-    if (e->target.get() == p &&
-        e->flags.any(RE::TESHitEvent::Flag::kHitBlocked)) {
-      blockCtx = {e->source, stamp()};
-      context("blocked", blockCtx);
-      if (!telemetryOnly && model.settings.flag("debug", "fixed_xp"))
-        route(RE::ActorValue::kBlock, 0, nullptr, "fixed");
-    }
-    if (!telemetryOnly) drain();
+      if (e->target.get() == p &&
+          e->flags.any(RE::TESHitEvent::Flag::kHitBlocked)) {
+        blockCtx = {e->source, stamp()};
+        context("blocked", blockCtx);
+        if (!telemetryOnly && model.settings.flag("debug", "fixed_xp"))
+          route(RE::ActorValue::kBlock, 0, nullptr, "fixed");
+      }
+      if (!telemetryOnly) drain();
+    });
     return RE::BSEventNotifyControl::kContinue;
   }
   RE::BSEventNotifyControl ProcessEvent(
@@ -312,17 +328,19 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
       enqueueEvent([this, copy] { ProcessEvent(&copy, nullptr); });
       return RE::BSEventNotifyControl::kContinue;
     }
-    if (e && e->object.get() == RE::PlayerCharacter::GetSingleton()) {
-      cast = {e->spell, stamp()};
-      context("cast", cast);
-      auto f = RE::TESForm::LookupByID<RE::SpellItem>(e->spell);
-      if (!telemetryOnly && f) {
-        auto c = classify(f);
-        if (model.settings.flag("debug", "fixed_xp"))
-          route(c.actorValue, 0, f, "fixed");
-        drain();
+    guarded("event", [&] {
+      if (e && e->object.get() == RE::PlayerCharacter::GetSingleton()) {
+        cast = {e->spell, stamp()};
+        context("cast", cast);
+        auto f = RE::TESForm::LookupByID<RE::SpellItem>(e->spell);
+        if (!telemetryOnly && f) {
+          auto c = classify(f);
+          if (model.settings.flag("debug", "fixed_xp"))
+            route(c.actorValue, 0, f, "fixed");
+          drain();
+        }
       }
-    }
+    });
     return RE::BSEventNotifyControl::kContinue;
   }
   RE::BSEventNotifyControl ProcessEvent(
@@ -333,16 +351,19 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
       enqueueEvent([this, copy] { ProcessEvent(&copy, nullptr); });
       return RE::BSEventNotifyControl::kContinue;
     }
-    if (e && e->item) {
-      craft = {e->item->GetFormID(), stamp()};
-      context("craft", craft);
-      auto ui = RE::UI::GetSingleton();
-      if (!telemetryOnly && ui && ui->IsMenuOpen(RE::CraftingMenu::MENU_NAME)) {
-        if (model.settings.flag("debug", "fixed_xp"))
-          route(RE::ActorValue::kSmithing, 0, e->item, "fixed");
-        drain();
+    guarded("event", [&] {
+      if (e && e->item) {
+        craft = {e->item->GetFormID(), stamp()};
+        context("craft", craft);
+        auto ui = RE::UI::GetSingleton();
+        if (!telemetryOnly && ui &&
+            ui->IsMenuOpen(RE::CraftingMenu::MENU_NAME)) {
+          if (model.settings.flag("debug", "fixed_xp"))
+            route(RE::ActorValue::kSmithing, 0, e->item, "fixed");
+          drain();
+        }
       }
-    }
+    });
     return RE::BSEventNotifyControl::kContinue;
   }
   RE::BSEventNotifyControl ProcessEvent(
@@ -353,19 +374,21 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
       enqueueEvent([this, copy] { ProcessEvent(&copy, nullptr); });
       return RE::BSEventNotifyControl::kContinue;
     }
-    if (e && e->holder == RE::PlayerCharacter::GetSingleton()) {
-      std::string tag = e->tag.c_str();
-      if (tag == "weaponSwing" || tag == "weaponLeftSwing") {
-        swing = {0, stamp(), tag == "weaponLeftSwing"};
-        auto item =
-            RE::PlayerCharacter::GetSingleton()->GetEquippedObject(swing.left);
-        swing.form = item ? item->GetFormID() : 0;
-        context(tag.c_str(), swing);
-      } else if (tag == "bashRelease" || tag == "bashPowerStart") {
-        bashCtx = {0, stamp(), false, true};
-        context(tag.c_str(), bashCtx);
+    guarded("event", [&] {
+      if (e && e->holder == RE::PlayerCharacter::GetSingleton()) {
+        std::string tag = e->tag.c_str();
+        if (tag == "weaponSwing" || tag == "weaponLeftSwing") {
+          swing = {0, stamp(), tag == "weaponLeftSwing"};
+          auto item = RE::PlayerCharacter::GetSingleton()->GetEquippedObject(
+              swing.left);
+          swing.form = item ? item->GetFormID() : 0;
+          context(tag.c_str(), swing);
+        } else if (tag == "bashRelease" || tag == "bashPowerStart") {
+          bashCtx = {0, stamp(), false, true};
+          context(tag.c_str(), bashCtx);
+        }
       }
-    }
+    });
     return RE::BSEventNotifyControl::kContinue;
   }
   RE::BSEventNotifyControl ProcessEvent(
@@ -376,15 +399,17 @@ class Events : public RE::BSTEventSink<RE::TESHitEvent>,
       enqueueEvent([this, copy] { ProcessEvent(&copy, nullptr); });
       return RE::BSEventNotifyControl::kContinue;
     }
-    if (e) {
-      spdlog::debug("[ctx] t_us={} frame={} menu={} open={}", stamp(), frame,
-                    e->menuName.c_str(), e->opening);
-      if (e->menuName == RE::RaceSexMenu::MENU_NAME && !e->opening)
-        model.raceClosed = true;
-      if (e->menuName == RE::JournalMenu::MENU_NAME && !e->opening &&
-          !telemetryOnly)
-        reload();
-    }
+    guarded("event", [&] {
+      if (e) {
+        spdlog::debug("[ctx] t_us={} frame={} menu={} open={}", stamp(), frame,
+                      e->menuName.c_str(), e->opening);
+        if (e->menuName == RE::RaceSexMenu::MENU_NAME && !e->opening)
+          model.raceClosed = true;
+        if (e->menuName == RE::JournalMenu::MENU_NAME && !e->opening &&
+            !telemetryOnly)
+          reloadINI();  // MCM lives in the journal; TOML only on reloadConfig
+      }
+    });
     return RE::BSEventNotifyControl::kContinue;
   }
 };

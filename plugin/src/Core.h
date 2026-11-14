@@ -63,12 +63,16 @@ struct Model {
   void loadConfig(const std::string& root, bool builtIn = false);
   void initialize(Skill&, double base);
   Sub* find(const std::string& id, Skill** parent = nullptr);
-  void award(const std::string& id, double raw);
+  // recover = false: the caller lowers rust once per vanilla event (recover()).
+  void award(const std::string& id, double raw, bool recover = true);
+  void recover(Skill&, double raw);
   void tick(double hours);
   json save() const;
   void restore(const json&);
   json snapshot() const;
 };
 double ramp(double idle, double grace, double end);
+// Written integer level n after hysteresis (impl/main-skill-level.md).
+double hysteresis(double F, double n, double up, double down);
 double rampIntegral(double idle, double dt, double grace, double end);
 }  // namespace sp

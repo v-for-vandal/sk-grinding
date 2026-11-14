@@ -52,14 +52,14 @@ debug_missile_yaw_deg = 0.0 # R-26 check 1 only: set to 10 for a fixed offset; 0
 
 [ui]                         # impl/status-ui.md (PrismaUI)
 toggle_key = 0x41            # DX scan code of the panel hotkey (0x41 = F7)
-refresh_ms = 250             # snapshot interval while the panel is open
 inspector  = false           # Ultralight inspector for the view (debugging the page)
+debug_mode = false           # MCM "Debug mode": Debug tab, debug view and debug MCM controls
 
 [log]                        # impl/plugin-foundation.md
 level      = "info"          # trace | debug | info | warn | error
 xp_verbose = false           # one [xp] line per XP award
 
-[debug]                      # impl/mcm-config.md (Debug page)
+[debug]                      # impl/mcm-config.md (MCM, shown in debug mode)
 xp_mult             = 1      # 1, 10 or 100: multiplies raw XP of every managed sub-skill
 fixed_xp            = false  # "Make all XP equal to 100": awards from our events, raw = fixed_xp_value (impl/xp-capture.md)
 fixed_xp_value      = 100

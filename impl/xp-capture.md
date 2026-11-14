@@ -94,7 +94,7 @@ the fallback of the skill below and log `[ctx] unresolved` at warn level.
   class parent, bow → `bow-smithing`, crossbow → `crossbow-smithing`; ammo: arrow →
   `bow-smithing`, bolt → `crossbow-smithing`; armor: `heavy-armor-smithing` /
   `light-armor-smithing` by armor type, clothing → `clothing-smithing`; anything else: no
-  category.
+  category. Material keywords are read from weapons, armor and ammo (ammo since 0.1.4).
 - **Jewelry:** an armor item in the ring, amulet or circlet slot (biped slots 36, 35, 42) that is
   clothing (not light / heavy armor) → only `jewelry`, no material, no category (Q-SMI-7).
 - Prototype simplification: both sub-skills get `raw` (the vanilla points, i.e. LoreRim's

@@ -49,7 +49,8 @@ python scripts/prototype-reference.py
 ```
 
 For browser checks, serve `ui/` over localhost and open `/test.html`; its result
-must say PASS. `PracticeTests config ui/mock.json` refreshes the sample snapshot.
+must say PASS. For the panel with the live model (no game), run
+`python tools/ui-sim/serve.py` after the build: see `tools/ui-sim/README.md`. `PracticeTests config ui/mock.json` refreshes the sample snapshot.
 Mock/test files are excluded from the MO2 package.
 
 Do not claim runtime checks have passed based on a clean build. Follow

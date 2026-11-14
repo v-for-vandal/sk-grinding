@@ -108,9 +108,15 @@ LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which L
 
 - 0.1.4 routes worker-thread managed skill awards through the bounded player
   update queue, delays Block routing for hit context, and changes missile aim
-  to MissileProjectile/GrenadeProjectile first-update hooks. Pure queue tests
+  to MissileProjectile/GrenadeProjectile first-update hooks (superseded by
+  post-velocity hooks in 0.1.5 for TDM Predictive). Pure queue tests
   cover worker production, exactly-once main-thread delivery, overflow, clearing
   and nested posting. Gameplay results require an in-game retest.
+- 0.1.4: every hook and event-sink body runs inside `runtime::guarded` (`Runtime.h`): a C++
+  exception is logged as `[boot] exception in <where>` and never reaches engine code. The
+  compiled config copy (`Defaults.h`) is generated as byte arrays (MSVC limits one string
+  literal to ~16 KB) and is regenerated when any `config/*.toml` changes. A player update on
+  a thread other than the recorded main thread is logged once.
 
 - 0.1.3 load-hang fix: the 0.1.2 minidump shows worker thread 9768 in
   `Events::ProcessEvent -> SKSE::TaskInterface::AddTask`, while the recorded

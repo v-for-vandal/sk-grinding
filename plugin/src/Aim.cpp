@@ -138,7 +138,7 @@ void getMissileVelocity(RE::Projectile* p, RE::NiPoint3& output) {
   // prediction after its own predecessor; chain it first, then add our error.
   // Target/velocity diagnostics verify this order against the installed DLL.
   missileVelocity(p, output);
-  perturb(p, output, before, target);
+  guarded("projectile velocity", [&] { perturb(p, output, before, target); });
 }
 void getGrenadeVelocity(RE::Projectile* p, RE::NiPoint3& output) {
   // Lobbers share the one-shot noise rule and must also preserve target state.
@@ -146,7 +146,7 @@ void getGrenadeVelocity(RE::Projectile* p, RE::NiPoint3& output) {
   const auto target =
       p->GetProjectileRuntimeData().desiredTarget.native_handle();
   grenadeVelocity(p, output);
-  perturb(p, output, before, target);
+  guarded("projectile velocity", [&] { perturb(p, output, before, target); });
 }
 }  // namespace
 void resetAim() {

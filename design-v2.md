@@ -140,7 +140,8 @@ gameplay event
   → current XP += result; own floor XP += floorRate × result   (§5.4)
   → potential = max(potential, current)
   → peak XP = max(peak XP, current XP)
-  → main skill: reduce idle meter U_main and rust R by raw XP; recompute main level,
+  → main skill: reduce idle meter U_main and rust R by raw XP, once per award even when it
+    feeds several sub-skills; recompute main level,
     write it with hysteresis                                    (§4.4)
   → re-evaluate sub-skill perks (with hysteresis)              (§5.6)
 ```
@@ -825,6 +826,10 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
 - **Q-UI-2.** Fallback if PrismaUI turns out problematic in Lorerim (input focus, HUD, other
   DLLs): SKSE Menu Framework (ImGui, already installed) as plan B — ok?
   - **A:**
+- **Decided:** the panel pauses the game while it is open and shows a snapshot taken when it
+  opens and after each of its own actions; there is no live refresh. Simpler and cheaper
+  (Ultralight renders on the CPU); nothing else changes the values while the game is paused.
+  Details: [`impl/status-ui.md`](impl/status-ui.md) *Data flow*.
 - **Q-UI-3.** Notifications: show a message when a sub-skill perk activates/deactivates, when a
   sub-skill starts decaying, when it reaches a new level?
   - **A:**

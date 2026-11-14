@@ -1,0 +1,99 @@
+# Prototype 1: code review 2026-11-14 and 0.1.4 follow-up
+
+## Windows integration follow-up (2026-11-14)
+
+Merged with local commit `8fe97b6`, retaining the 0.1.5 post-velocity aim hook,
+immutable worker cache, FormID-only deferred awards, bounded queue and 50 ms bash
+correlation. Thus the missile and stale-bash findings below describe the older
+review baseline; Predictive compatibility still needs an in-game retest.
+
+- Release DLL and PracticeSim build under MSVC; CTest passes.
+- Fixed R4's Windows compilation error: multi-runtime CommonLib requires
+  `TESAmmo::AsKeywordForm()->HasKeyword(...)`.
+- Plugin metadata now uses `PROJECT_VERSION` (0.1.5), matching the boot log.
+- Retained guarded main-thread processing and added guards around post-velocity
+  perturbation and deferred UseSkill processing when resolving overlapping fixes.
+- PracticeSim accepts a snapshot request and returns six skills without errors.
+- ESP generation/readback and Papyrus compilation pass. UI/MCM rendering, ammo
+  routing, rust recovery and TDM behaviour still require game verification.
+
+A static review of `prototype1` at `45dd9a6`. The fixes below were made on a Linux machine
+**without MSVC and without the game**. The pure core (`Core.cpp`, `Config.cpp`, `CoreTests.cpp`)
+was built with g++ and its tests pass. The game-side sources (`Telemetry.cpp`, `State.cpp`,
+`Aim.cpp`, `Classification.cpp`) were **not compiled**.
+
+## 1. First: build on Windows
+
+- Build the Release DLL and the tests with the commands in [`plugin/README.md`](../plugin/README.md).
+  Fix any compile errors in the files listed above; keep the behaviour described in section 2.
+- Expect `[boot] SkillPractice 0.1.4` in the log.
+
+## 2. Done in 0.1.4 (blind): check in game
+
+| # | Change | Files | How to check |
+|---|---|---|---|
+| R1 | A managed-skill `UseSkill` call on a worker thread is suppressed and replayed on the main thread by the next player update (the same FIFO as the deferred context events). Before, it passed through and leaked vanilla XP, which `synchronize()` then counted as an external change of the main skill. Unmanaged skills still pass through at once. | `Telemetry.cpp` (`use`, `useOnMain`), `State.cpp` (`managed`) | log level debug: look for `[use] deferred from thread=`; after such lines there must be `[xp]` lines and **no** `[main] external` lines during normal play. |
+| R3 | Hooks and event sinks run inside `runtime::guarded`: an exception is logged as `[boot] exception in <where>` and does not reach engine code. A key missing in the user's `SkillPractice.toml` is taken from the compiled copy (`[cfg] … missing …, using built-in default`). Rows of the materials / directions files are checked at load. | `Runtime.h`, `Config.cpp`, `Telemetry.cpp`, `Aim.cpp` | delete one key (e.g. `context_window_ms`) from the installed TOML: one `[cfg]` warning at start, the game works. No `[boot] exception` lines in a normal session. |
+| R4 | Smithing material keywords are now also read from ammo (before: arrows and bolts always went to `other-smithing`). | `Classification.cpp` (`has`) | craft arrows of a material listed in `smithing-materials.toml`: the material sub-skill gets XP. If LoreRim's ammo has no `WeapMaterial*` keywords, report it (then this needs a design decision). |
+| R6 | Closing the journal re-reads only the MCM INI files (`reloadINI`), not all TOML files. | `Telemetry.cpp`, `State.cpp` | change an MCM value, close the journal: one `[cfg]` line, **no** `[cfg] normalization` lines; the panel's *External* counter is not reset. |
+| R7 | `Defaults.h` is generated as byte arrays (MSVC C2026 limit ~16 KB per string literal; `smithing-materials.toml` was 13.9 KB) and is regenerated when any `config/*.toml` changes. | `CMakeLists.txt` | the build passes; the test *compiled defaults match repository TOML* passes after editing a TOML without a manual reconfigure. |
+| R8 | Test: `WeaponClasses.h` order equals `tools/esp-gen/keywords.json` (FormID = 0x800 + index). | `CoreTests.cpp` | `PracticeTests` passes. |
+| R9 | A player update on a thread other than the recorded main thread is logged once as a warning (before: the plugin silently did nothing). | `Telemetry.cpp` | no such warning in a normal session. |
+| R10 | `classify()` is cached per spell FormID (cleared on config reload); the `[init]` line shows the highest start floor of the skill (before: the first sub-skill's, possibly a concept one at 0); UTF-8 BOMs removed from three sources. | `Classification.cpp`, `State.cpp` | `[spell]` dump unchanged compared with 0.1.3. |
+
+## 2a. New: UI simulator
+
+- `PracticeSim` (new CMake target) and [`tools/ui-sim/`](../tools/ui-sim/README.md) were built
+  and checked on Linux (g++, headless Firefox). On Windows: after the build, run
+  `python tools/ui-sim/serve.py`, open `http://127.0.0.1:8077/`, press *Sword hit* with
+  *Repeat* 100: One-Handed rises in the panel. Fix MSVC-only compile errors if any.
+- Optional for the panel author: a debug action / hotkey that calls
+  `api->Invoke(view, "location.reload()")` to pick up edited `app.js` / `style.css` in game
+  without a restart.
+
+## 2b. New: bar view and MCM debug mode
+
+- The panel now opens on a bar per sub-skill; the old table is the *Debug view*. MCM has one page
+  *Settings* with the toggle *Debug mode* (`[General] bDebugMode` → `ui.debug_mode`, snapshot
+  field `debugMode`); the other controls are in its group (`groupCondition: 1`,
+  `groupBehavior: "hide"`). Check in game: with Debug mode off, MCM shows only the toggle and the
+  panel shows no summary line, no tabs and no *Debug view* checkbox; on, everything is back
+  (after closing the Journal). If MCM Helper ignores `groupBehavior`, the controls are only
+  greyed out: acceptable, report it.
+- Bar tooltips are our own DOM element driven by `mousemove` (not `title`). Check in game that
+  hovering a bar part shows its text (*Drilled into the bones* / *Learned* / *Been there once*)
+  and that it stays while the panel refreshes.
+- `UI.cpp` (blind): no periodic refresh any more (decided, design-v2 §12.1): the snapshot is sent
+  on open and after each panel action; `refreshUI` is gone, the player update calls `refreshAim`
+  directly; `ui.refresh_ms` removed. Check: values change after *Give XP*; F7 close and reopen
+  shows changes made while the panel was closed.
+
+## 3. Open: for the Windows agent
+
+- **Missile noise has no effect** (player report 2026-11-12). Suspected cause: `Projectile::Launch`
+  applies noise only on the recorded main thread (`Aim.cpp`), and player spell launches may run on
+  another thread. Steps:
+  1. Read the first 20 `[aim] player launch thread=… main=…` lines of a session where Ice Spike /
+     Firebolt are cast. If `thread != main`, that is the cause; also check whether
+     `[aim] classified` lines appear at all.
+  2. If so: compute the per-school missile σ on the main thread (each player update) and keep it
+     in atomics; in the hook, decide "missile form" without touching the model (e.g. a per-spell
+     form cache filled on the main thread at equip / cast and read under a lock), then apply the
+     noise on any thread. Do not read `model` from a worker thread.
+  3. If the threads match: the engine overrides `angleX` / `angleZ` later; look at what else in
+     `LaunchData` sets the direction (origin / contact normal, `useOrigin`, the caster's
+     aim) and log it before and after `original`.
+  Record the result in [R-26](../research/R-26-spell-aim.md) and
+  [`impl/spell-aim-inaccuracy.md`](../impl/spell-aim-inaccuracy.md).
+
+## 4. Decided after the review: rust once per award (done in 0.1.4, blind)
+
+- The owner decided: rust `R` and `U_main` fall **once per vanilla award**, by its raw, for each
+  parent main skill of the sub-skills it fed, not once per sub-skill. `Model::recover` (Core),
+  `route` collects the parents and calls it once (`Classification.cpp`). Pure test added.
+- Check in game: with *Forgetting speed* ×1000 and *No grace*, let Destruction rust, then cast
+  spells and compare how fast `R` falls in the panel with One-Handed for similar `[xp] raw`.
+
+## 5. Noted, not changed
+
+- The bash context lives `context_window_ms` (750 ms): a block right after a bash counts as a bash.
