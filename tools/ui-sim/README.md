@@ -10,6 +10,11 @@ For fast work on the panel and on the balance of the numbers.
 - **Real:** sub-skill XP, zones, floors, potential, peak, decay, rust (once per award), the main
   level formula and the written level with hysteresis, config loading and *Reload TOML*. The
   panel's own buttons (*Give XP*, *Set current*, *Re-initialize all*, *Reload config*) work.
+- **Real, from prototype 2 core:** cross-links and the Alteration floor (`effFloor`, `floorFrom`
+  per sub-skill) and perk requirement formulas (`requirements` in the snapshot). The level of a
+  main skill the plugin does not manage (Alteration, HeavyArmor, …) is set with the action
+  `{"action": "external", "av": "Alteration", "level": 50}` (in the game: the player's base
+  actor value).
 - **Simulated:** player actions. A preset ([`presets.json`](presets.json)) names the sub-skills
   directly (what `runtime::route` would pick) and the vanilla use points, which are
   **placeholders until R-17**. The *Points* field overrides them.

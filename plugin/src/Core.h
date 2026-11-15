@@ -6,6 +6,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+
+#include "Requirements.h"
 namespace sp {
 using json = nlohmann::json;
 struct Curve {
@@ -22,6 +24,12 @@ struct LevelXP {
   void add(double xp, const Curve&, int cap);
   void subtract(double levels, const Curve&, const LevelXP& floor);
 };
+// Cross-link into a sub-skill (design-v2 §6, impl/cross-links.md): the own floor of the
+// sub-skill at (skill, sub), an index into Model::all(), times c.
+struct LinkIn {
+  int skill = 0, sub = 0;
+  double c = 0;
+};
 struct Sub {
   std::string id, group;
   Curve curve;
@@ -33,6 +41,8 @@ struct Sub {
   // Shown in the panel only (impl/status-ui.md *Effects and automatic perks*):
   // continuous effects (from [[effect]] and [aim]) and automatic perks.
   json effects = json::array(), perks = json::array();
+  std::vector<LinkIn> links;  // non-transitive: only own floors are read
+  bool magic = false;         // its effective floor follows the main Alteration level
   double shape(double level) const;
   void prepare(int cap);
   double worth(double level) const;
@@ -61,6 +71,18 @@ struct Settings {
   double get(const char* section, const char* key) const;
   bool flag(const char* section, const char* key) const;
 };
+// One perk requirement of config/perks/*.toml (impl/perk-requirements.md): one formula, one
+// GlobalVariable of our ESL that the DLL sets to 1 / 0.
+struct Requirement {
+  std::string handle, global, formula, file;
+  json perk;  // the whole config row (FormKey, EditorID, main_level, …) for the runtime
+  Expr expr;
+  bool met = false;
+};
+struct AlterationFloor {
+  bool enabled = false;
+  double c = .2, scale = 2;
+};
 struct Model {
   Settings settings;
   std::vector<Skill> skills;
@@ -69,6 +91,11 @@ struct Model {
   double activeHours = 0, lastHours = 0;
   bool pendingInit = true, raceClosed = false;
   json unknownSubs = json::object(), unknownMains = json::object();
+  // Levels of main skills the plugin does not manage (Alteration, HeavyArmor, Speech, …),
+  // set by the runtime from the player's base actor values; 0 when absent.
+  std::map<std::string, double> externalLevels;
+  AlterationFloor alteration;
+  std::vector<Requirement> requirements;
   void loadConfig(const std::string& root, bool builtIn = false);
   void initialize(Skill&, double base);
   // Shared sub-skills: forms start like a school's sub-skills at the best school level,
@@ -88,6 +115,16 @@ struct Model {
   json snapshot() const;
   json subSnapshot(const Skill&, const Sub&, double grace, double rampEnd) const;
   json effects(const Sub&) const;
+  const Sub& at(const LinkIn&) const;
+  // Written level of a managed main skill, else externalLevels (0 when unknown).
+  double mainLevel(const std::string& av) const;
+  // max(own floor, c × own floor of each linked sub-skill, Alteration term); `source` gets
+  // "own", the linked sub-skill id or "Alteration".
+  double effectiveFloor(const Sub&, std::string* source = nullptr) const;
+  Values values() const;
+  // Re-evaluates every requirement with hysteresis; returns the indices whose state changed.
+  std::vector<size_t> updateRequirements();
+  json requirementSnapshot() const;
   json perks(const Sub&, double current) const;
 };
 double ramp(double idle, double grace, double end);

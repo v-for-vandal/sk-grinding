@@ -28,7 +28,7 @@ BLK-01 Improved Blocking ............ —          =
 ├── BLK-13 Shield's Best Friend ..... Block 30   → shield/parry 30, 1h-short-sword 30
 └── BLK-10 Weapons Master ........... Block 10   → shield/parry 10, 1h 10/20/30
     ├── BLK-14 Weapons Master 2 ..... Block 30   → shield/parry 30, 1h 30/40/50
-    └── BLK-15 Masterly Strike ...... Block 35   =
+    └── BLK-15 Masterly Strike ...... Block 35   → shield/parry 40, 1h 40/50/60
         └── BLK-17 Surprise Attack .. Block 50   → 1h 50/60/70
             └── BLK-18 Strike the Jugular . Block 75  → 1h 70/80/90
                 └── BLK-19 Master of All .. Block 100 → 1h –/90/100
@@ -525,6 +525,6 @@ Same as the winner: Requiem - Weapons and Armor Redone.esp.
 - **Records:** weapon damage +25% — when item/spell: TwoHanded weapon OR OneHanded weapon OR is Unarmed OR is REQ_Weapon_Unarmed
 - **Proposal (auto):** whole skill (all its weapon sub-skills)
 - **Sub-skill requirements:**
-     replace Block >= 75 with:
+     replace Block >= 100 with:
      twoOf(1h-* weapon skills) >= 90 or
      oneOf(1h-* weapon skills) >= 100

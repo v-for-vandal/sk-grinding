@@ -91,7 +91,7 @@ For one main skill (all its sub-skills at once):
 
 ```
 main  = player base actor value of the skill
-floor = clamp(floor_per_level × (main − floor_zero_at), 0, floor_cap)   // non-concept sub-skills
+floor = clamp(floor_per_level × (main − floor_zero_at), 0, hard_cap)   // non-concept sub-skills
 floor = 0                                                             // concept (k = 0)
 current = ownFloor = potential = peak = floor;  U = 0
 base = main;  L0_i = floor;  R = 0;  U_main = 0;  n = round(main);  initialized = true
@@ -120,8 +120,8 @@ main ≤ start_level → all 0, base = main;  leftover after saturation → base
   not); archetypes 0. **Implemented 2026-11-14** (`Model::initializeShared`, `bestSchool()`):
   initialized at the first award to a shared sub-skill (the first managed spell cast, the same
   event that initializes its school); *Initialize now* / *Re-initialize all* redo them. It uses
-  the current mapping keys (`floor_per_level`, `floor_zero_at`), so until the floor cap goes it
-  is also clamped by `floor_cap`. Before init, spell aim uses the same value.
+  the current mapping keys (`floor_per_level`, `floor_zero_at`), clamped only by `hard_cap`
+  (`floor_cap` removed 2026-11-15). Before init, spell aim uses the same value.
 - Existing co-saves keep their `base` / `L0_i` (the formula handles any `L0`); only a new init or
   *Re-initialize all* uses the split.
 - Unit test: for every skill file and main ∈ {15, 20, 25, 40, 60, 100}, init then `F = main`.
@@ -161,7 +161,7 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 - Unit: `k` equals the script's output (6 files); `levelFromXP(15, N) = 100`; path members all at
   75, others 0 → `F = 100` for a fresh character (base 15, `L0 = 0`).
 - Level-50 save: after load, every managed main skill shows the same level as before, the panel
-  shows floors `= clamp(2 × (main − 15), 0, 75)`.
+  shows floors `= clamp(2 × (main − 15), 0, hard_cap)` (no floor cap since 2026-11-15).
 - New game: skills stay untouched until the first hit / cast / craft after character creation;
   then `[init]` lines appear with the skills of that moment.
 - With `xp_mult = 100`: hitting with a sword raises `1h-sword` and, through the formula,

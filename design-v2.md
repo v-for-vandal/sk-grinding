@@ -689,12 +689,11 @@ effect(L) =  M · x^p / (x^p + h^p),  x = L − P     for L ≥ P      // bonus,
 - A cross-link `A → B` with coefficient `c` means:
   `effectiveFloor(B) = max(ownFloor(B), max over links A→B of c × ownFloor(A))`.
 - **Non-cumulative**: links do not add up; only the maximum applies.
-- **Non-transitive (Proposal)**: only **own** floors propagate. If `mace` got its effective floor
-  from `sword`, it does not pass it further.
-  - **Q-CL-1.** Confirm non-transitivity.
-    - **A:**
+- **Non-transitive** (decided, former Q-CL-1): only **own** floors propagate. If `mace` got its
+  effective floor from `sword`, it does not pass it further.
 - Cross-links never change current or potential. When effective floor rises above current, the
   ×3 catch-up multiplier applies.
+- Implementation: [`impl/cross-links.md`](impl/cross-links.md).
 
 ### 6.2 Link table (current decisions)
 
@@ -1095,6 +1094,7 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-34 | Partial (web): Requiem's passive armor training (`REQ_PassiveArmorTraining`, replaced by our script for the movement sub-skills) and stamina damage on hit (`REQ_PlayerImpactEffects`); open: esp numbers, script conflicts. Details: [`research/R-34-requiem-armor-movement-and-hits.md`](research/R-34-requiem-armor-movement-and-hits.md) |
 | R-35 | **New:** re-export ARMO with armor rating and weight (missing from the 2026-11-11 dump); input of the material tier worksheet. Details: [`research/R-35-armor-rating-export.md`](research/R-35-armor-rating-export.md) |
 | R-36 | **New:** perk entry point *Mod Armor Rating*: live AV multiplier, per-item conditions, clothing pieces (the rejected flat clothing variant), generated AVs. Details: [`research/R-36-mod-armor-rating.md`](research/R-36-mod-armor-rating.md) |
+| R-37 | **Web research done, checks open:** non-damage melee levers for weapon sub-skill effects: power / light attack stamina (Requiem's own light-attack cost, hook 37650/38603), Precision pre-hit API (cancel, damage and stagger modifiers), attack speed AVs, stagger and critical entry points. Details: [`research/R-37-melee-non-damage-levers.md`](research/R-37-melee-non-damage-levers.md) |
 
 Original task list:
 

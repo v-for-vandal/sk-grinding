@@ -41,6 +41,10 @@ struct Sim {
         sk.written = n;
       }
     }
+    // As the DLL will after every change (plan/prototype-2.md): requirement globals.
+    for (auto i : model.updateRequirements())
+      messages.push_back("requirement " + model.requirements[i].handle +
+                         (model.requirements[i].met ? " met" : " lost"));
   }
   Skill* skillByAV(const std::string& av) {
     for (auto& sk : model.skills)
@@ -144,6 +148,13 @@ struct Sim {
       synchronize();
     } else if (a == "set") {
       set(j);
+      synchronize();
+    } else if (a == "external") {
+      // Level of a main skill the plugin does not manage (Alteration floor, perk formulas);
+      // the DLL reads it from the player's base actor value (plan/prototype-2.md).
+      double l = j.at("level");
+      if (!std::isfinite(l) || l < 0) throw std::runtime_error("external: bad level");
+      model.externalLevels[j.at("av").get<std::string>()] = l;
       synchronize();
     } else if (a == "equip") {
       equipped = j.at("equipped");

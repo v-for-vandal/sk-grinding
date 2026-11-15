@@ -24,7 +24,7 @@ if(NOT nlohmann_json_FOUND)
     DOWNLOAD_EXTRACT_TIMESTAMP ON)
   FetchContent_MakeAvailable(nlohmann_json)
 endif()
-add_library(PracticeCore STATIC src/Core.cpp src/Config.cpp)
+add_library(PracticeCore STATIC src/Core.cpp src/Config.cpp src/Requirements.cpp)
 target_include_directories(PracticeCore PUBLIC src)
 file(GLOB_RECURSE DEFAULT_CONFIGS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../config/*.toml")
 # Compiled copy of config/*.toml (fallback and source of missing keys). Stored

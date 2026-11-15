@@ -1,0 +1,119 @@
+# Perk requirements of the Block tree: impl/perk-requirements.md.
+# Source: skills/block/perks.md (*Sub-skill requirements* of each perk). Fields: see
+# perks/one-handed.toml. BLK-01, BLK-02 and BLK-09 keep their LoreRim requirements.
+# `main_level = "drop"`: the worksheet says "replace Block >= N with <formula>".
+
+[aliases]
+shield       = ["heavy-shield", "light-shield"]
+shield-parry = ["heavy-shield", "light-shield", "parry"]
+1h-weapons   = ["1h-*"]      # "1h-* weapon skills" (concept sub-skills do not match)
+
+[[perk]]
+handle     = "BLK-03"        # Experienced Blocking
+perk       = "079355:Skyrim.esm"
+editor_id  = "REQ_Block_ExperiencedBlocking"
+requires   = "oneOf(shield-parry) >= 20"
+main_level = "drop"          # LoreRim Block >= 20
+
+[[perk]]
+handle     = "BLK-04"        # Powerful Bashes
+perk       = "058F67:Skyrim.esm"
+editor_id  = "REQ_Block_PowerfulBashes"
+requires   = "bash >= 25"    # Block >= 25 stays
+
+[[perk]]
+handle     = "BLK-05"        # Elemental Protection
+perk       = "058F69:Skyrim.esm"
+editor_id  = "REQ_Block_ElementalProtection"
+requires   = "oneOf(shield) >= 50"   # Block >= 50 stays
+
+[[perk]]
+handle     = "BLK-06"        # Overpowering Bashes
+perk       = "05F594:Skyrim.esm"
+editor_id  = "REQ_Block_OverpoweringBashes"
+requires   = "bash >= 50"
+main_level = 30              # LoreRim Block >= 50
+
+[[perk]]
+handle     = "BLK-07"        # Defensive Stance
+perk       = "106253:Skyrim.esm"
+editor_id  = "REQ_Block_DefensiveStance"
+requires   = "oneOf(shield) >= 75"
+main_level = 50              # LoreRim Block >= 75
+
+[[perk]]
+handle     = "BLK-08"        # Disarming Bash
+perk       = "058F66:Skyrim.esm"
+editor_id  = "REQ_Block_DisarmingBash"
+requires   = "bash >= 75"
+main_level = 50              # LoreRim Block >= 75
+
+[[perk]]
+handle     = "BLK-10"        # Weapons Master
+perk       = "000800:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_WeaponsMaster1"
+requires   = "oneOf(shield-parry) >= 10 AND (threeOf(1h-weapons) >= 10 OR twoOf(1h-weapons) >= 20 OR oneOf(1h-weapons) >= 30)"
+# Block >= 10 stays
+
+[[perk]]
+handle     = "BLK-11"        # Shield Strike
+perk       = "000845:Requiem - Special Feats.esp"
+editor_id  = "Feat_Perk_Skill_Block_ShieldStrike1"
+requires   = "bash >= 35 AND oneOf(shield) >= 25"
+main_level = "drop"          # LoreRim Block >= 25
+
+[[perk]]
+handle     = "BLK-12"        # Torch Combat
+perk       = "000828:Requiem - Special Feats.esp"
+editor_id  = "Feat_Perk_Skill_Block_TorchCombat1"
+requires   = "bash >= 25"
+main_level = "drop"          # LoreRim Block >= 25
+
+[[perk]]
+handle     = "BLK-13"        # Shield's Best Friend
+perk       = "000803:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_Block_Shortsword"
+requires   = "oneOf(shield-parry) >= 30 AND 1h-short-sword >= 30"
+main_level = "drop"          # LoreRim Block >= 30
+
+[[perk]]
+handle     = "BLK-14"        # Weapons Master 2
+perk       = "000801:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_WeaponsMaster2"
+requires   = "oneOf(shield-parry) >= 30 AND (threeOf(1h-weapons) >= 30 OR twoOf(1h-weapons) >= 40 OR oneOf(1h-weapons) >= 50)"
+main_level = "drop"          # LoreRim Block >= 30
+
+[[perk]]
+handle     = "BLK-15"        # Masterly Strike
+perk       = "000802:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_PenetratingStrikes_Master"
+requires   = "oneOf(shield-parry) >= 40 AND (threeOf(1h-weapons) >= 40 OR twoOf(1h-weapons) >= 50 OR oneOf(1h-weapons) >= 60)"
+main_level = "drop"          # LoreRim Block >= 35
+
+[[perk]]
+handle     = "BLK-16"        # Shield Strike 2
+perk       = "000846:Requiem - Special Feats.esp"
+editor_id  = "Feat_Perk_Skill_Block_ShieldStrike2"
+requires   = "oneOf(shield) >= 50 AND bash >= 50"
+main_level = "drop"          # LoreRim Block >= 50
+
+[[perk]]
+handle     = "BLK-17"        # Surprise Attack
+perk       = "000804:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_WeaponMasterCritical"
+requires   = "threeOf(1h-weapons) >= 50 OR twoOf(1h-weapons) >= 60 OR oneOf(1h-weapons) >= 70"
+main_level = "drop"          # LoreRim Block >= 50
+
+[[perk]]
+handle     = "BLK-18"        # Strike the Jugular
+perk       = "000805:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_MasteryCritMult"
+requires   = "threeOf(1h-weapons) >= 70 OR twoOf(1h-weapons) >= 80 OR oneOf(1h-weapons) >= 90"
+main_level = "drop"          # LoreRim Block >= 75
+
+[[perk]]
+handle     = "BLK-19"        # Master of All
+perk       = "000806:LoreRim - Weaponmaster.esp"
+editor_id  = "REQ_WeaponsMasterFinal"
+requires   = "twoOf(1h-weapons) >= 90 OR oneOf(1h-weapons) >= 100"
+main_level = "drop"          # LoreRim Block >= 100 (decided 2026-11-15)

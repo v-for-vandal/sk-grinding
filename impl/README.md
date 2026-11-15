@@ -24,14 +24,15 @@ Each file `impl/<block>.md` has these parts:
 - **Test:** how to see that it works in game.
 
 A block is small enough to be one task for the executor agent (stage 2 plan). Plans that combine
-blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](../plan/prototype-1.md)).
+blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](../plan/prototype-1.md); next: [`prototype-2.md`](../plan/prototype-2.md)).
 
 ## Index
 
 | Block | Status | Depends on | Research |
 |---|---|---|---|
 | [`block-stamina-cost.md`](block-stamina-cost.md): block stamina cost scaled by the shield / parry sub-skill | proposed | *player-hit-hook*, *subskill-state*, *effect-curve* | [R-23](../research/R-23-block-stamina.md) |
-| [`perk-requirements.md`](perk-requirements.md): sub-skill requirements on existing perks (purchase and effects), value edits | chosen | *subskill-state* | [R-25](../research/R-25-perk-condition-injection.md) |
+| [`cross-links.md`](cross-links.md): effective floor from cross-links and the main Alteration level | in progress (core done; runtime pending) | *subskill-state*, *decay* | — |
+| [`perk-requirements.md`](perk-requirements.md): sub-skill requirements on existing perks (purchase and effects), value edits | in progress (core formulas done; DLL injection pending) | *subskill-state* | [R-25](../research/R-25-perk-condition-injection.md) |
 | [`perk-tree-nodes.md`](perk-tree-nodes.md): restored Ordinator perks as new nodes in LoreRim trees (nodes, conditions, changed effects) | proposed | *perk-requirements*, *plugin-foundation* | [R-29](../research/R-29-restored-ordinator-perks.md) |
 | [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md): inaccuracy of `missile` (launch noise; lobbers included) and `beam` (aim sway) spells | done (prototype; runtime pending) | *subskill-state*, *spell-classifier*, *projectile-launch-hook* | [R-26](../research/R-26-spell-aim.md) |
 | [`heal-xp.md`](heal-xp.md): healing XP (damage-source filter for healing others, combat multipliers, per-target budget, XP without our bonus) | chosen | *subskill-state*, *player-hit-hook*, *effect-curve*, per-target budget | — |
@@ -44,16 +45,16 @@ blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](
 | [`spell-classifier.md`](spell-classifier.md): spell form, school sub-direction, archetype | done (prototype; runtime pending) | *plugin-foundation* | — |
 | [`status-ui.md`](status-ui.md): status and debug panel (PrismaUI) | done (prototype; runtime pending) | *subskill-state*, *main-skill-level*, *decay* | [frameworks §6](../refs/frameworks.md) |
 | [`armor-effects.md`](armor-effects.md): armor continuous effects (armor rating, stamina lost on hit, movement speed) | proposed | *subskill-state*, *effect-curve*, *plugin-foundation* | [R-33](../research/R-33-requiem-mass-effect.md), [R-34](../research/R-34-requiem-armor-movement-and-hits.md), [R-36](../research/R-36-mod-armor-rating.md) |
+| [`weapon-effects.md`](weapon-effects.md): weapon non-damage effects (light / power attack stamina cost, attack speed) | proposed | *weapon-class*, *subskill-state*, *effect-curve* | [R-37](../research/R-37-melee-non-damage-levers.md), [R-34](../research/R-34-requiem-armor-movement-and-hits.md) |
 | [`armor-movement-xp.md`](armor-movement-xp.md): Requiem's passive armor training → `heavy-armor-movement` / `light-armor-movement` (our version of the script file) | chosen | *plugin-foundation*, *subskill-state*, *xp-capture* | [R-34](../research/R-34-requiem-armor-movement-and-hits.md) |
 | [`mcm-config.md`](mcm-config.md): config files, MCM page (debug mode) | done (prototype; runtime pending) | *plugin-foundation* | — |
 
 ## Design changes not implemented yet (2026-11-14)
 
-(Done since: shared magic forms and archetypes, pseudo-skill `magic` in the panel.)
+(Done since: shared magic forms and archetypes, pseudo-skill `magic` in the panel; no own-floor cap, 2026-11-15.)
 
 Decided in the design after the first playtest; each affected block has a *Design change* note.
 
-- No own-floor cap: [`subskill-state.md`](subskill-state.md).
 - Start init by splitting the main XP, `start_split = false`:
   [`main-skill-level.md`](main-skill-level.md).
 - Mod-list XP preset and per-skill factors: [`xp-capture.md`](xp-capture.md),

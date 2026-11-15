@@ -206,6 +206,10 @@ int main(int argc, char** argv) try {
         numeric += ramp(u + (i + .5) * dt / steps, 24, 72) * dt / steps;
       near(rampIntegral(u, dt, 24, 72), numeric, 1e-6);
     }
+  // The zone and decay checks below are about the own floor: no cross-links here (they
+  // are covered by the cross-link tests further down).
+  for (auto sk : m.all())
+    for (auto& x : sk->subs) x.links.clear();
   auto* s = m.find("1h-sword");
   s->curve = {1, 10, 1};
   s->current.set(5, s->curve, 500);
@@ -337,9 +341,212 @@ int main(int argc, char** argv) try {
     near(reloaded.find("form/missile")->current.value(missile->curve),
          missile->current.value(missile->curve));
   }
+  {
+    // Cross-links (design-v2 §6, impl/cross-links.md).
+    Model x;
+    x.loadConfig(argv[1]);
+    for (auto& sk : x.skills) x.initialize(sk, 15);  // every floor 0
+    x.initializeShared(15);
+    x.pendingInit = false;
+    auto lvl = [&](const char* id, double current, double floor) {
+      auto s = x.find(id);
+      s->current.set(current, s->curve, 500);
+      s->floor.set(floor, s->curve, 500);
+      s->potential = s->peak = s->current;
+    };
+    lvl("1h-sword", 80, 60);
+    std::string from;
+    near(x.effectiveFloor(*x.find("1h-mace"), &from), 30);
+    check(from == "1h-sword", "1h link source");
+    near(x.effectiveFloor(*x.find("2h-sword"), &from), 15);
+    near(x.effectiveFloor(*x.find("1h-unarmed")), 30);
+    near(x.effectiveFloor(*x.find("dual-wield"), &from), 0);
+    check(from == "own" && x.find("dual-wield")->links.empty(), "concept sub-skills unlinked");
+    check(x.find("heavy-shield")->links.empty(), "Block has no links");
+    lvl("1h-dagger", 50, 40);  // non-cumulative: 0.5 × 60 and 0.5 × 40 do not add up
+    near(x.effectiveFloor(*x.find("1h-mace")), 30);
+    lvl("1h-mace", 0, 50);  // own floor above the linked ones wins
+    near(x.effectiveFloor(*x.find("1h-mace"), &from), 50);
+    check(from == "own", "own floor source");
+    lvl("1h-mace", 0, 0);
+    {
+      // Non-transitive: sword → mace → dagger gives the dagger nothing from the sword.
+      Model chain = x;
+      for (auto sk : chain.all())
+        for (auto& s : sk->subs) s.links.clear();
+      auto ref = [&](const char* id) {
+        for (int k = 0; k < int(chain.skills.size()); ++k)
+          for (int i = 0; i < int(chain.skills[k].subs.size()); ++i)
+            if (chain.skills[k].subs[i].id == id) return LinkIn{k, i, .5};
+        throw std::runtime_error("no such sub-skill");
+      };
+      chain.find("1h-mace")->links = {ref("1h-sword")};
+      chain.find("1h-dagger")->links = {ref("1h-mace")};
+      chain.find("1h-dagger")->floor.set(0, chain.find("1h-dagger")->curve, 500);
+      near(chain.effectiveFloor(*chain.find("1h-mace")), 30);
+      near(chain.effectiveFloor(*chain.find("1h-dagger")), 0);
+    }
+    // Catch-up zone up to the effective floor, then the learning zone; the loop ends.
+    auto mace = x.find("1h-mace");
+    auto snapSub = [&](const char* id) {
+      json snap = x.snapshot();
+      for (auto& sk : snap["skills"])
+        for (auto& s : sk["subs"])
+          if (s["id"] == id) return s;
+      throw std::runtime_error("not in snapshot");
+    };
+    check(snapSub("1h-mace")["zone"] == 3.0, "catch-up below eff. floor");
+    x.award("1h-mace", mace->curve.between(0, 30) / 3 + mace->curve.between(30, 31));
+    near(mace->current.value(mace->curve), 31, 1e-4);
+    auto sub = snapSub("1h-mace");
+    check(sub["floorFrom"] == "1h-sword", "snapshot floorFrom");
+    near(sub["effFloor"].get<double>(), 30);
+    check(sub["ownFloor"].get<double>() < 30, "own floor below the link");
+    // Decay stops at the effective floor, not at the own floor.
+    lvl("1h-mace", 50, 0);
+    x.settings.values["debug"]["no_grace"] = true;
+    x.settings.values["debug"]["time_scale"] = 1000;
+    x.tick(24);
+    near(mace->current.value(mace->curve), 30, 1e-4);
+    // Alteration: 0.2 × 2 × level on every magic sub-skill (schools and shared), not on 1h.
+    x.externalLevels["Alteration"] = 50;
+    near(x.effectiveFloor(*x.find("destruction/fire"), &from), 20);
+    check(from == "Alteration", "Alteration source");
+    near(x.effectiveFloor(*x.find("form/missile")), 20);
+    near(x.effectiveFloor(*x.find("archetype/standard")), 20);
+    check(x.find("restoration/help")->magic, "Restoration sub-skills are magic");
+    check(!x.find("1h-sword")->magic, "weapons are not magic");
+    sp::Skill* oneHanded = nullptr;
+    x.find("1h-sword", &oneHanded);
+    near(x.mainLevel("OneHanded"), oneHanded->written);
+    near(x.mainLevel("Speech"), 0);
+  }
+  {
+    // Requirement formulas (impl/perk-requirements.md).
+    NameResolver names;
+    names.ids = {"a-1", "a-2", "a-3", "b"};
+    names.aliases["line"] = {"a-*"};
+    names.aliases["pair"] = {"a-1", "b"};
+    std::map<std::string, double> v = {{"a-1", 30}, {"a-2", 20}, {"a-3", 10}, {"b", 0}};
+    double main = 40;
+    Values vals{[&](const std::string& id) { return v.at(id); },
+                [&](const std::string&) { return main; }};
+    std::vector<std::string> notes;
+    auto ok = [&](const char* f, double slack = 0) {
+      return evaluate(parseRequirement(f, names, notes), vals, slack);
+    };
+    check(ok("oneOf(line) >= 30") && !ok("oneOf(line) >= 31"), "oneOf");
+    check(ok("twoOf(line) >= 20") && !ok("twoOf(line) >= 21"), "twoOf");
+    check(ok("threeOf(line) >= 10") && !ok("threeOf(line) >= 11"), "threeOf");
+    check(ok("twoOf(a-*) >= 20") && ok("oneOf(pair) >= 30") && ok("line >= 30"), "globs, aliases");
+    check(ok("a-1 >= 30") && !ok("b >= 1"), "single sub-skill");
+    check(ok("OneHanded >= 40") && !ok("HeavyArmor >= 41"), "main-skill operand");
+    check(ok("b >= 5 OR a-1 >= 5 AND a-2 >= 5"), "AND binds tighter than OR");
+    check(!ok("(b >= 5 OR a-1 >= 5) AND a-3 >= 15"), "parentheses");
+    check(ok("b >= 5 or a-1 >= 5 and a-2 >= 5"), "keywords in any case");
+    check(ok("oneOf(line) >= 31", 2) && !ok("oneOf(line) >= 33", 2), "slack lowers thresholds");
+    check(notes.empty(), "no notes yet");
+    ok("twoOf(b) >= 1");
+    check(notes.size() == 1, "k > n is a warning");
+    for (auto bad : {"b >", "oneOf(b >= 1", "b >= 1 junk", "b = 1", "(b >= 1", "c >= 1",
+                     "zz-* >= 1", "b >= x"}) {
+      bool threw = false;
+      try {
+        parseRequirement(bad, names, notes);
+      } catch (const std::runtime_error&) {
+        threw = true;
+      }
+      check(threw, bad);
+    }
+    auto tree = explain(parseRequirement("b >= 5 OR twoOf(line) >= 20", names, notes), vals);
+    check(tree["op"] == "or" && tree["met"] == true && tree["terms"][1]["values"].size() == 3,
+          "explain tree");
+  }
+  {
+    // config/perks/*.toml: every row parses; hysteresis; state survives save/restore.
+    Model r;
+    r.loadConfig(argv[1]);
+    for (auto& sk : r.skills) r.initialize(sk, 15);
+    r.initializeShared(15);
+    check(r.requirements.size() == 26 + 16, "all perk rows loaded");
+    for (auto& w : r.settings.values["configWarnings"])
+      check(w.get<std::string>().find("perks/") == std::string::npos, "no perk row skipped");
+    auto idx = [&](const char* h) {
+      for (size_t i = 0; i < r.requirements.size(); ++i)
+        if (r.requirements[i].handle == h) return i;
+      throw std::runtime_error(std::string("no requirement ") + h);
+    };
+    check(r.requirements[idx("1H-05")].global == "SPO_Req_1H05" &&
+              r.requirements[idx("ORD-LA-05")].global == "SPO_Req_ORDLA05",
+          "global names");
+    auto set = [&](const char* id, double l) {
+      auto s = r.find(id);
+      s->current.set(l, s->curve, 500);
+    };
+    auto changed = [&](const char* h) {
+      auto c = r.updateRequirements();
+      return std::find(c.begin(), c.end(), idx(h)) != c.end();
+    };
+    check(r.updateRequirements().empty(), "nothing met at level 0");
+    set("1h-mace", 45);
+    check(changed("1H-05") && r.requirements[idx("1H-05")].met, "1H-05 met at 45");
+    set("1h-mace", 43.5);
+    check(!changed("1H-05") && r.requirements[idx("1H-05")].met, "kept within hysteresis");
+    auto saved = r.save();
+    set("1h-mace", 42.9);
+    check(changed("1H-05") && !r.requirements[idx("1H-05")].met, "lost below 45 - 2");
+    Model back;
+    back.loadConfig(argv[1]);
+    back.restore(saved);
+    check(back.requirements[idx("1H-05")].met, "met flag restored");
+    // Sword line: two of sword / short sword / spear at 35 (1H-07: 45 / 35 / 25).
+    set("1h-sword", 35);
+    r.updateRequirements();
+    check(!r.requirements[idx("1H-07")].met, "one at 35 is not enough");
+    set("1h-spear", 35);
+    r.updateRequirements();
+    check(r.requirements[idx("1H-07")].met, "two at 35");
+    // BLK-10: shield/parry 10 AND 1h 10/20/30.
+    set("parry", 10);
+    r.updateRequirements();
+    check(r.requirements[idx("BLK-10")].met, "BLK-10 met");
+    for (auto id : {"1h-sword", "1h-spear", "1h-mace"}) set(id, 0);
+    set("1h-dagger", 29);  // oneOf 30 − hysteresis 2
+    r.updateRequirements();
+    check(r.requirements[idx("BLK-10")].met, "BLK-10 kept at 29");
+    set("1h-dagger", 27);
+    r.updateRequirements();
+    check(!r.requirements[idx("BLK-10")].met, "BLK-10 lost at 27");
+  }
+  {
+    // A row naming an unmanaged sub-skill is skipped with a warning; a syntax error is fatal.
+    auto dir = std::filesystem::temp_directory_path() / "sp-core-tests-perks";
+    std::filesystem::remove_all(dir);
+    std::filesystem::copy(argv[1], dir, std::filesystem::copy_options::recursive);
+    std::ofstream(dir / "perks" / "zz.toml")
+        << "[[perk]]\nhandle = \"LA-10\"\nperk = \"000001:Test.esp\"\n"
+           "requires = \"clothing >= 30\"\n";
+    Model u;
+    u.loadConfig(dir.string());
+    check(u.settings.values["configWarnings"].dump().find("LA-10 skipped") != std::string::npos,
+          "unknown sub-skill row skipped");
+    std::ofstream(dir / "perks" / "zz.toml")
+        << "[[perk]]\nhandle = \"LA-10\"\nperk = \"000001:Test.esp\"\n"
+           "requires = \"1h-sword >=\"\n";
+    bool threw = false;
+    try {
+      Model bad;
+      bad.loadConfig(dir.string());
+    } catch (const std::runtime_error&) {
+      threw = true;
+    }
+    check(threw, "syntax error in a perk row is fatal");
+    std::filesystem::remove_all(dir);
+  }
   std::cout
       << "Core tests passed: six normalization paths, fractional curves, cap, "
-         "zones, floors, decay integral, initialization, persistence, shared magic sub-skills.\n";
+         "zones, floors, decay integral, initialization, persistence, shared magic "
+         "sub-skills, cross-links, Alteration floor, requirement formulas.\n";
   return 0;
 } catch (const std::exception& e) {
   std::cerr << e.what() << '\n';

@@ -1,6 +1,9 @@
 # Sub-skill requirements and edits on existing perks
 
-- **Status:** chosen (globals + runtime injection by the DLL); details to confirm in R-25.
+- **Status:** in progress: the formulas (parser, evaluation, hysteresis, config) are implemented
+  and unit-tested in the core (prototype 2); the globals in our ESL and the condition injection
+  by the DLL are pending ([`plan/prototype-2.md`](../plan/prototype-2.md)); details to confirm in
+  R-25.
 - **Design:** design-v2 §5.6, Q-DYN-10 (decided: `current` is checked), Q-DYN-11 (decided: a
   bought perk stops working below the requirement), Q-DYN-12 (showing requirements), Q-DYN-13 (decided:
   this block); per-skill verdicts in `skills/<skill>/perks*.md` (*Sub-skill requirements*),
@@ -62,6 +65,69 @@ Ability effects with conditions are re-checked by the engine about once a second
 turns off with a short delay. Entry points that fire on an event (hit, swing, bash) check at
 the event.
 
+## Core implementation (done, prototype 2)
+
+Pure code in `PracticeCore`, tested on Linux (`PracticeTests`):
+
+- `plugin/src/Requirements.{h,cpp}`: `parseRequirement` → `Expr` tree; `evaluate(expr, values,
+  slack)`; `explain` (tree with thresholds, values read and met flags, for the panel, Q-DYN-12).
+  Grammar:
+  ```
+  expr    := term ("OR" term)*          // AND binds tighter than OR; keywords in any case
+  term    := factor ("AND" factor)*
+  factor  := "(" expr ")" | compare
+  compare := operand ">=" number
+  operand := oneOf|twoOf|threeOf|fourOf|fiveOf "(" name ("," name)* ")"
+           | name                       // a sub-skill, an alias / glob (= any one of them),
+                                        // or a main skill actor value (OneHanded, HeavyArmor…)
+  ```
+  A name is an alias of `[aliases]` (members are ids or globs), a glob (`1h-*`, `*` = any run of
+  characters), a sub-skill id, or a main skill (CommonLib actor value names). `kOf(list) >= N`:
+  at least `k` distinct sub-skills of the list have `current >= N`. A `k` larger than the list is
+  a load warning ("can never be met").
+- `Model::requirements` (`Requirement{handle, global, formula, file, perk, expr, met}`),
+  `Model::updateRequirements()` (returns the indices whose state changed),
+  `Model::requirementSnapshot()` (snapshot key `requirements`), `Model::mainLevel(av)` (written
+  level of a managed skill, else `Model::externalLevels`, set by the runtime).
+- Hysteresis: a met requirement is re-evaluated with every threshold lowered by
+  `[perk_requirements] hysteresis` (2.0); an unmet one at the thresholds as written.
+- Co-save: the `met` flags are saved under `requirements` (by handle; absent in older saves =
+  unmet), so a perk inside the hysteresis band is not switched off by a reload.
+
+### Config files
+
+`config/perks/*.toml` (installed as `Data/SKSE/Plugins/SkillPractice/perks/`), one file per
+tree: [`one-handed.toml`](../config/perks/one-handed.toml) (the four weapon lines, the Hand to
+Hand line, Rushing Tide, Hissing Dragon), [`block.toml`](../config/perks/block.toml).
+
+```toml
+[aliases]                                  # shared by all files
+sword-line = ["1h-sword", "1h-short-sword", "1h-spear"]
+1h-weapons = ["1h-*"]
+
+[[perk]]
+handle     = "1H-13"                       # worksheet handle; unique
+perk       = "0C1E90:Skyrim.esm"           # FormKey (required)
+editor_id  = "REQ_OneHanded_SwordFocus2"   # for logs and checks
+requires   = "oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50"
+main_level = 35                            # new value of the perk's own skill condition, or "drop"
+# optional: global = "SPO_Req_…" (default SPO_Req_<handle without '-'>), effects_gated,
+# has_perk_replace = { from = "ORD-LA-04", to = "1H-30" } (restored perks), magnitudes …
+```
+
+- The core reads `handle`, `perk`, `requires`, `global`; the rest of the row is kept as JSON in
+  `Requirement::perk` for the runtime. A row without `requires` (only `main_level` / parent
+  changes) gets no global.
+- A row whose formula names a sub-skill that is not registered (its skill is not managed yet,
+  e.g. `clothing`) is **skipped with a config warning**; a syntax error is a load error.
+
+Decided when converting the worksheets (2026-11-15):
+
+- `1h-*` (Block's "1h-* weapon skills") includes `1h-unarmed` and `1h-other`.
+- BLK-15 Masterly Strike follows its *Sub-skill requirements* text (shield/parry 40 AND 1h
+  40/50/60, Block dropped); the Block diagram is updated to match.
+- BLK-19 Master of All: the Block condition (Block ≥ 100 in the record) is dropped.
+
 ## Variants
 
 - **Chosen: runtime injection at `kDataLoaded`** from config. No record overrides; survives LoreRim
@@ -88,6 +154,10 @@ Global settings: `hysteresis` (§5.6), default `effects_gated` (true).
 
 ## Test
 
+- Unit tests (done): every grammar form, aliases with globs, main-skill operands, precedence,
+  syntax errors, unknown-sub-skill rows skipped, hysteresis, `updateRequirements` changes, the
+  `met` flags through save / restore, every row of `config/perks/*.toml` loads, sample 1H and BLK
+  rows evaluate as expected.
 - Perks menu: a perk with an unmet requirement cannot be bought; with the requirement met it
   can; a replaced `Block` level shows the new number (R-25 check 4).
 - Buy a gated perk, lower the sub-skill by console below `threshold − hysteresis`: its entry

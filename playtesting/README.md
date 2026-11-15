@@ -27,3 +27,4 @@ folder is about **balance and design** (are the numbers and rules right).
 | [`spell-forms.md`](spell-forms.md): spell form of beam-looking spells (Sunbeam) | ready | skills/magic Q-MAG-9, R-32 |
 | [`skill-books.md`](skill-books.md): book points with and without the Skilled trait | waiting (book hook) | design-v2 §10.1, R-30 |
 | [`dragon-fight.md`](dragon-fight.md): budgets and XP in a LoreRim dragon fight | waiting (budgets) | design-v2 §11.2 (budgets, target worth) |
+| [`weapon-damage.md`](weapon-damage.md): weapon damage from the sub-skill keeps fights fun | waiting (damage effect) | weapons *Continuous effects* (damage kept 2026-11-15) |

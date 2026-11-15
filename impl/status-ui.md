@@ -167,7 +167,7 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
   |---|---|
   | Sub-skill | id |
   | Own floor | `ownFloor` (level, 1 decimal) — "current floor" |
-  | Eff. floor | `effectiveFloor` |
+  | Eff. floor | `effectiveFloor`; the snapshot also has `floorFrom` (`own`, the linked sub-skill id or `Alteration`, [`cross-links.md`](cross-links.md)); a top-level `requirements` array lists the perk requirements with an `explain` tree ([`perk-requirements.md`](perk-requirements.md)) |
   | Current | `current` |
   | Potential | `potential` |
   | Peak | `peak` |

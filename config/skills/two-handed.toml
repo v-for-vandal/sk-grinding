@@ -92,3 +92,23 @@ name   = "Glancing hit chance"
 group  = "weapon"
 linear = { at0 = 30, zero_at = 50 }              # Q-WPN-8 placeholder
 unit   = "%"
+
+[[effect]]
+name   = "Light attack stamina cost"
+group  = "weapon"
+curve  = { pen = 50, P = 50, M = 40, h = 150 }  # +50 % at 0, −10 % at 100, −20 % at 200 (R-37)
+unit   = "%"
+invert = true
+
+[[effect]]
+name   = "Power attack stamina cost"
+group  = "weapon"
+curve  = { pen = 50, P = 50, M = 40, h = 150 }  # same curve as the light attack cost
+unit   = "%"
+invert = true
+
+[[effect]]
+name   = "Attack speed"
+group  = "weapon"
+curve  = { pen = 15, P = 50, M = 20, h = 150 }  # placeholder; only if R-37 check 4 passes
+unit   = "%"

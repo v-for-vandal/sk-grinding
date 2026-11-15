@@ -1,0 +1,45 @@
+# Cross-links (floor influence): design-v2 §6, impl/cross-links.md.
+# effectiveFloor(B) = max(ownFloor(B), max over links A→B of coefficient × ownFloor(A), Alteration term).
+# Non-cumulative (only the largest term applies) and non-transitive (only own floors propagate).
+# Patterns: sub-skill ids, `*` matches any run of characters. A pattern that matches no
+# registered sub-skill is a config warning (Archery and Armor are not managed in prototype 1).
+# Concept sub-skills (dual-wield, with-shield, with-magic, *-armor-casting) have no links (Q-CL-3);
+# their ids do not match the weapon patterns. Smithing, Block and magic: none.
+# ALL NUMBERS ARE PLACEHOLDERS.
+
+[alteration]                 # skills/alteration/design.md, Q-ALT-1
+enabled        = true
+coefficient    = 0.2         # cAlt: Alteration 100 → floor 0.2 × 2 × 100 = 40
+scale          = 2.0         # main-skill scale (0–100) → sub-skill scale (0–200)
+schools        = ["Alteration", "Conjuration", "Destruction", "Illusion", "Restoration"]
+include_shared = true        # shared magic forms and archetypes (config/skills/shared.toml)
+
+# Weapons: same hand class ×1/2, across 1H↔2H ×1/4.
+[[link]]
+from        = ["1h-*"]
+to          = ["1h-*"]
+coefficient = 0.5
+
+[[link]]
+from        = ["2h-*"]
+to          = ["2h-*"]
+coefficient = 0.5
+
+[[link]]
+from        = ["1h-*"]
+to          = ["2h-*"]
+coefficient = 0.25
+symmetric   = true
+
+# Archery: bow ↔ crossbow sub-skills ×1/2, none to melee (was Q-CL-2).
+[[link]]
+from        = ["archery-*"]
+to          = ["archery-*"]
+coefficient = 0.5
+
+# Armor: light-armor ↔ clothing ×1/2 (Q-CL-4).
+[[link]]
+from        = ["light-armor"]
+to          = ["clothing"]
+coefficient = 0.5
+symmetric   = true

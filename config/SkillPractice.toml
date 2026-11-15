@@ -12,7 +12,6 @@ zone_recall     = 1.5        # effective floor <= current < potential
 zone_new        = 1.0        # current >= potential
 split_zone_gain = true       # Q-DYN-2 proposal: a gain that crosses a zone boundary is split
 floor_rate      = 0.3        # own floor XP = floor_rate × XP before the zone multiplier (§5.4)
-floor_cap       = 75         # own floor never above this level
 hard_cap        = 500        # technical level cap (§5.1)
 context_window_ms = 750      # impl/xp-capture.md: max age of a context event
 
@@ -32,7 +31,7 @@ min_level         = 0
 max_level         = 300      # technical clamp of the written value only; main skills are uncapped (design-v2 §5.1)
 
 [init]                       # impl/main-skill-level.md, start conversion (§4.4.4, Q-ML-9)
-floor_per_level = 2.0        # floor = clamp(floor_per_level × (main − floor_zero_at), 0, floor_cap)
+floor_per_level = 2.0        # floor = clamp(floor_per_level × (main − floor_zero_at), 0, hard_cap)
 floor_zero_at   = 15
 
 [aim]                        # impl/spell-aim-inaccuracy.md
@@ -52,6 +51,10 @@ debug_missile_yaw_deg = 0.0 # R-26 check 1 only: set to 10 for a fixed offset; 0
 
 [perks]                      # design-v2 §5.6 (sub-skill perks)
 hysteresis = 2.0             # an automatic perk is lost below its level minus this
+
+[perk_requirements]          # impl/perk-requirements.md; rows in perks/*.toml
+hysteresis    = 2.0          # a met requirement is kept until it fails at every threshold − this (§5.6)
+effects_gated = true         # default of a row's effects_gated (Q-DYN-11): a bought perk stops below its requirement
 
 [ui]                         # impl/status-ui.md (PrismaUI)
 toggle_key = 0x41            # DX scan code of the panel hotkey (0x41 = F7)

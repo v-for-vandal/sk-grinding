@@ -2,7 +2,7 @@
 # (skills/magic/design.md; impl/spell-classifier.md *Ids*). No [main]: they belong to no main
 # skill, have k = 0 (no worth, no rust) and are shown in the panel as the pseudo-skill "Magic".
 # Start (impl/main-skill-level.md): forms = floor_per_level × (best managed school − floor_zero_at),
-# clamped by floor_cap; archetypes start at 0.
+# clamped only by hard_cap (no floor cap, design-v2 §5.4); archetypes start at 0.
 #
 # ALL NUMBERS ARE PLACEHOLDERS (prototype 1).
 

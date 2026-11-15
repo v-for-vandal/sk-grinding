@@ -1,0 +1,193 @@
+# Perk requirements of the One-Handed tree: impl/perk-requirements.md.
+# Source: skills/weapons/one-handed.perks.md *Weapon-line requirements (decided)* and
+# skills/armor/light-armor.perks-ordinator.md (Rushing Tide, Hissing Dragon).
+# Per row: handle (worksheet), perk (FormKey), editor_id, requires (formula → one global
+# SPO_Req_<handle without '-'>), main_level (new value of the perk's own OneHanded condition,
+# or "drop"), has_perk_replace (restored perks: Ordinator parent → LoreRim parent).
+
+[aliases]                    # weapon lines: the sub-skills whose weapons carry the line keyword
+sword-line = ["1h-sword", "1h-short-sword", "1h-spear"]   # WeapTypeSword
+axe-line   = ["1h-war-axe", "1h-scythe"]                  # WeapTypeWarAxe
+
+[[perk]]
+handle     = "1H-05"           # Mace Focus 1
+perk       = "05F592:Skyrim.esm"
+editor_id  = "REQ_OneHanded_MaceFocus1"
+requires   = "1h-mace >= 45"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-07"           # Sword & Spear Focus 1
+perk       = "05F56F:Skyrim.esm"
+editor_id  = "REQ_OneHanded_SwordFocus1"
+requires   = "oneOf(sword-line) >= 45 OR twoOf(sword-line) >= 35 OR threeOf(sword-line) >= 25"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-08"           # War Axe Focus 1
+perk       = "03FFFA:Skyrim.esm"
+editor_id  = "REQ_OneHanded_WarAxeFocus1"
+requires   = "oneOf(axe-line) >= 45 OR twoOf(axe-line) >= 35"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-10"           # Mace Focus 2
+perk       = "0C1E92:Skyrim.esm"
+editor_id  = "REQ_OneHanded_MaceFocus2"
+requires   = "1h-mace >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-13"           # Sword & Spear Focus 2
+perk       = "0C1E90:Skyrim.esm"
+editor_id  = "REQ_OneHanded_SwordFocus2"
+requires   = "oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-14"           # War Axe Focus 2
+perk       = "0C3678:Skyrim.esm"
+editor_id  = "REQ_OneHanded_WarAxeFocus2"
+requires   = "oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-15"           # Mace Focus 3
+perk       = "0C1E93:Skyrim.esm"
+editor_id  = "REQ_OneHanded_MaceFocus3"
+requires   = "1h-mace >= 95"
+main_level = 55                # LoreRim OneHanded >= 75
+
+[[perk]]
+handle     = "1H-16"           # Sword & Spear Focus 3
+perk       = "0C1E91:Skyrim.esm"
+editor_id  = "REQ_OneHanded_SwordFocus3"
+requires   = "oneOf(sword-line) >= 95 OR twoOf(sword-line) >= 85 OR threeOf(sword-line) >= 75"
+main_level = 55                # LoreRim OneHanded >= 75
+
+[[perk]]
+handle     = "1H-17"           # War Axe Focus 3
+perk       = "0C3679:Skyrim.esm"
+editor_id  = "REQ_OneHanded_WarAxeFocus3"
+requires   = "oneOf(axe-line) >= 95 OR twoOf(axe-line) >= 85"
+main_level = 55                # LoreRim OneHanded >= 75
+
+[[perk]]
+handle     = "1H-20"           # Grappling
+perk       = "000A8E:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Grapple_Grappling"
+requires   = "1h-unarmed >= 45"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-21"           # Short Blade Focus 1
+perk       = "AD399A:Requiem.esp"
+editor_id  = "REQ_OneHanded_DaggerFocus1"
+requires   = "1h-dagger >= 45"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-22"           # Unarmed Defense
+perk       = "000A90:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Unarmed_UnarmedDefense"
+requires   = "1h-unarmed >= 45"
+main_level = 25                # LoreRim OneHanded >= 25
+
+[[perk]]
+handle     = "1H-24"           # Armsbreaker
+perk       = "00088B:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_WarAxe_Armsbreaker"
+requires   = "oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-26"           # Piercing Strike
+perk       = "000888:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Sword_DisarmingBlade"
+requires   = "oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-27"           # Puncture
+perk       = "000895:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Dagger_Puncture"
+requires   = "1h-dagger >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-28"           # Short Blade Focus 2
+perk       = "AD3999:Requiem.esp"
+editor_id  = "REQ_OneHanded_DaggerFocus2"
+requires   = "1h-dagger >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-29"           # Stunning Blow
+perk       = "000891:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Mace_StunningBlow"
+requires   = "1h-mace >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-30"           # Takedown
+perk       = "000A8F:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Grapple_Takedown"
+requires   = "1h-unarmed >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-31"           # Unarmed Stance
+perk       = "000A91:Requiem - Weapons and Armor Redone.esp"
+editor_id  = "REQ_OneHanded_Unarmed_UnarmedStance"
+requires   = "1h-unarmed >= 70"
+main_level = 35                # LoreRim OneHanded >= 50
+
+[[perk]]
+handle     = "1H-32"           # Short Blade Focus 3
+perk       = "AD3998:Requiem.esp"
+editor_id  = "REQ_OneHanded_DaggerFocus3"
+requires   = "1h-dagger >= 95"
+main_level = 55                # LoreRim OneHanded >= 75
+
+[[perk]]
+handle     = "1H-33"           # Death Adder
+perk       = "004EF9:Ordinator - Perks of Skyrim.esp"
+editor_id  = "DAGGERORD_One70_DeathAdder_Perk_70_OrdASISExclude"
+requires   = "1h-dagger >= 100"
+main_level = 60                # LoreRim OneHanded >= 80
+
+[[perk]]
+handle     = "1H-34"           # Final Stand
+perk       = "222D59:Ordinator - Perks of Skyrim.esp"
+editor_id  = "SWORDORD_One60_DeathOrGlory_Perk_60"
+requires   = "oneOf(sword-line) >= 100 OR twoOf(sword-line) >= 90 OR threeOf(sword-line) >= 80"
+main_level = 60                # LoreRim OneHanded >= 80
+
+[[perk]]
+handle     = "1H-35"           # Guillotine
+perk       = "222D5A:Ordinator - Perks of Skyrim.esp"
+editor_id  = "AXEORD_One50_Execute_Perk_50_OrdASISExclude"
+requires   = "oneOf(axe-line) >= 100 OR twoOf(axe-line) >= 90"
+main_level = 60                # LoreRim OneHanded >= 80
+
+[[perk]]
+handle     = "1H-36"           # Heavy Slam
+perk       = "222D58:Ordinator - Perks of Skyrim.esp"
+editor_id  = "MACEORD_One70_GrandSlam_Perk_70_OrdASISExclude"
+requires   = "1h-mace >= 100"
+main_level = 60                # LoreRim OneHanded >= 80
+
+[[perk]]
+handle     = "ORD-LA-05"     # Rushing Tide, restored to the One-Handed tree after Takedown
+perk       = "04D4E2:Ordinator - Perks of Skyrim.esp"
+editor_id  = "ORD_Lia50_RushingTide_Perk_50"
+requires   = "1h-unarmed >= 70"
+main_level = "drop"          # its own LightArmor >= 50
+has_perk_replace = { from = "ORD-LA-04", to = "1H-30" }   # Sweeping Wind → Takedown
+
+[[perk]]
+handle     = "ORD-LA-08"     # Hissing Dragon, after Rushing Tide
+perk       = "04D4E3:Ordinator - Perks of Skyrim.esp"
+editor_id  = "ORD_Lia70_HissingDragon_70_OrdASISExclude"
+requires   = "1h-unarmed >= 90"
+main_level = "drop"          # its own LightArmor >= 70
