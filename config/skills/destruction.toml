@@ -2,7 +2,7 @@
 # Run:  python3 scripts/normalize_conversion.py config/skills/destruction.toml
 # The DLL reads the same file (impl/main-skill-level.md) and solves k itself.
 #
-# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Magic sub-skills (skills/magic/design.md). Prototype assumption for Q-CAT-1 (open): one set of form and archetype sub-skills per school, ids `<school>/<form>`; archetype: only `<school>/standard` (R-7 not done). Groups: form, direction (school sub-direction), archetype.
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Magic sub-skills (skills/magic/design.md): only the school sub-directions `<school>/<direction>` (group direction); forms and archetypes are shared by all schools (shared.toml, `form/<form>`, `archetype/standard`, k = 0).
 
 [main]                 # vanilla AVIF curve (refs/vanilla-skill-xp.md §2); LoreRim's own AVIF has ImproveOffset 9999
 actor_value    = "Destruction"   # RE::ActorValue::kDestruction; a skill is managed by the DLL only if it has a file here
@@ -28,76 +28,14 @@ pace_sub   = 1500        # P_sub: raw XP per active game hour while a sub-skill 
 pace_skill = 800        # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
 
 [budget]
-form      = { share = 0.35 }
-direction = { share = 0.45 }
-archetype = { share = 0.20 }
+direction = { share = 1.0 }   # forms and the archetype are shared (shared.toml, k = 0)
 
 [reference_path]
 level   = 75
-members = ["destruction/missile", "destruction/flame", "destruction/fire", "destruction/frost", "destruction/standard"]
+members = ["destruction/fire", "destruction/frost", "destruction/shock"] # three: one element alone ≈ 69 at 75 (impl/spell-classifier.md)
 
 # ---- sub-skills -------------------------------------------------------------------------------
-# forms (T lower: a form is learned sooner), school sub-directions, archetype
-[[subskill]]
-name = "destruction/missile"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/explosion"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/beam"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/flame"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/rune"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/wall"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/cloak"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/direct"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/self"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "destruction/touch"
-group = "form"
-T = 60
-w = 12
-
+# school sub-directions (forms and the archetype: shared.toml)
 [[subskill]]
 name = "destruction/fire"
 group = "direction"
@@ -140,8 +78,3 @@ group = "direction"
 T = 90
 w = 15
 
-[[subskill]]
-name = "destruction/standard"
-group = "archetype"
-T = 50
-w = 12

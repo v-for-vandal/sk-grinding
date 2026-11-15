@@ -75,6 +75,8 @@ void load(SKSE::SerializationInterface* in) {
       restored = true;
       spdlog::info("[save] loaded version=1 subs={} mains={}", j["subs"].size(),
                    j["mains"].size());
+      for (auto& id : model.dropped)
+        spdlog::info("[state] dropped old per-school record sub={}", id);
     }
   } catch (const std::exception& e) {
     failedSave = true;
@@ -87,7 +89,8 @@ void load(SKSE::SerializationInterface* in) {
 void revert(SKSE::SerializationInterface*) {
   clearDeferredEvents();
   resetAim();
-  for (auto& sk : model.skills) {
+  for (auto skp : model.all()) {
+    auto& sk = *skp;
     sk.initialized = false;
     sk.external = 0;
     for (auto& s : sk.subs) {
@@ -244,8 +247,29 @@ void reload() {
                   e.what());
   }
 }
+double bestSchool() {
+  // All five schools, managed or not (impl/main-skill-level.md).
+  auto p = RE::PlayerCharacter::GetSingleton();
+  double best = 0;
+  if (p)
+    for (auto value : {RE::ActorValue::kAlteration, RE::ActorValue::kConjuration,
+                       RE::ActorValue::kDestruction, RE::ActorValue::kIllusion,
+                       RE::ActorValue::kRestoration})
+      best = std::max(best, double(p->AsActorValueOwner()->GetBaseActorValue(value)));
+  return best;
+}
 bool ready(sp::Skill& sk) {
   if (failedSave) return false;
+  if (sk.pseudo) {
+    if (!sk.initialized) {
+      if (!model.raceClosed) return false;
+      double best = bestSchool();
+      model.initializeShared(best);
+      spdlog::info("[init] shared sub-skills bestSchool={} form={} count={}", best,
+                   model.startLevel(best), sk.subs.size());
+    }
+    return true;
+  }
   if (!sk.initialized) {
     if (!model.raceClosed) return false;
     auto p = RE::PlayerCharacter::GetSingleton();
@@ -261,8 +285,8 @@ bool ready(sp::Skill& sk) {
 }
 void initialize(bool force) {
   if (failedSave) return;
-  for (auto& sk : model.skills)
-    if (force || !sk.initialized) {
+  for (auto skp : model.all())
+    if (auto& sk = *skp; force || !sk.initialized) {
       sk.initialized = false;
       bool old = model.raceClosed;
       model.raceClosed = true;

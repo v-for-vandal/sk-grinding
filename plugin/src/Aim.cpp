@@ -34,20 +34,14 @@ void cacheMissileNoise(RE::PlayerCharacter* player) {
       if (!spell || next->contains(spell->GetFormID())) return;
       auto c = classify(spell);
       if (c.form != "missile") return;
-      auto sub = model.find(c.school + "/missile");
-      auto sk = skill(c.actorValue);
-      if (!sub || !sk) return;
+      auto sub = model.find("form/missile");  // shared by all schools
+      if (!sub || !skill(c.actorValue)) return;
       // Before first practice, use the same provisional start level as init.
       // Requiring initialized=true made the first cast perfectly accurate even
       // though initialization itself waits for the spell's first XP event.
-      const double level =
-          sk->initialized
-              ? sub->current.value(sub->curve)
-              : std::clamp(model.settings.get("init", "floor_per_level") *
-                               (player->AsActorValueOwner()->GetBaseActorValue(
-                                    c.actorValue) -
-                                model.settings.get("init", "floor_zero_at")),
-                           0., model.settings.get("xp", "floor_cap"));
+      const double level = model.shared.initialized
+                               ? sub->current.value(sub->curve)
+                               : model.startLevel(bestSchool());
       (*next)[spell->GetFormID()] = {
           model.settings.get("aim", "missile_sigma_max_deg") *
               std::max(0., 1 - level / model.settings.get("aim", "missile_L0")),
@@ -200,9 +194,8 @@ void refreshAim(float dt) {
       auto spell = caster->currentSpell->As<RE::SpellItem>();
       auto c = classify(spell);
       if (c.form != "beam") continue;
-      auto sub = model.find(c.school + "/beam");
-      auto sk = skill(c.actorValue);
-      if (sub && sk && sk->initialized) {
+      auto sub = model.find("form/beam");  // shared by all schools
+      if (sub && skill(c.actorValue) && model.shared.initialized) {
         casting = true;
         level = std::min(level, sub->current.value(sub->curve));
       }

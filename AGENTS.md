@@ -31,6 +31,8 @@ sub-skills. This repository holds the **design** for now; the code comes later.
 - [`config/`](config/): the plugin's config files (all numbers, placeholders for now);
   [`config/skills/`](config/skills/) also drives `scripts/normalize_conversion.py`.
 - [`plan/`](plan/): tasks for the implementing agent (first: [`plan/prototype-1.md`](plan/prototype-1.md)).
+- [`playtesting/`](playtesting/README.md): one file per in-game balance / design scenario (why,
+  steps, what to record, expected result); the design links there where it waits for results.
 - [`refs/`](refs/): background notes. [`old/`](old/): superseded designs.
 
 ## Conventions

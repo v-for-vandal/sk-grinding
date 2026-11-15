@@ -18,25 +18,30 @@ everything to the SKSE co-save. Player only.
   [`config/skills/`](../config/skills/)). One file = one managed main skill (`[main] actor_value`).
   Every `[[subskill]]` entry is one sub-skill: string id `name`, parent = the file's main skill,
   group, `T`, `w`, optional `T1`, optional fixed `k`, optional `curve`, optional `decay_rate`.
-- Ids are global and unique (`1h-sword`, `heavy-shield`, `destruction/missile`, `iron`). A
+- Ids are global and unique (`1h-sword`, `heavy-shield`, `form/missile`, `iron`). A
   duplicate id is a load error (logged, the second one is ignored).
-- Concept sub-skills = entries with `k = 0` (`dual-wield`, `with-shield`, `with-magic`).
+- Concept sub-skills = entries with `k = 0` (`dual-wield`, `with-shield`, `with-magic`; later `heavy-armor-casting`, `light-armor-casting`).
 - The registry also keeps, per main skill: the main XP curve (`[main]`), `[dynamics]`, and the
   solved `k` and `M_i` tables ([`main-skill-level.md`](main-skill-level.md)).
-- Cross-links (§6.2) are **not** in prototype 1: effective floor = own floor.
+- Cross-links (§6.2) and the Alteration floor: implemented in the core since prototype 2
+  ([`cross-links.md`](cross-links.md)); `Sub::links` is resolved from `config/cross-links.toml`
+  at config load.
 
 ## Values per sub-skill
 
 | Field | Type | Meaning |
 |---|---|---|
 | `current` | `LevelXP` | present level, decays (§5.5) |
-| `ownFloor` | `LevelXP` | grows with practice, never decreases, ≤ `floor_cap` |
+| `ownFloor` | `LevelXP` | grows with practice, never decreases, no cap (≤ `current`, step 4) |
 | `potential` | `LevelXP` | best level reached (later also books / trainers) |
 | `peak` | `LevelXP` | best level reached by practice; used by rust ([`main-skill-level.md`](main-skill-level.md)) |
 | `idle` | `float` | idle meter `U`, active game hours ([`decay.md`](decay.md)) |
 | `lastRawXP` | `float` | last raw award (UI only, not saved) |
 
-`effectiveFloor` is derived: `max(ownFloor, cross-links)`; in prototype 1 it equals `ownFloor`.
+`effectiveFloor` is derived, never stored: `max(ownFloor, cross-links, Alteration term)`
+(`Model::effectiveFloor`, [`cross-links.md`](cross-links.md)). It drives the catch-up zone (step 2
+below) and the decay stop ([`decay.md`](decay.md)); the own floor alone is what grows and what
+the rust cap reads.
 
 `LevelXP` = `{ uint16 level; float progress; }` with `0 ≤ progress < cost(level)` (§5.1: never a
 total-XP float). Helpers needed:
@@ -64,7 +69,7 @@ in prototype 1):
      that multiplier, the rest the lower one. Loop until all raw XP is spent (at most 2 steps).
 3. `current += raw × z` (per part, as above).
 4. `ownFloor += floor_rate × raw` (raw XP **before** the zone multiplier, every zone, §5.4);
-   clamp to `floor_cap` (as a level: at `floor_cap` progress = 0) and to `≤ current`.
+   clamp to `≤ current`. No floor cap (design-v2 §5.4; `[xp] floor_cap` removed 2026-11-15).
 5. `potential = max(potential, current)`; `peak = max(peak, current)`.
 6. Idle meter: `U = max(0, U − c_dec × raw)`, `c_dec = 1 / (q × pace_sub)` ([`decay.md`](decay.md)).
 7. Tell the main skill: rust and `U_main` are reduced **once per vanilla award**, not per
@@ -119,7 +124,7 @@ or removing sub-skills in config never shifts saved data.
 
 - Unit tests (no game, see [`plugin-foundation.md`](plugin-foundation.md)): `LevelXP` add / sub
   across many levels, at `hard_cap`, with `cost(0) = 0`; zone split at both boundaries;
-  floor never above `floor_cap` or `current`.
+  floor never above `current`.
 - In game: give 10 000 XP to one sub-skill from the debug panel, save, load: identical values in
   the panel and in a state dump before and after.
 - Remove one sub-skill from a TOML, load, save, put it back, load: its values are back.

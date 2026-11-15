@@ -13,7 +13,7 @@ checks pass. **Successful in-game validation is still pending.** Use a separate 
 
 Replace the archive and restart; verify `[boot] SkillPractice 0.1.5` and
 `aim=post-velocity`. In third person with target lock and Missile Aim Mode
-Predictive, compare Firebolt at destruction/missile current 0 and 75, leaving
+Predictive, compare Firebolt at form/missile current 0 and 75, leaving
 `debug_missile_yaw_deg=0`. Expect spread at 0, no added noise at 75. Repeat
 without lock-on to check the original free-aim case. Send the log: the velocity
 chain module and `[aim] post-velocity` record show the handler ordering and
@@ -29,7 +29,7 @@ off, XP multiplier at 1, Debug logging and Verbose XP on.
    award restoration/self, help and standard.
 2. Perform separate shield bashes and ordinary blocks. A bash award routes to
    bash plus half to the shield; a later ordinary block must not inherit bash.
-3. Equip Firebolt, set destruction/missile current to 0 on the test save, fire
+3. Equip Firebolt, set form/missile current to 0 on the test save, fire
    at a distant wall repeatedly; repeat at 75. Expect `[aim] first-update`
    and spread at 0, no spread at 75. Compare TDM lock-on on/off if flight is
    corrected after the initial offset. Check NPC casts remain unchanged.
@@ -126,8 +126,8 @@ The fix is built/tested locally; its in-game result still needs confirmation.
     Hit with a sword (`1h-sword`), greatsword (`2h-sword`), punch (`1h-unarmed`),
     block with a shield (`heavy-shield`/`light-shield`), parry (`parry`), bash
     (`bash`, plus half to a shield), craft/temper, cast Ice Spike and heal.
-    Ice Spike should feed destruction/missile, frost and standard; self heal
-    restoration/self, help and standard. Smithing feeds its material and category,
+    Ice Spike should feed form/missile, destruction/frost and archetype/standard; self heal
+    form/self, restoration/help and archetype/standard. Smithing feeds its material and category,
     while clothing jewelry feeds jewelry only. Main levels follow the formula.
     Dump weapon classes also tests post-KID coverage and multiple keywords.
 11. **Decay and rust.** Raise sword current above its floor. Enable forgetting
@@ -160,13 +160,13 @@ The fix is built/tested locally; its in-game result still needs confirmation.
     path coverage. `[ctx]` versus `[use]` timestamps show event ordering.
     Send the complete log including `[boot]` original-module ownership lines.
 16. **Missile aim / R-26 checks 1–2.** Initialize Destruction and set
-    destruction/missile to 0 on a test save, then shoot Ice Spike at a wall
+    form/missile to 0 on a test save, then shoot Ice Spike at a wall
     20 times; repeat at 75. Expect spread at 0 and none at 75. For the fixed
     launch probe, edit the installed TOML `aim.debug_missile_yaw_deg=10`, Reload
     config, and fire again; then restore it to 0. Test dual casting, multiple
     projectiles and a lobber if available. Compare TDM lock-on on/off; report
     whether homing cancels the noise. NPC missiles and Fireball stay unchanged.
-17. **Beam aim / R-26 checks 4–6.** Set destruction/beam to 0. Charge Lightning
+17. **Beam aim / R-26 checks 4–6.** Set form/beam to 0. Charge Lightning
     Bolt, then hold Sparks for at least three seconds: crosshair/aim should
     wander smoothly and the spell should follow it. Stop casting: disturbance
     stops. Repeat at 75: no sway. Repeat in first/third person with default

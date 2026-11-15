@@ -1,0 +1,64 @@
+# Shared magic sub-skills: spell forms and archetypes, common to every school
+# (skills/magic/design.md; impl/spell-classifier.md *Ids*). No [main]: they belong to no main
+# skill, have k = 0 (no worth, no rust) and are shown in the panel as the pseudo-skill "Magic".
+# Start (impl/main-skill-level.md): forms = floor_per_level × (best managed school − floor_zero_at),
+# clamped only by hard_cap (no floor cap, design-v2 §5.4); archetypes start at 0.
+#
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1).
+
+[shared]
+name = "Magic"         # panel title of the pseudo-skill
+
+[sub_curve]            # sub-skill XP curve, 0..200 scale (design-v2 §5.1)
+improve_mult   = 2
+improve_offset = 0
+exponent       = 1.95
+
+[dynamics]
+decay_rate = 2.0       # sub-skill decay at full rate, levels per active game day (Q-DYN-4 (a))
+pace_sub   = 1500      # P_sub: raw XP per active game hour while a sub-skill is practised (Q-DYN-15)
+
+# ---- sub-skills -------------------------------------------------------------------------------
+[[subskill]]
+name = "form/missile"
+group = "form"
+
+[[subskill]]
+name = "form/explosion"
+group = "form"
+
+[[subskill]]
+name = "form/beam"
+group = "form"
+
+[[subskill]]
+name = "form/flame"
+group = "form"
+
+[[subskill]]
+name = "form/rune"
+group = "form"
+
+[[subskill]]
+name = "form/wall"
+group = "form"
+
+[[subskill]]
+name = "form/cloak"
+group = "form"
+
+[[subskill]]
+name = "form/direct"
+group = "form"
+
+[[subskill]]
+name = "form/self"
+group = "form"
+
+[[subskill]]
+name = "form/touch"
+group = "form"
+
+[[subskill]]
+name = "archetype/standard"
+group = "archetype"

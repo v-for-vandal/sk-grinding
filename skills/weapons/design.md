@@ -54,6 +54,32 @@ from its perks) stays as it is.
   |---|---|---|---|---|---|---|---|---|---|
   | damage | −20 | 50 | 45 | 40 | +17.3 | **+25.0** | +32.1 | **+35.5** | +41.3 |
 
+  Kept for now (2026-11-15) on condition that it does not hurt the fun of fights: playtest
+  [`weapon-damage.md`](../../playtesting/weapon-damage.md).
+
+  Non-damage effects (decided 2026-11-15; levers: [R-37](../../research/R-37-melee-non-damage-levers.md)).
+  Melee sub-skills only (`1h-*`, `2h-*`); the values are % changes of the cost or speed:
+
+  | | `pen` at 0 | `P` | `M` | `h` | at 100 | at 200 |
+  |---|---|---|---|---|---|---|
+  | light attack stamina cost (inverted) | +50 | 50 | 40 | 150 | **−10** | **−20** |
+  | power attack stamina cost (inverted) | +50 | 50 | 40 | 150 | **−10** | **−20** |
+  | attack speed *(only if R-37 check 4 passes; numbers placeholder)* | −15 | 50 | 20 | 150 | +5 | +10 |
+
+  - The stamina curve is the one of armor *stamina on hit*
+    ([armor](../armor/design.md) *Continuous effects*).
+  - **Light attacks:** Requiem already charges stamina for normal attacks (scaled by its own
+    weapon skill, R-37). Our effect multiplies that cost, it does not add a second drain. How
+    Requiem charges it (and so where we multiply) is R-37 check 1.
+  - **Power attacks:** a multiplier on the cost after Requiem (entry point *Mod Power Attack
+    Stamina* with our AV, or the hook of the cost calculation, R-37 check 2).
+  - **Attack speed:** `WeaponSpeedMult` / `LeftWeaponSpeedMult` per hand, set from the sub-skill
+    of the weapon in that hand (Ordinator perks change the same AVs). Only if a change applies
+    mid-combat (R-37 check 4).
+  - `dual-wield`, `with-shield` and `with-magic` lower the effective level of the weapon
+    sub-skill (below), so they act on these effects too.
+  - Implementation: [`impl/weapon-effects.md`](../../impl/weapon-effects.md).
+
 - **`dual-wield`** (applies while a weapon is in each hand). Each pair of weapon classes has a
   checkpoint `C` (table below).
   - **Penalty:** the effective level of the attacking weapon's sub-skill is `current × factor`,

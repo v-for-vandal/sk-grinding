@@ -33,6 +33,26 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree (decided)
+
+Purchasable perks brought back (type A). How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md);
+checks before building: [R-29](../../research/R-29-restored-ordinator-perks.md) (Heavy Armor).
+Sub-skills: [`design.md`](design.md).
+
+```
+HA-06 Fortitude ............................. HeavyArmor 50
+└── ORD-HA-03 Rallying Standard ............. HeavyArmor 75
+HA-08 Power of the Combatant ................ HeavyArmor 75
+├── ORD-HA-09 Rise Above .................... HeavyArmor 80, or 75 + speech-intimidation 60
+└── ORD-HA-12 Primal Fear ................... HeavyArmor 90, or 75 + speech-intimidation 75
+HA-12 Defiance .............................. HeavyArmor 50
+├── ORD-HA-04 Revel in Battle ............... HeavyArmor 50
+└── ORD-HA-05 Bedrock ....................... HeavyArmor 60
+HA-16 Reap the Whirlwind .................... HeavyArmor 100
+└── ORD-HA-13 Sovereign ..................... HeavyArmor 120
+    └── ORD-HA-14 Face of the Mountain ...... HeavyArmor 140
+```
+
 ### ORD-HA-01 · Heavy Armor Mastery
 
 - **ID:** `007AB2:Ordinator - Perks of Skyrim.esp` · `ORD_Hea00_HeavyArmorMastery_Perk_00` · type: A (Ordinator's own record)
@@ -69,7 +89,10 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** Grants the "Rallying Standard" power. Once a day, place a banner that grants 150 points of armor and 25% melee damage to allies within 25 feet wearing all Heavy Armor (including you) and prevents them from fleeing. Lasts 60 seconds.
 - **Records:** ability *Rallying Standard*: Rallying Standard
 - **Proposal (auto):** illusion/emotional
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent **HA-06 Fortitude**
+  (Ordinator: Heavy Armor Fit = HA-04). Its children Warbringer and Doombringer stay out.
+- **Sub-skill requirements:** HeavyArmor ≥ 75 (Ordinator 40); `has perk Heavy Armor Fit (HA-04)` →
+  `has perk Fortitude (HA-06)`.
 
 ### ORD-HA-04 · Revel in Battle
 
@@ -79,7 +102,11 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** Defiance also increases melee weapon damage by 3% for 10 seconds. This effect stacks.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent HA-12 Defiance (as in
+  Ordinator). Likely works as is: LoreRim's Defiance (HA-12) is Ordinator's own record and its
+  on-swing spell already carries the effect *Revel in Battle* (`OneHandedPowerModifier 3`), so
+  owning this perk should be enough. To verify in game (R-29).
+- **Sub-skill requirements:** none; HeavyArmor ≥ 50 and `has perk Defiance (HA-12)` as in Ordinator.
 
 ### ORD-HA-05 · Bedrock
 
@@ -89,7 +116,10 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** If wearing all Heavy Armor, you have 20% chance to brace for impact when attacked by an enemy, becoming immune to stagger for 4 seconds.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent HA-12 Defiance (as in
+  Ordinator). The perk has no effects of its own and no LoreRim record found carrying its effect:
+  which script grants the brace (stagger immunity) must be checked before building (R-29).
+- **Sub-skill requirements:** none; HeavyArmor ≥ 60 and `has perk Defiance (HA-12)` as in Ordinator.
 
 ### ORD-HA-06 · Break Upon Me
 
@@ -131,7 +161,13 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** If wearing all Heavy Armor, you intimidate enemies within 15 feet. They lose 5% attack damage and you gain 5% attack damage for each enemy affected.
 - **Records:** ability *Rise Above*: Rise Above (magnitude 15)
 - **Proposal (auto):** speech-persuasion
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent **HA-08 Power of the
+  Combatant** (Ordinator: Break Upon Me, not restored).
+- **Sub-skill requirements:** `HeavyArmor >= 80 OR (HeavyArmor >= 75 AND speech-intimidation >= 60)`
+  (one global, the formula reads the main skill too: [`impl/perk-requirements.md`](../../impl/perk-requirements.md));
+  the perk's own `HeavyArmor ≥ 80` is dropped; `has perk Break Upon Me (ORD-HA-06)` →
+  `has perk Power of the Combatant (HA-08)`. The main-skill level of the second branch equals the
+  parent's 75 (lower would be unreachable through the parent).
 
 ### ORD-HA-10 · Warbringer
 
@@ -161,7 +197,11 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** If wearing all Heavy Armor, walking (but not running) towards living enemies within 30 feet in front of you may break their confidence, causing them to flee for 8 seconds.
 - **Records:** ability *Primal Fear*: Primal Fear (magnitude 30)
 - **Proposal (auto):** illusion/emotional
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent **HA-08 Power of the
+  Combatant** (Ordinator: Rise Above), a sibling of Rise Above.
+- **Sub-skill requirements:** `HeavyArmor >= 90 OR (HeavyArmor >= 75 AND speech-intimidation >= 75)`
+  (one global, as Rise Above); the perk's own `HeavyArmor ≥ 90` is dropped; `has perk Rise Above
+  (ORD-HA-09)` → `has perk Power of the Combatant (HA-08)`.
 
 ### ORD-HA-13 · Sovereign
 
@@ -171,7 +211,10 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** When struck by an attack, subsequent attacks are deflected if wearing all Heavy Armor. You take 75% reduced damage from attacks for 1 second.
 - **Records:** damage taken −75% — when has effect ORD_Hea_Sovereign_Effect_Proc
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent HA-16 Reap the Whirlwind (as in
+  Ordinator). Main skills are uncapped (design-v2 §5.1), so 120 is reachable through breadth of
+  sub-skills. The `ORD_Hea_Sovereign_Effect_Proc` effect comes from a script: check (R-29).
+- **Sub-skill requirements:** HeavyArmor ≥ 120 (Ordinator 90).
 
 ### ORD-HA-14 · Face of the Mountain
 
@@ -181,4 +224,6 @@ ORD-HA-01 Heavy Armor Mastery ................. —  (rank 2: HeavyArmor 20)
 - **In game:** When struck by a power attack or power bash, the attacker's strike rebounds forcefully as if striking solid rock, staggering them and potentially knocking them to the ground if wearing all Heavy Armor.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** bash
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent ORD-HA-13 Sovereign (as in
+  Ordinator). No effects of its own: the script that checks it must be found (R-29).
+- **Sub-skill requirements:** HeavyArmor ≥ 140 (Ordinator 100).

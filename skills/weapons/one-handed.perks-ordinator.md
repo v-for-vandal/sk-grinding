@@ -47,6 +47,18 @@ ORD-1H-01 One-Handed Mastery .................. —  (rank 2: OneHanded 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree from other worksheets (decided)
+
+Two Light Armor Ordinator perks go to the One-Handed tree, for a pure unarmed fighter; details and
+requirements: [`../armor/light-armor.perks-ordinator.md`](../armor/light-armor.perks-ordinator.md)
+*Restored to the LoreRim tree*.
+
+```
+1H-30 Takedown .............................. OneHanded 50
+└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 70 only
+    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 90 only
+```
+
 ### ORD-1H-01 · One-Handed Mastery
 
 - **ID:** `00B149:Ordinator - Perks of Skyrim.esp` · `ORD_One00_OneHandedMastery_Perk_00` · type: A (Ordinator's own record)

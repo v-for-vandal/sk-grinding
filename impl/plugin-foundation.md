@@ -4,8 +4,9 @@
 - **Design:** design-v2 §1 (SKSE plugin + small ESL + MCM glue), §14 (runtime, FormKeys,
   persistence), [`refs/frameworks.md`](../refs/frameworks.md) §5 (CommonLibSSE-NG, templates).
 - **Depends on:** nothing.
-- **Research:** R-21 / Q-TECH-2 (license) is open: do not add a license file; keep CommonLibSSE-NG
-  as a submodule so the choice stays open.
+- **Research:** none. License decided (design-v2 §14): GPL-3.0-or-later with the modding
+  exception, as CommonLibSSE-NG; the license file is still to be added (with R-21: read
+  CommonLib's `EXCEPTIONS.md` for the exact wording).
 
 ## Repository layout (new folders)
 
@@ -103,6 +104,11 @@ Scripts/Source/SkillPractice_MCMScript.psc
 Requirements: SKSE, Address Library, Keyword Item Distributor, OCF, SkyUI, MCM Helper (all in
 LoreRim), **PrismaUI 1.5.1** (not in LoreRim; needs Media Keys Fix SKSE, which LoreRim has). `Requiem - Magic Redone.esp` is used for sub-direction keywords
 (missing → those rules are skipped, logged).
+
+**Design change (2026-11-15, not implemented):** the package also carries our version of
+Requiem's `Scripts/REQ_PassiveArmorTraining.pex` (+ source), which must win the file conflict
+over Requiem; its build needs Requiem's script sources (`REQ_CoreScript`).
+[`armor-movement-xp.md`](armor-movement-xp.md).
 
 ## Prototype notes
 

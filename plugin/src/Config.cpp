@@ -62,6 +62,171 @@ void requireRows(const json& file, const char* table, const char* list,
       throw std::runtime_error(std::string(name) + ": bad " + list);
   }
 }
+// [[effect]] and [[auto_perk]] of a skill file: shown in the panel only
+// (impl/status-ui.md *Effects and automatic perks*); the DLL applies none of them yet.
+void readDisplay(const json& file, Skill& sk, const std::string& name) {
+  auto bad = [&](const std::string& what) {
+    throw std::runtime_error(name + ": " + what);
+  };
+  auto find = [&](const std::string& id) -> Sub& {
+    for (auto& s : sk.subs)
+      if (s.id == id) return s;
+    bad("unknown subskill " + id);
+    throw std::logic_error("unreachable");
+  };
+  for (auto& e : file.value("effect", json::array())) {
+    if (!e.contains("name") || !e.at("name").is_string()) bad("effect without name");
+    json out = {{"name", e.at("name")},
+                {"unit", e.value("unit", "%")},
+                {"invert", e.value("invert", false)},
+                {"applied", false}};
+    if (e.contains("curve")) {
+      auto& c = e.at("curve");
+      out["kind"] = "curve";
+      for (auto key : {"pen", "P", "M", "h"}) out[key] = c.at(key).get<double>();
+      out["p"] = c.value("p", 1.);
+      if (out["P"] <= 0 || out["h"] <= 0 || out["p"] <= 0) bad("bad effect curve");
+    } else if (e.contains("linear")) {
+      auto& c = e.at("linear");
+      out["kind"] = "linear";
+      out["at0"] = c.at("at0").get<double>();
+      out["zeroAt"] = c.at("zero_at").get<double>();
+      if (out["zeroAt"] <= 0) bad("bad effect line");
+    } else
+      bad("effect without curve or linear");
+    std::vector<std::string> targets;
+    if (e.contains("subskills"))
+      targets = e.at("subskills").get<std::vector<std::string>>();
+    else if (e.contains("group")) {
+      for (auto& s : sk.subs)
+        if (s.group == e.at("group").get<std::string>()) targets.push_back(s.id);
+    } else
+      bad("effect without group or subskills");
+    if (targets.empty()) bad("effect without targets");
+    for (auto& id : targets) find(id).effects.push_back(out);
+  }
+  for (auto& p : file.value("auto_perk", json::array())) {
+    for (auto key : {"id", "name", "subskill", "description"})
+      if (!p.contains(key) || !p.at(key).is_string())
+        bad(std::string("auto_perk without ") + key);
+    double level = p.at("level");
+    if (level < 0) bad("auto_perk level");
+    find(p.at("subskill")).perks.push_back(
+        {{"id", p.at("id")},
+         {"name", p.at("name")},
+         {"level", level},
+         {"description", p.at("description")}});
+  }
+}
+// config/cross-links.toml (design-v2 §6, impl/cross-links.md). A pattern that matches no
+// registered sub-skill is a warning: the file lists skills that later prototypes manage.
+void readLinks(const json& file, Model& m) {
+  auto& warn = m.settings.values["configWarnings"];
+  auto skills = m.all();
+  std::vector<std::pair<int, int>> where;  // index into all(), sub index
+  std::vector<std::string> ids;
+  for (int k = 0; k < int(skills.size()); ++k)
+    for (int i = 0; i < int(skills[k]->subs.size()); ++i) {
+      where.push_back({k, i});
+      ids.push_back(skills[k]->subs[i].id);
+    }
+  auto match = [&](const json& patterns, const std::string& what) {
+    std::vector<size_t> out;
+    for (auto& p : patterns) {
+      bool any = false;
+      for (size_t i = 0; i < ids.size(); ++i)
+        if (globMatch(p.get<std::string>(), ids[i])) {
+          out.push_back(i);
+          any = true;
+        }
+      if (!any)
+        warn.push_back("cross-links.toml: " + what + " pattern " + p.get<std::string>() +
+                       " matches no sub-skill");
+    }
+    return out;
+  };
+  auto sub = [&](size_t i) -> Sub& { return skills[where[i].first]->subs[where[i].second]; };
+  auto add = [&](size_t from, size_t to, double c) {
+    if (from == to) return;
+    auto& links = sub(to).links;
+    for (auto& l : links)
+      if (l.skill == where[from].first && l.sub == where[from].second) {
+        l.c = std::max(l.c, c);  // non-cumulative: the same pair twice keeps the larger c
+        return;
+      }
+    links.push_back({where[from].first, where[from].second, c});
+  };
+  json rows = file.value("link", json::array());
+  for (auto& row : rows) {
+    double c = row.at("coefficient");
+    if (!(c > 0 && c <= 1)) throw std::runtime_error("cross-links.toml: coefficient out of (0, 1]");
+    auto from = match(row.at("from"), "from"), to = match(row.at("to"), "to");
+    bool both = row.value("symmetric", false);
+    for (auto a : from)
+      for (auto b : to) {
+        add(a, b, c);
+        if (both) add(b, a, c);
+      }
+  }
+  auto alt = file.value("alteration", json::object());
+  m.alteration.enabled = alt.value("enabled", false);
+  m.alteration.c = alt.value("coefficient", .2);
+  m.alteration.scale = alt.value("scale", 2.);
+  if (m.alteration.c < 0 || m.alteration.scale < 0)
+    throw std::runtime_error("cross-links.toml: bad [alteration]");
+  auto schools = alt.value("schools", std::vector<std::string>{});
+  for (auto& sk : m.skills)
+    if (std::find(schools.begin(), schools.end(), sk.av) != schools.end())
+      for (auto& s : sk.subs) s.magic = true;
+  if (alt.value("include_shared", false))
+    for (auto& s : m.shared.subs) s.magic = true;
+}
+// config/perks/*.toml (impl/perk-requirements.md). A row whose formula names a sub-skill
+// that is not registered is skipped with a warning (its skill is not managed yet); a syntax
+// error is fatal.
+void readRequirements(const std::vector<std::pair<std::string, json>>& files, Model& m) {
+  auto& warn = m.settings.values["configWarnings"];
+  NameResolver names;
+  for (auto sk : m.all())
+    for (auto& s : sk->subs) names.ids.push_back(s.id);
+  std::set<std::string> handles;
+  for (auto& [name, file] : files) {
+    if (file.contains("aliases"))
+      for (auto& [alias, list] : file.at("aliases").items())
+        names.aliases[alias] = list.get<std::vector<std::string>>();
+  }
+  for (auto& [name, file] : files) {
+    if (!file.contains("perk")) continue;
+    for (auto& row : file.at("perk")) {
+      Requirement r;
+      r.handle = row.at("handle");
+      r.file = name;
+      r.perk = row;
+      if (!handles.insert(r.handle).second)
+        throw std::runtime_error(name + ": duplicate perk handle " + r.handle);
+      if (!row.contains("perk") || !row.at("perk").is_string())
+        throw std::runtime_error(name + ": " + r.handle + " without perk FormKey");
+      if (!row.contains("requires")) continue;  // main_level / parent changes only
+      r.formula = row.at("requires");
+      std::string g = r.handle;
+      std::erase(g, '-');
+      r.global = row.value("global", "SPO_Req_" + g);
+      std::vector<std::string> notes;
+      try {
+        r.expr = parseRequirement(r.formula, names, notes);
+      } catch (const std::runtime_error& e) {
+        std::string what = e.what();
+        if (what.find("unknown sub-skill") == std::string::npos &&
+            what.find("matches no sub-skill") == std::string::npos)
+          throw std::runtime_error(name + ": " + r.handle + ": " + what);
+        warn.push_back(name + ": " + r.handle + " skipped: " + what);
+        continue;
+      }
+      for (auto& n : notes) warn.push_back(name + ": " + r.handle + ": " + n);
+      m.requirements.push_back(std::move(r));
+    }
+  }
+}
 }  // namespace
 void Model::loadConfig(const std::string& root, bool builtIn) {
   Model next;
@@ -112,8 +277,52 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
       if (f.path().extension() == ".toml")
         files.push_back(std::filesystem::path("skills") / f.path().filename());
   std::sort(files.begin(), files.end());
+  std::vector<std::filesystem::path> perkFiles;
+  if (builtIn) {
+    for (auto& [name, content] : defaults)
+      if (name.starts_with("perks/")) perkFiles.emplace_back(name);
+  } else if (std::filesystem::is_directory(root + "/perks"))
+    for (auto& f : std::filesystem::directory_iterator(root + "/perks"))
+      if (f.path().extension() == ".toml")
+        perkFiles.push_back(std::filesystem::path("perks") / f.path().filename());
+  std::sort(perkFiles.begin(), perkFiles.end());
   for (auto& path : files) {
     auto j = parse(path.generic_string());
+    if (!j.contains("main")) {
+      // shared.toml: the shared magic sub-skills, pseudo-skill "magic" (k = 0, no rust).
+      if (!j.contains("shared") || !next.shared.subs.empty())
+        throw std::runtime_error(path.generic_string() +
+                                 ": no [main] and not the one shared file");
+      auto& sh = next.shared;
+      sh.pseudo = true;
+      sh.av = "magic";
+      sh.name = j.at("shared").value("name", "Magic");
+      auto d = j.value("dynamics", json::object());
+      sh.decay = d.value("decay_rate", 2.);
+      sh.paceSub = d.value("pace_sub", 1500.);
+      sh.rustRate = 0;
+      if (sh.decay < 0 || sh.paceSub <= 0)
+        throw std::runtime_error("invalid shared dynamics");
+      for (auto& v : j.at("subskill")) {
+        Sub s;
+        s.id = v.at("name");
+        if (!ids.insert(s.id).second)
+          throw std::runtime_error("duplicate subskill " + s.id);
+        s.group = v.at("group");
+        s.T = v.value("T", 90.);
+        s.w = v.value("w", 15.);
+        s.fixed = true;
+        s.k = 0;
+        s.decay = v.value("decay_rate", sh.decay);
+        s.curve = curve(v.value("curve", json::object()),
+                        curve(j.value("sub_curve", json::object())));
+        if (s.w <= 0 || s.decay < 0) throw std::runtime_error("invalid subskill");
+        s.prepare(cap);
+        sh.subs.push_back(s);
+      }
+      readDisplay(j, sh, path.generic_string());
+      continue;
+    }
     Skill sk;
     auto m = j.at("main"), d = j.at("dynamics");
     sk.av = m.at("actor_value");
@@ -177,6 +386,7 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
       if (std::none_of(sk.subs.begin(), sk.subs.end(),
                        [&](auto& s) { return s.id == id; }))
         throw std::runtime_error("unknown path member " + id);
+    readDisplay(j, sk, path.generic_string());
     sk.solve(cap);
     next.skills.push_back(sk);
   }
@@ -188,6 +398,11 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
   for (auto school : {"destruction", "restoration"})  // read at runtime
     requireRows(next.settings.values["directions"], school, "keywords",
                 "magic-directions.toml");
+  readLinks(parse("cross-links.toml"), next);
+  std::vector<std::pair<std::string, json>> perkData;
+  for (auto& path : perkFiles)
+    perkData.push_back({path.generic_string(), parse(path.generic_string())});
+  readRequirements(perkData, next);
   if (!skills.empty()) next.restore(save());
   *this = std::move(next);
 }

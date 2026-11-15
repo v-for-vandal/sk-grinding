@@ -91,14 +91,40 @@ For one main skill (all its sub-skills at once):
 
 ```
 main  = player base actor value of the skill
-floor = clamp(floor_per_level × (main − floor_zero_at), 0, floor_cap)   // non-concept sub-skills
+floor = clamp(floor_per_level × (main − floor_zero_at), 0, hard_cap)   // non-concept sub-skills
 floor = 0                                                             // concept (k = 0)
 current = ownFloor = potential = peak = floor;  U = 0
 base = main;  L0_i = floor;  R = 0;  U_main = 0;  n = round(main);  initialized = true
 ```
 
-So the main level does not jump: `X = 0` and `F = base`. Q-ML-9 (which sub-skills get the floor)
-is open; prototype 1 uses its proposal: all non-concept sub-skills.
+So the main level does not jump: `X = 0` and `F = base`. Prototype 1 gives the floor to all
+non-concept sub-skills.
+
+**Design change (2026-11-14, not implemented): split of the main XP** (design-v2 §4.4.4).
+Replaces the mapping above; `[init] floor_per_level`, `floor_zero_at` go away.
+
+```
+X0 = mainXP(start_level → main)                     // [main] curve of the skill file, double
+S  = { i : k_i > 0 and start_split_i }               // start_split: per-sub-skill key, default true
+share = X0 / |S|; solve M_i(L_i) = share by bisection on the M_i table (fractional L)
+  saturation: if M_i(hard_cap) < share → L_i = hard_cap, recompute share over the rest
+current = ownFloor = potential = peak = L_i  (i ∈ S);  0 otherwise
+base = start_level;  L0_i = 0;  R = 0;  U_main = 0;  n = round(main)
+main ≤ start_level → all 0, base = main;  leftover after saturation → base = b with F(b, ΣM) = main
+```
+
+- Check after init: `F` equals `main` within 0.01; log it in the `[init]` block with `|S|` and
+  the levels given.
+- Shared sub-skills (not in `S`): forms `current = ownFloor = potential = peak =
+  max(0, 2 × (m − 15))`, `m` = highest base level among the magic schools (all five, managed or
+  not); archetypes 0. **Implemented 2026-11-14** (`Model::initializeShared`, `bestSchool()`):
+  initialized at the first award to a shared sub-skill (the first managed spell cast, the same
+  event that initializes its school); *Initialize now* / *Re-initialize all* redo them. It uses
+  the current mapping keys (`floor_per_level`, `floor_zero_at`), clamped only by `hard_cap`
+  (`floor_cap` removed 2026-11-15). Before init, spell aim uses the same value.
+- Existing co-saves keep their `base` / `L0_i` (the formula handles any `L0`); only a new init or
+  *Re-initialize all* uses the split.
+- Unit test: for every skill file and main ∈ {15, 20, 25, 40, 60, 100}, init then `F = main`.
 
 **When:**
 
@@ -135,7 +161,7 @@ Log one `[init]` block per skill: main level read, floor given, number of sub-sk
 - Unit: `k` equals the script's output (6 files); `levelFromXP(15, N) = 100`; path members all at
   75, others 0 → `F = 100` for a fresh character (base 15, `L0 = 0`).
 - Level-50 save: after load, every managed main skill shows the same level as before, the panel
-  shows floors `= clamp(2 × (main − 15), 0, 75)`.
+  shows floors `= clamp(2 × (main − 15), 0, hard_cap)` (no floor cap since 2026-11-15).
 - New game: skills stay untouched until the first hit / cast / craft after character creation;
   then `[init]` lines appear with the skills of that moment.
 - With `xp_mult = 100`: hitting with a sword raises `1h-sword` and, through the formula,

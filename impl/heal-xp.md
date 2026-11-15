@@ -46,7 +46,7 @@ in combat and × 0.1 out of combat.
 ## Config
 
 - `kHeal` (budget, × target max health), refill period: placeholders, as for the other budgets
-  (Q-AG-7);
+  (24 game hours, design §11.2);
 - multipliers 1 / 0.1 (self), 1 / 0.1 (others), fallback 0.2 / 0.1;
 - DR window and curve for self heals: as for crafting (Q-AG-12) until tuned.
 

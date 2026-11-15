@@ -37,7 +37,8 @@ rate     = decay_rate / 24 × ramp(U)             // levels per active hour (Q-D
 
 - Decay over one interval `dt` while `U` goes from `U0` to `U0 + dt` is the integral of the ramp,
   in closed form (piecewise linear: zero part, triangle part, flat part). Do not sum per frame.
-- Apply: `current.sub(levels, floor = effectiveFloor)`. `ownFloor`, `potential`, `peak` are not
+- Apply: `current.sub(levels, floor = effectiveFloor)` (own floor, cross-links and the Alteration
+  term, [`cross-links.md`](cross-links.md); implemented). `ownFloor`, `potential`, `peak` are not
   touched.
 - `decay_rate`: the sub-skill entry's own value, else the file's `[dynamics] decay_rate`.
 - **Debug:** `debug.no_grace = true` → `grace_hours = 0` and `ramp_end_hours = 0`

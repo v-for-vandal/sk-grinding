@@ -1,8 +1,8 @@
 # Status panel and debug panel (PrismaUI)
 
 - **Status:** done (browser checks passed; PrismaUI runtime validation pending).
-- **Design:** design-v2 §12.1 (PrismaUI panel, decided), §13 (debug); Q-UI-1 (how to open):
-  prototype uses a hotkey.
+- **Design:** design-v2 §12.1 (PrismaUI panel, decided), §13 (debug); opening: a hotkey (decided; changeable in
+  MCM, see [`mcm-config.md`](mcm-config.md)).
 - **Depends on:** [`subskill-state.md`](subskill-state.md), [`main-skill-level.md`](main-skill-level.md),
   [`decay.md`](decay.md), [`weapon-class.md`](weapon-class.md),
   [`spell-classifier.md`](spell-classifier.md), [`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md).
@@ -60,7 +60,13 @@ Snapshot (JSON, one object):
                 "R": 0.0, "Umain": 3.1, "rustPerDay": 0.0, "external": 0, "pending": false,
                 "subs": [ { "id": "1h-sword", "ownFloor": 55.2, "effFloor": 55.2, "current": 75.0,
                             "potential": 75.0, "peak": 75.0, "U": 3.1, "decayPerDay": 0.0,
-                            "zone": 1.0, "worth": 0.0, "lastXP": 0.0 } ] } ],
+                            "zone": 1.0, "worth": 0.0, "lastXP": 0.0,
+                            "effects": [ { "name": "Weapon damage", "unit": "%", "kind": "curve",
+                                           "pen": 20, "P": 50, "M": 45, "h": 40, "p": 1,
+                                           "invert": false, "applied": false } ],
+                            "perks": [ { "id": "…", "name": "…", "level": 50, "description": "…",
+                                         "owned": true,
+                                         "requires": [ { "sub": "1h-sword", "level": 50, "keep": 48 } ] } ] } ] } ],
   "equipped": [ { "hand": "right", "kind": "weapon|spell|shield|none", "name": "Iron Sword",
                   "class": "SPO_WeapClass_1H_Sword", "sub": "1h-sword",
                   "form": "", "direction": "", "projectile": "", "formLevel": 0, "sigma": 0, "sway": 0 } ] }
@@ -105,6 +111,47 @@ colours and sizes are placeholders, CSS variables `--bar-*` in `style.css`):
   them *(verify: hover works in game)*. Re-evaluated after each snapshot, since the bars
   are rebuilt under a still cursor.
 
+- **Pseudo-skill `magic`** (implemented 2026-11-14). The shared
+  sub-skills (magic forms, archetypes; [magic](../skills/magic/design.md)) get their own block
+  after all main skills (last in the snapshot), title *Magic* (`[shared] name`), built like a main skill block but with no level and no
+  next-level bar (it is not a skill: nothing to level). Snapshot: one entry in `skills` with
+  `"av": "magic"`, `"pseudo": true`, no `F` / `toNext` / `written` / `R`; the debug table shows
+  no main-skill line for it (title *Magic (shared, no level)*). Snapshot fields of the entry:
+  `av`, `name`, `pseudo`, `pending`, `subs`.
+- **Sub-skill names** in the bars: the last part of the id, prefix `1h-` / `2h-` and suffix
+  `-smithing` dropped (`one-handed-smithing` → *One handed*, `form/missile` → *Missile*).
+
+### Effects and automatic perks (2026-11-14)
+
+- **Effects in the tooltip.** Hovering a bar shows the part under the mouse (as before; over the
+  empty rest of the bar: the sub-skill name and `current`), then *At level N:* and every
+  continuous effect of the sub-skill at the level `N` **under the mouse** (`N` = mouse position
+  on the bar's scale, rounded), e.g. `Weapon damage −8.0 %`. An effect the game does not apply
+  yet (`applied: false`) is dimmed and marked *not in game yet*. A sub-skill without effects
+  shows *No continuous effects yet*. The level is the raw level: context penalties (effective
+  level, design-v2 §5.7) are not shown.
+- **Automatic perks as diamonds.** Each automatic perk of the sub-skill (design-v2 §5.6; the
+  *automatic* kind of the skill designs: added and removed by the DLL, no perk point) is a
+  diamond on the bar at its level: hollow while not owned, filled while owned. A perk above the
+  bar scale is pinned to the bar's end with a dashed outline. Hovering it shows the name,
+  *Owned* / *Not yet*, the description and the requirement (`Requires Sword ≥ 50`, *kept down
+  to 48*: the hysteresis of §5.6, `[perks] hysteresis`). Tree perks with sub-skill requirements
+  are not drawn here (design-v2 Q-DYN-12).
+- **Data.** The DLL sends the definitions, the page evaluates them (`effectAt` in `app.js`):
+  - `kind: "curve"`: the §5.7 curve with `pen`, `P`, `M`, `h`, `p`; `invert: true` negates it
+    (block stamina cost: the penalty part makes a block more expensive);
+  - `kind: "linear"`: `at0 · max(0, 1 − L / zeroAt)` (glancing chance, aim effects).
+  - Sources: `[[effect]]` rows of `config/skills/*.toml` (`group` or `subskills`, `curve =
+    {pen, P, M, h, p}` or `linear = {at0, zero_at}`, `unit`, `invert`), all `applied: false`
+    (shown only; *hit-damage-multiplier*, *effect-curve* and the block blocks are not built), plus
+    the aim effects of `*/missile` (*Launch noise σ*) and `*/beam` (*Aim sway*) built from
+    `[aim]`, `applied` = their MCM toggle ([`spell-aim-inaccuracy.md`](spell-aim-inaccuracy.md)).
+  - Automatic perks: `[[auto_perk]]` rows (`id`, `name`, `subskill`, `level`, `description`).
+    No perk is granted yet, so `owned = current ≥ level`; when granting is built, `owned` = the
+    player has the perk (so the hysteresis band shows correctly). `one-handed.toml` has two
+    **placeholder** perks on `1h-sword` (50, 100) only to show the markers: remove them when the
+    real automatic perks are designed.
+
 Filter and *Hide untouched* apply here too.
 
 **Debug view** (table, debug mode + checkbox *Debug view*). Header line (debug mode only): mod state (pending init / running), active game hours, `xp_mult`, `time_scale`,
@@ -120,7 +167,7 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
   |---|---|
   | Sub-skill | id |
   | Own floor | `ownFloor` (level, 1 decimal) — "current floor" |
-  | Eff. floor | `effectiveFloor` |
+  | Eff. floor | `effectiveFloor`; the snapshot also has `floorFrom` (`own`, the linked sub-skill id or `Alteration`, [`cross-links.md`](cross-links.md)); a top-level `requirements` array lists the perk requirements with an `explain` tree ([`perk-requirements.md`](perk-requirements.md)) |
   | Current | `current` |
   | Potential | `potential` |
   | Peak | `peak` |
@@ -152,7 +199,8 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
 ## Config
 
 `[ui]` in [`config/SkillPractice.toml`](../config/SkillPractice.toml): `toggle_key`,
-`inspector`.
+`inspector`. `[perks] hysteresis` (requirement line of a perk). `[[effect]]` and `[[auto_perk]]`
+in `config/skills/*.toml` (*Effects and automatic perks*).
 
 ## Prototype notes
 
@@ -169,6 +217,10 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
   filter, sorting, tabs, JSON actions, reinitialization guard and Escape. Since the bar view
   (headless Firefox): 76 bars, *Debug view* toggles the table and back, debug mode off hides the
   debug controls. `mock.json` has `debugMode: true`.
+- Effects and perk diamonds (2026-11-14): `ui/test.html` also checks two diamonds on `1h-sword`
+  (one owned), the curve (−20 at 0, +25 at 100), the effect tooltip at level 30 (`−8.0 %`,
+  *not in game yet*) and the perk tooltip; passes in headless Firefox. `mock.json` regenerated
+  (`debugMode` set back to `true` by hand).
 - Serve `ui/` over HTTP for mock mode. A direct `file://` page cannot fetch JSON
   under normal browser security rules. `ui/mock.json` is generated by PracticeTests.
 - API 1.5.1 V2 falls back to V1; absence is nonfatal. Runtime F7/focus, game
@@ -181,4 +233,6 @@ One collapsible block per managed main skill, title `One-Handed  81.37 (written 
   closes it and the game controls come back; the game is paused while it is open; no crash when opening it in combat.
 - *Give XP* from the panel: the row and the main line change at once (the snapshot after the
   action).
+- Hover the *Sword* bar: effects change with the mouse position; the placeholder diamond at 50
+  is filled once *Sword* ≥ 50 (*Set current*), hollow below.
 - Without PrismaUI installed: the game starts, `[ui] PrismaUI not available`, XP still works.

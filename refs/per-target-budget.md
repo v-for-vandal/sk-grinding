@@ -1,7 +1,7 @@
 # Per-target budget (PB)
 
 Reference note for [`design-v2.md`](../design-v2.md) §11.2 (anti-grind toolkit, item 2) and
-[`grinding-analysis.md`](../grinding-analysis.md). Open questions are in design §11.2 (Q-AG-3…Q-AG-9).
+[`grinding-analysis.md`](../grinding-analysis.md). Decisions and the open question Q-AG-8 are in design §11.2; playtest scenarios in §11.3.
 
 **Idea:** one target (an NPC, a creature, a merchant, …) can only give a limited amount of XP. While
 the target is "fresh" its XP is full. Once its budget is used up, XP falls off quickly. Over game
@@ -19,7 +19,7 @@ time the budget refills.
 ## 2. Data
 
 ```cpp
-enum class BudgetCategory : uint8_t { /* see §3, final list per Q-AG-3 */ };
+enum class BudgetCategory : uint8_t { /* see §3 */ };
 
 struct BudgetKey {
     RE::FormID     target;    // reference FormID of the actor / object
@@ -43,7 +43,7 @@ std::unordered_map<BudgetKey, BudgetEntry> budgets;   // needs a hash for Budget
 - Co-save: versioned record `'PTBG'` with entry count + entries. Dynamic references (FormID `FF…`)
   may not survive a reload; drop entries whose FormID no longer resolves on load.
 
-## 3. Categories (proposal, final list per Q-AG-3)
+## 3. Categories (decided, design §11.2)
 
 | Category | Sources | Budget type | Target |
 |---|---|---|---|
@@ -72,7 +72,7 @@ Lockpicking, smithing, enchanting and alchemy crafting have no meaningful "targe
 - Count the **effective** damage: clamp each hit to the target's remaining health (overkill on a
   one-shot does not count beyond what the target had).
 - Defense: XP is granted only for damage received from one attacker up to `B = kDef × S(attacker)`,
-  where `S` is the attacker's strength measure (Q-AG-5). Skeevers and mudcrabs stop giving
+  where `S` is the attacker's max health with the target-worth level ratio (design §11.2). Skeevers and mudcrabs stop giving
   armor/block XP quickly.
 - The vanilla XP amount per hit is not changed by the budget, only multiplied by `m` (§5). The
   budget decides **how long** a target keeps giving XP.
@@ -145,7 +145,7 @@ refillHours = 24
 ## 10. Reuse: daily crafting bucket
 
 Crafting takes no game time, so crafting skills (Smithing, decided; Enchanting and Alchemy
-proposed, Q-AG-13) get a **daily bucket** built on the same machinery:
+decided, design §11.2) get a **daily bucket** built on the same machinery:
 
 - key: (player, category), e.g. (player, `craft-smithing`); one bucket per main skill, shared
   by all its sub-skills;

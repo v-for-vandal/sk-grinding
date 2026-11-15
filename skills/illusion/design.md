@@ -5,8 +5,9 @@
 Skeleton: only the school-specific part. Forms (`missile`, `beam`, `flame`, …), archetypes, XP per
 cast and accuracy are common to all schools and live in [`magic/design.md`](../magic/design.md).
 
-**Sub-skills (parent: Illusion):** forms and archetypes as in [magic](../magic/design.md), plus
-the school sub-directions below.
+**Sub-skills (parent: Illusion):** the school sub-directions below. The forms and archetypes are
+**shared** by all schools and have no parent ([magic](../magic/design.md)); a cast of this school
+feeds them too.
 
 **School sub-directions** (proposal: one per LoreRim perk branch; keywords from the perk
 conditions, R-8):

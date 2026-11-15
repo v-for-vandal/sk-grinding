@@ -1,14 +1,17 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Panel checks</title></head><body><pre id="result">pending</pre><iframe src="index.html"></iframe><script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Panel checks</title></head><body><pre id="result">pending</pre><iframe src="index.html" style="width:1100px;height:800px"></iframe><script>
 const result=document.getElementById('result');
 let tries=0;
 function test(){const frame=document.querySelector('iframe'),w=frame.contentWindow,d=w.document;if(!d.querySelector('.bar-row')){if(++tries<100)return setTimeout(test,50);throw Error('Mock did not render');}
  const check=(value,label)=>{if(!value)throw Error(label);};
  try{
-  check(d.querySelectorAll('.bar-row').length===76,'76 bars');
+  check(d.querySelectorAll('.bar-row').length===65,'65 bars');
+  const magic=d.querySelector('details[data-av="magic"]');check(magic&&magic.querySelector('.bar[data-id="form/missile"]')&&!magic.querySelector('.skill-level,.skill-next'),'pseudo-skill Magic: forms, no level');
+  check(!d.querySelector('.bar[data-id="destruction/missile"]'),'no per-school forms');
+  check([...d.querySelectorAll('.bar-name')].some(n=>n.textContent==='One handed')&&![...d.querySelectorAll('.bar-name')].some(n=>/smithing/i.test(n.textContent)),'smithing names without the word smithing');
   check(!!d.getElementById('tableView').closest('label').offsetParent,'debug view checkbox shown in debug mode');
   d.getElementById('tableView').click();
-  check(d.querySelectorAll('details').length===6,'six main skills');
-  check(d.querySelectorAll('tbody tr').length===76,'76 sub-skills');
+  check(d.querySelectorAll('details').length===7,'six main skills and Magic');
+  check(d.querySelectorAll('tbody tr').length===65,'65 sub-skills');
   d.getElementById('filter').value='1h-sword';d.getElementById('filter').dispatchEvent(new Event('input'));
   check(d.querySelectorAll('tbody tr').length===1,'filter');
   d.getElementById('filter').value='';d.getElementById('filter').dispatchEvent(new Event('input'));
@@ -19,9 +22,20 @@ function test(){const frame=document.querySelector('iframe'),w=frame.contentWind
   d.getElementById('reinit').click();check(calls.length===1,'reinit requires confirmation');
   d.getElementById('sure').checked=true;d.getElementById('reinit').click();check(calls.at(-1).action==='reinitAll','confirmed reinit');
   d.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));check(calls.at(-1).action==='close','Escape closes');
-  d.getElementById('tableView').click();check(d.querySelectorAll('.bar-row').length===76&&d.getElementById('tables').hidden,'back to bars');
+  d.getElementById('tableView').click();check(d.querySelectorAll('.bar-row').length===65&&d.getElementById('tables').hidden,'back to bars');
+  check(d.querySelectorAll('.perk').length===2&&d.querySelectorAll('.perk.owned').length===1,'perk markers: two, one owned');
+  const curve={kind:'curve',pen:20,P:50,M:45,h:40,p:1};
+  check(Math.abs(w.effectAt(curve,100)-25)<1e-9&&Math.abs(w.effectAt(curve,0)+20)<1e-9,'effect curve');
+  d.querySelector('[data-tab="skills"]').click();
+  const bar=d.querySelector('.bar[data-id="1h-sword"]');bar.scrollIntoView({block:'center'});
+  const move=(x,y)=>d.dispatchEvent(new w.MouseEvent('mousemove',{clientX:x,clientY:y}));
+  let r=bar.getBoundingClientRect();move(r.left+r.width*0.3,r.top+r.height/2);
+  const tip=d.getElementById('tip');
+  check(!tip.hidden&&tip.textContent.includes('At level 30')&&tip.textContent.includes('−8.0 %')&&tip.textContent.includes('not in game yet'),'effects at the hovered level: '+tip.textContent);
+  r=bar.querySelector('.perk').getBoundingClientRect();move(r.left+r.width/2,r.top+r.height/2);
+  check(tip.textContent.includes('Owned')&&tip.textContent.includes('Requires Sword ≥ 50')&&tip.textContent.includes('kept down to 48'),'perk tooltip: '+tip.textContent);
   w.spUpdate({state:'running',debug:{},skills:[],equipped:[],debugMode:false});check(!d.getElementById('tableView').closest('label').offsetParent&&d.getElementById('debug').hidden,'debug mode off hides debug controls');
-  result.textContent='PASS: mock, bars, six skills, 76 rows, filter, sorting, tabs, action bridge, reinit guard, Escape';result.dataset.status='pass';
+  result.textContent='PASS: mock, bars, Magic pseudo-skill, smithing names, six skills + Magic, 65 rows, filter, sorting, tabs, action bridge, reinit guard, Escape, perk markers, effect curve, effect and perk tooltips';result.dataset.status='pass';
  }catch(e){result.textContent='FAIL: '+e.message;result.dataset.status='fail';}
 }
 setTimeout(test,100);

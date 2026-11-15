@@ -118,7 +118,7 @@ sp::json snapshot() {
   // The new-character test showed Block 15 here versus 20 in the game while
   // no [init] had occurred: this was a display default, not a lost bonus.
   for (auto& row : j["skills"]) {
-    if (!row.at("pending").get<bool>()) continue;
+    if (!row.at("pending").get<bool>() || row.value("pseudo", false)) continue;
     const auto value = av(row.at("av").get<std::string>());
     const auto actual = p->AsActorValueOwner()->GetBaseActorValue(value);
     row["F"] = actual;
@@ -140,7 +140,7 @@ sp::json snapshot() {
       e["form"] = c.form;
       e["direction"] = c.direction;
       e["projectile"] = c.projectile;
-      auto sub = model.find(c.school + "/" + c.form);
+      auto sub = model.find("form/" + c.form);
       double level = sub ? sub->current.value(sub->curve) : 0;
       e["formLevel"] = level;
       e["sigma"] =

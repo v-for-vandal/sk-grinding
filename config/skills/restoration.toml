@@ -2,7 +2,7 @@
 # Run:  python3 scripts/normalize_conversion.py config/skills/restoration.toml
 # The DLL reads the same file (impl/main-skill-level.md) and solves k itself.
 #
-# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Magic sub-skills (skills/magic/design.md). Prototype assumption for Q-CAT-1 (open): one set of form and archetype sub-skills per school, ids `<school>/<form>`; archetype: only `<school>/standard` (R-7 not done). Groups: form, direction (school sub-direction), archetype.
+# ALL NUMBERS ARE PLACEHOLDERS (prototype 1). Magic sub-skills (skills/magic/design.md): only the school sub-directions `<school>/<direction>` (group direction); forms and archetypes are shared by all schools (shared.toml, `form/<form>`, `archetype/standard`, k = 0).
 
 [main]                 # vanilla AVIF curve (refs/vanilla-skill-xp.md §2); LoreRim's own AVIF has ImproveOffset 9999
 actor_value    = "Restoration"   # RE::ActorValue::kRestoration; a skill is managed by the DLL only if it has a file here
@@ -28,76 +28,14 @@ pace_sub   = 1500        # P_sub: raw XP per active game hour while a sub-skill 
 pace_skill = 800        # P_skill: raw XP per active game hour of normal play with the skill (Q-ML-7)
 
 [budget]
-form      = { share = 0.35 }
-direction = { share = 0.45 }
-archetype = { share = 0.20 }
+direction = { share = 1.0 }   # forms and the archetype are shared (shared.toml, k = 0)
 
 [reference_path]
 level   = 75
-members = ["restoration/self", "restoration/missile", "restoration/help", "restoration/wards", "restoration/standard"]
+members = ["restoration/help", "restoration/wards", "restoration/sun"] # three, as every school (impl/spell-classifier.md)
 
 # ---- sub-skills -------------------------------------------------------------------------------
-# forms (T lower: a form is learned sooner), school sub-directions, archetype
-[[subskill]]
-name = "restoration/missile"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/explosion"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/beam"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/flame"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/rune"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/wall"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/cloak"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/direct"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/self"
-group = "form"
-T = 60
-w = 12
-
-[[subskill]]
-name = "restoration/touch"
-group = "form"
-T = 60
-w = 12
-
+# school sub-directions (forms and the archetype: shared.toml)
 [[subskill]]
 name = "restoration/help"
 group = "direction"
@@ -128,8 +66,30 @@ group = "direction"
 T = 90
 w = 15
 
-[[subskill]]
-name = "restoration/standard"
-group = "archetype"
-T = 50
-w = 12
+
+# ---- continuous effects (shown in the panel; not applied yet) ---------------------------------
+# impl/status-ui.md *Effects and automatic perks*; skills/restoration/design.md (Q-RES-7).
+
+[[effect]]
+name      = "Magnitude"
+subskills = ["restoration/help"]
+curve     = { pen = 20, P = 50, M = 45, h = 40 }
+unit      = "%"
+
+[[effect]]
+name      = "Ward strength"
+subskills = ["restoration/wards"]
+curve     = { pen = 20, P = 50, M = 45, h = 40 }
+unit      = "%"
+
+[[effect]]
+name      = "Damage"
+subskills = ["restoration/sun"]
+curve     = { pen = 20, P = 50, M = 45, h = 40 }
+unit      = "%"
+
+[[effect]]
+name      = "Damage"
+subskills = ["restoration/poison"]
+curve     = { pen = 20, P = 50, M = 45, h = 40 }
+unit      = "%"

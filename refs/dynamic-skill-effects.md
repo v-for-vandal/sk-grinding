@@ -85,7 +85,7 @@ perk tree.
 - Sub-skills are DLL data, so the engine imposes no cap on them at all.
 - Practical limits: some vanilla/Requiem formulas may clamp the skill at 100 or behave oddly above it
   (prices, pickpocket chance, sneak detection). The vanilla skill menu is designed for 0–100.
-  See research R-14 and question Q-DYN-8.
+  See research R-14. Decided: main skills are uncapped (design-v2 §5.1, former Q-DYN-8).
 - If option 3 is used, our own effect formulas must stay sane at any level: linear or saturating,
   never exploding.
 - **Decided (design §5.1):** sub-skills have no practical cap. The design scale is 0–200, and the

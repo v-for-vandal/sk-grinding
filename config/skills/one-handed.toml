@@ -110,3 +110,54 @@ group = "concept"
 k = 0          # concept sub-skill: no main-skill contribution
 T = 100
 w = 20
+
+# ---- continuous effects and automatic perks (shown in the panel; not applied yet) -------------
+# impl/status-ui.md *Effects and automatic perks*. curve = design-v2 §5.7 (p defaults to 1);
+# linear = at0 at level 0, falling to 0 at zero_at. invert: the stat moves against effect(L).
+[[effect]]
+name   = "Weapon damage"
+group  = "weapon"
+curve  = { pen = 20, P = 50, M = 45, h = 40 }   # skills/weapons/design.md
+unit   = "%"
+
+[[effect]]
+name   = "Glancing hit chance"
+group  = "weapon"
+linear = { at0 = 30, zero_at = 50 }              # Q-WPN-8 placeholder
+unit   = "%"
+
+[[effect]]
+name   = "Light attack stamina cost"
+group  = "weapon"
+curve  = { pen = 50, P = 50, M = 40, h = 150 }  # +50 % at 0, −10 % at 100, −20 % at 200 (R-37)
+unit   = "%"
+invert = true
+
+[[effect]]
+name   = "Power attack stamina cost"
+group  = "weapon"
+curve  = { pen = 50, P = 50, M = 40, h = 150 }  # same curve as the light attack cost
+unit   = "%"
+invert = true
+
+[[effect]]
+name   = "Attack speed"
+group  = "weapon"
+curve  = { pen = 15, P = 50, M = 20, h = 150 }  # placeholder; only if R-37 check 4 passes
+unit   = "%"
+
+# Placeholder automatic perks: only to show the panel markers; no perk record exists and
+# nothing is granted. Remove when the real automatic perks are designed.
+[[auto_perk]]
+id          = "placeholder-sword-50"
+name        = "Placeholder: Sword Rhythm"
+subskill    = "1h-sword"
+level       = 50
+description = "Placeholder perk, shows how automatic perks appear in the panel. Does nothing."
+
+[[auto_perk]]
+id          = "placeholder-sword-100"
+name        = "Placeholder: Sword Mastery"
+subskill    = "1h-sword"
+level       = 100
+description = "Placeholder perk, shows how automatic perks appear in the panel. Does nothing."

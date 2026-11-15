@@ -21,6 +21,7 @@ struct Sim {
   double get(const char* s, const char* k) { return model.settings.get(s, k); }
   void initializeAll() {
     for (auto& sk : model.skills) model.initialize(sk, base);
+    model.initializeShared(base);  // every school starts at `base`
     model.pendingInit = false;
     model.raceClosed = true;
     messages.push_back("all skills initialized at base " +
@@ -40,6 +41,10 @@ struct Sim {
         sk.written = n;
       }
     }
+    // As the DLL will after every change (plan/prototype-2.md): requirement globals.
+    for (auto i : model.updateRequirements())
+      messages.push_back("requirement " + model.requirements[i].handle +
+                         (model.requirements[i].met ? " met" : " lost"));
   }
   Skill* skillByAV(const std::string& av) {
     for (auto& sk : model.skills)
@@ -62,7 +67,9 @@ struct Sim {
         subs.emplace_back(s.at(0).get<std::string>(), s.at(1).get<double>());
     }
     if (subs.empty()) throw std::runtime_error("use: no sub-skills");
-    if (!event) model.find(subs[0].first, &event);
+    // A shared sub-skill (form/*, archetype/*) has no base_mult: take the first school one.
+    for (size_t i = 0; !event && i < subs.size(); ++i)
+      if (model.find(subs[i].first, &event) && event->pseudo) event = nullptr;
     if (!event) throw std::runtime_error("use: unknown skill / sub-skill");
     double raw = points * event->baseMult * get("debug", "xp_mult");
     for (int t = 0; t < times; ++t) {
@@ -91,7 +98,7 @@ struct Sim {
     for (auto e : equipped) {
       if (e.value("kind", "") == "spell") {
         std::string form = e.value("form", ""), school = e.value("school", "");
-        auto sub = model.find(school + "/" + form);
+        auto sub = model.find("form/" + form);  // shared by all schools
         double level = sub ? sub->current.value(sub->curve) : 0;
         e["formLevel"] = level;
         e["sigma"] = form == "missile" && model.settings.flag("aim", "missile_enabled")
@@ -141,6 +148,13 @@ struct Sim {
       synchronize();
     } else if (a == "set") {
       set(j);
+      synchronize();
+    } else if (a == "external") {
+      // Level of a main skill the plugin does not manage (Alteration floor, perk formulas);
+      // the DLL reads it from the player's base actor value (plan/prototype-2.md).
+      double l = j.at("level");
+      if (!std::isfinite(l) || l < 0) throw std::runtime_error("external: bad level");
+      model.externalLevels[j.at("av").get<std::string>()] = l;
       synchronize();
     } else if (a == "equip") {
       equipped = j.at("equipped");

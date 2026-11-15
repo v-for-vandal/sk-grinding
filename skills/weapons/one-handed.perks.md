@@ -48,6 +48,48 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 ```
 <!-- DIAGRAM_END -->
 
+## Weapon-line requirements (decided)
+
+The four weapon lines and the Hand to Hand line (decided 2026-11-15). Each perk of a line gets a
+lower OneHanded requirement plus a requirement on the sub-skills of its line.
+
+**Lines.** A sub-skill belongs to the line whose keyword its weapons carry: the line perks
+condition on the vanilla `WeapType*` keyword of the item (counted in
+[`weapon-types.tsv`](../../research/tables/weapon-types.tsv), One-Handed records).
+
+| Line (perks) | Keyword | Sub-skills |
+|---|---|---|
+| `sword-line`: Sword & Spear Focus 1H-07/13/16, Piercing Strike 1H-26, Final Stand 1H-34 | `WeapTypeSword` | `1h-sword`, `1h-short-sword`, `1h-spear` |
+| `axe-line`: War Axe Focus 1H-08/14/17, Armsbreaker 1H-24, Guillotine 1H-35 | `WeapTypeWarAxe` | `1h-war-axe`, `1h-scythe` |
+| `mace-line`: Mace Focus 1H-05/10/15, Stunning Blow 1H-29, Heavy Slam 1H-36 | `WeapTypeMace` | `1h-mace` |
+| `blade-line`: Short Blade Focus 1H-21/28/32, Puncture 1H-27, Death Adder 1H-33 | `WeapTypeDagger` | `1h-dagger` |
+| `unarmed-line`: Grappling 1H-20, Unarmed Defense 1H-22, Takedown 1H-30, Unarmed Stance 1H-31 | unarmed | `1h-unarmed` |
+
+- Shortswords, wakizashi, spears and javelins all carry `WeapTypeSword` (744 of 779 spear
+  records; the 35 others have no vanilla type keyword); tantos carry `WeapTypeDagger`; whips
+  carry `WeapTypeMace`; pickaxes carry `WeapTypeWarAxe` or nothing.
+- `1h-scythe` is split in the data (5 records: 2 `WeapTypeWarAxe`, 2 `WeapTypeSword`, 1
+  `WeapTypeDagger`). It goes to `axe-line` (sickles are axe-animated, and the line has no other
+  second member).
+- `1h-other` carries none of the four keywords and is in no line.
+
+**Rule.** For a perk whose LoreRim requirement is OneHanded ≥ X:
+
+- new OneHanded = max(X − 20, 25, the new OneHanded of the previous perk of the same line + 10);
+  the first perk of a line takes max(X − 20, 25);
+- plus `oneOf(line) >= X + 20 OR twoOf(line) >= X + 10 OR threeOf(line) >= X`; a term that
+  needs more sub-skills than the line has is dropped (one-member lines: `<sub-skill> >= X + 20`).
+
+| Rank | X | New OneHanded | oneOf | twoOf | threeOf |
+|---|---|---|---|---|---|
+| Focus 1 (1H-05/07/08/21), Grappling, Unarmed Defense | 25 | 25 | 45 | 35 | 25 |
+| Focus 2 (1H-10/13/14/28) | 50 | 35 | 70 | 60 | 50 |
+| Focus 3 (1H-15/16/17/32) | 75 | 55 | 95 | 85 | 75 |
+| Branch (1H-24/26/27/29), Takedown, Unarmed Stance | 50 | 35 | 70 | 60 | 50 |
+| Branch capstone (1H-33/34/35/36) | 80 | 60 | 100 | 90 | 80 |
+
+Hand to Hand (1H-19) has no OneHanded requirement and stays as it is.
+
 ## One-Handed — Base-game records (vanilla slots, reworked)
 
 ### 1H-01 · Weapon Mastery
@@ -189,7 +231,7 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 
 ### 1H-04 · Flurry
 
-- **ID:** `106256:Skyrim.esm` · `REQ_OneHanded_Flurry1` · winner: Requiem_-_Modern_Combat_Rework.esp · origin: base game
+- **ID:** `106256:Skyrim.esm` · `REQ_OneHanded_Flurry1` · winner: `Requiem_-_Modern_Combat_Rework.esp` · origin: base game
 - **Requires:** has perk Weapon Mastery (1H-01) AND OneHanded ≥ 25
 - **In game:** When fighting with dual or single one-handed weapons or fists, you are able to hit enemy weak points better. [+10% critical hit chance and critical damage]
 - **Records:**
@@ -197,6 +239,7 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - critical hit damage +10% — when right hand ≥ fists AND right hand ≤ mace
 - **Proposal (auto):** —
 - **Sub-skill requirements:**
+     dual-wield >= 25
 
 #### Alternatives
 
@@ -237,7 +280,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - power attack damage +5% — when item/spell: WeapTypeMace
   - ability *Mace Focus 1*: Fortify One-Handed Armor Penetration (ValueModifier OneHandedModifier 7.5)
 - **Proposal (auto):** mace
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the mace-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-mace >= 45`
 
 #### Alternatives
 
@@ -338,7 +383,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *req_2hsword01*: Reduces melee weapon damage by 11%.
   - critical hit chance +11 — when item/spell: WeapTypeSword
 - **Proposal (auto):** sword
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the sword-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(sword-line) >= 45 OR twoOf(sword-line) >= 35 OR threeOf(sword-line) >= 25`
 
 #### Alternatives
 
@@ -400,7 +447,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - spell magnitude +2% per point of OneHanded — when item/spell: spell REQ_RW_AXEBLEED AND is the player
   - on weapon hit, apply *req_1haxe01*: DamageHealthAxe (ValueModifier Health 0.5) — when item/spell: WeapTypeWarAxe; target: not is undead AND not ActorTypeDwarven AND not ActorTypeUndead AND not ActorTypeGhost AND not player teammate AND not is blocking AND not is the player
 - **Proposal (auto):** war-axe
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the axe-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(axe-line) >= 45 OR twoOf(axe-line) >= 35`
 
 #### Alternatives
 
@@ -539,7 +588,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - power attack damage +10% — when item/spell: WeapTypeMace
   - ability *Mace Focus 2*: Fortify One-Handed Armor Penetration (ValueModifier OneHandedModifier 7.5)
 - **Proposal (auto):** mace
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the mace-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-mace >= 70`
 
 #### Alternatives
 
@@ -632,7 +683,7 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 
 ### 1H-12 · Storm of Steel
 
-- **ID:** `106258:Skyrim.esm` · `REQ_OneHanded_StormOfSteel` · winner: Requiem_-_Modern_Combat_Rework.esp · origin: base game
+- **ID:** `106258:Skyrim.esm` · `REQ_OneHanded_StormOfSteel` · winner: `Requiem_-_Modern_Combat_Rework.esp` · origin: base game
 - **Requires:** has perk Flurry (1H-04) AND OneHanded ≥ 50
 - **In game:** You've mastered the art of using multiple weapons in combat. [50% more dual-wield power attack poise damage with any weapon and 25% more power attack damage]
 - **Records:**
@@ -640,6 +691,8 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - weapon damage +25% — when left hand > fists AND left hand ≤ mace AND right hand > fists AND right hand ≤ mace AND attack PowerAttackTypeForward OR attack PowerAttackTypeStanding
 - **Proposal (auto):** —
 - **Sub-skill requirements:**
+      dual-wield >= 50
+      Replace: OneHanded >= 40
 
 #### Alternatives
 
@@ -684,7 +737,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *req_2hsword02*: Reduces melee weapon damage by 22%.
   - critical hit chance +11 — when item/spell: WeapTypeSword
 - **Proposal (auto):** sword
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the sword-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50`
 
 #### Alternatives
 
@@ -752,7 +807,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *War Axe Focus 2*: Fortify One-Handed Armor Penetration (ValueModifier OneHandedModifier 5)
   - on weapon hit, apply *req_1haxe02*: DamageHealthAxe (ValueModifier Health 1) — when item/spell: WeapTypeWarAxe; target: not is undead AND not ActorTypeDwarven AND not ActorTypeUndead AND not ActorTypeGhost AND not player teammate AND not is blocking AND not is the player
 - **Proposal (auto):** war-axe
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the axe-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60`
 
 #### Alternatives
 
@@ -852,7 +909,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - power attack damage +15% — when item/spell: WeapTypeMace
   - ability *Mace Focus 3*: Fortify One-Handed Armor Penetration (ValueModifier OneHandedModifier 7.5)
 - **Proposal (auto):** mace
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 75 → **OneHanded ≥ 55** plus the mace-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-mace >= 95`
 
 #### Alternatives
 
@@ -909,7 +968,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *req_2hsword03*: Reduces melee weapon damage by 25%.
   - critical hit chance +11 — when item/spell: WeapTypeSword
 - **Proposal (auto):** sword
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 75 → **OneHanded ≥ 55** plus the sword-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(sword-line) >= 95 OR twoOf(sword-line) >= 85 OR threeOf(sword-line) >= 75`
 
 #### Alternatives
 
@@ -977,7 +1038,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *War Axe Focus 3*: Fortify One-Handed Armor Penetration (ValueModifier OneHandedModifier 5)
   - on weapon hit, apply *req_1haxe03*: DamageHealthAxe (ValueModifier Health 1.5) — when item/spell: WeapTypeWarAxe; target: not is undead AND not ActorTypeDwarven AND not ActorTypeUndead AND not ActorTypeGhost AND not player teammate AND not is blocking AND not is the player
 - **Proposal (auto):** war-axe
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 75 → **OneHanded ≥ 55** plus the axe-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(axe-line) >= 95 OR twoOf(axe-line) >= 85`
 
 #### Alternatives
 
@@ -1165,7 +1228,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** You can grapple opponents to disarm or immobilize them. [unarmed power attacks stagger targets by 50% chance and disarm by 10% chance]
 - **Records:** on weapon hit, apply *Grapple*: Stagger (magnitude 0.5); Stagger (magnitude 0.1); Disarm (magnitude 1) — when is power attacking; item/spell: is Unarmed OR is REQ_Weapon_Unarmed
 - **Proposal (auto):** unarmed (Q-WPN-3)
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the unarmed-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-unarmed >= 45`
 
 ### 1H-21 · Short Blade Focus
 
@@ -1177,7 +1242,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - sneak attack multiplier +100% — when item/spell: WeapTypeDagger
   - weapon damage (base calc) +20% — when item/spell: WeapTypeDagger; target: relative angle ≤ 90 AND relative angle ≥ 270
 - **Proposal (auto):** dagger
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the blade-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-dagger >= 45`
 
 #### Alternatives
 
@@ -1212,11 +1279,13 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - magnitude of spells received −15% — when right hand = fists OR right hand = spell AND left hand ≠ fists AND left hand ≠ spell; item/spell: REQ_ThrowingKnife
   - magnitude of spells received −30% — when left hand = fists OR left hand = spell AND right hand = fists OR right hand = spell; item/spell: REQ_ThrowingKnife
 - **Proposal (auto):** unarmed (Q-WPN-3)
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 25 → **OneHanded ≥ 25** (X − 20 is below 25) plus the unarmed-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-unarmed >= 45`
 
 ### 1H-23 · Armed Spellcasting
 
-- **ID:** `00083E:Requiem - Special Feats.esp` · `Feat_Perk_Skill_OneHanded_ArmedSpellcasting1` · winner: Requiem_-_Modern_Combat_Rework.esp · origin: Requiem - Special Feats.esp
+- **ID:** `00083E:Requiem - Special Feats.esp` · `Feat_Perk_Skill_OneHanded_ArmedSpellcasting1` · winner: `Requiem_-_Modern_Combat_Rework.esp · origin: Requiem - Special Feats.esp`
 - **Requires:** has perk Weapon Mastery (1H-01) AND OneHanded ≥ 50
 - **In game:** You can balance your weapon well with single hand, and can use it to cast magic. [+25% poise damage and 10% stronger spells, scrolls and enchants left hand is empty or wielding magic]
 - **Records:**
@@ -1225,6 +1294,8 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - spell duration +10% — when right hand ≥ sword AND right hand ≤ mace; item/spell: not spell REQ_NoDurationScaling AND Alteration spell OR Conjuration spell OR Destruction spell OR Illusion spell OR Restoration spell
 - **Proposal (auto):** —
 - **Sub-skill requirements:**
+    OneHanded goes to >= 35
+    with-magic >= 50
 
 #### Alternatives
 
@@ -1244,7 +1315,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** Blade of your war axe can carve into target's weapons and shields, weakening their damage and protection. [power attacks with war axes reduce target's attack damage by 10% and blockable damage by 80% for 10 seconds]
 - **Records:** on weapon hit, apply *Armsbreaker*: Attack damage is reduced by %, blocking is % less effective for  seconds. — when is power attacking; item/spell: WeapTypeWarAxe
 - **Proposal (auto):** war-axe
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the axe-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60`
 
 ### 1H-25 · Balanced Wielding
 
@@ -1275,7 +1348,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - target's armor (penetration) −10% — when item/spell: WeapTypeSword
   - stagger dealt +50% — when item/spell: WeapTypeSword
 - **Proposal (auto):** sword
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the sword-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50`
 
 #### Alternatives
 
@@ -1295,7 +1370,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - critical hit chance +25 — when item/spell: WeapTypeDagger
   - critical hit damage +100% — when item/spell: WeapTypeDagger
 - **Proposal (auto):** dagger
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the blade-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-dagger >= 70`
 
 #### Alternatives
 
@@ -1318,7 +1395,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - sneak attack multiplier +200% — when item/spell: WeapTypeDagger
   - weapon damage (base calc) +40% — when item/spell: WeapTypeDagger; target: relative angle ≤ 90 AND relative angle ≥ 270
 - **Proposal (auto):** dagger
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the blade-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-dagger >= 70`
 
 #### Alternatives
 
@@ -1349,7 +1428,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - weapon damage +25% — when item/spell: WeapTypeWarhammer; target: is staggered
   - on weapon hit, apply *Stunning Blow*: Stunning Blow; Stunning Blow (magnitude 1) — when is power attacking; item/spell: WeapTypeMace
 - **Proposal (auto):** mace
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the mace-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-mace >= 70`
 
 #### Alternatives
 
@@ -1367,7 +1448,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** You can knock down enemies by grappling. [unarmed power attacks knock down targets by 10% chance]
 - **Records:** on weapon hit, apply *Takedown*: Knockdown; Knockdown (Resisted) (magnitude 1) — when is power attacking; item/spell: is Unarmed OR is REQ_Weapon_Unarmed
 - **Proposal (auto):** unarmed (Q-WPN-3)
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the unarmed-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-unarmed >= 70`
 
 ### 1H-31 · Unarmed Stance
 
@@ -1376,7 +1459,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** While unarmed, you can maneuver more freely and resist physical force. [+5% movement speed for each hand empty, +50 mass when both hands are empty]
 - **Records:** ability *Unarmed Stance*: Movement is 5% faster.; Movement is 10% faster.; Increases mass by 50.
 - **Proposal (auto):** unarmed (Q-WPN-3)
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 50 → **OneHanded ≥ 35** (the parent line perk + 10) plus the unarmed-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-unarmed >= 70`
 
 ### 1H-32 · Short Blade Focus
 
@@ -1388,7 +1473,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - sneak attack multiplier +300% — when item/spell: WeapTypeDagger
   - weapon damage (base calc) +60% — when item/spell: WeapTypeDagger; target: relative angle ≤ 90 AND relative angle ≥ 270
 - **Proposal (auto):** dagger
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 75 → **OneHanded ≥ 55** plus the blade-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-dagger >= 95`
 
 #### Alternatives
 
@@ -1417,7 +1504,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** Forward power attacks with a dagger ignore 25% of armor.
 - **Records:** target's armor (penetration) −25% — when attack PowerAttackTypeForward; item/spell: WeapTypeDagger
 - **Proposal (auto):** dagger
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 80 → **OneHanded ≥ 60** plus the blade-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-dagger >= 100`
 
 #### Alternatives
 
@@ -1439,7 +1528,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - weapon damage +100% — when Health < 70% AND Health ≥ 50%; item/spell: WeapTypeSword
   - weapon damage +50% — when Health < 90% AND Health ≥ 70%; item/spell: WeapTypeSword
 - **Proposal (auto):** sword
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 80 → **OneHanded ≥ 60** plus the sword-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(sword-line) >= 100 OR twoOf(sword-line) >= 90 OR threeOf(sword-line) >= 80`
 
 ### 1H-35 · Guillotine
 
@@ -1450,7 +1541,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - critical hit chance set to 100 — when attack PowerAttackTypeStanding; item/spell: WeapTypeWarAxe; target: Health < 25%
   - critical hit damage +1900% — when attack PowerAttackTypeStanding; item/spell: WeapTypeWarAxe; target: Health < 25%
 - **Proposal (auto):** war-axe
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 80 → **OneHanded ≥ 60** plus the axe-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `oneOf(axe-line) >= 100 OR twoOf(axe-line) >= 90`
 
 ### 1H-36 · Heavy Slam
 
@@ -1459,7 +1552,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **In game:** Whenever a standing power attack with a mace inflicts a critical strike, it deals 3% more critical damage per point of Stamina.
 - **Records:** critical hit damage +3% per point of Stamina — when attack PowerAttackTypeStanding; item/spell: WeapTypeMace
 - **Proposal (auto):** mace
-- **Sub-skill requirements:**
+- **Resolution:** kept; OneHanded ≥ 80 → **OneHanded ≥ 60** plus the mace-line requirement
+  ([weapon-line requirements](#weapon-line-requirements-decided)).
+- **Sub-skill requirements:** `1h-mace >= 100`
 
 ### 1H-37 · Deathbringer
 

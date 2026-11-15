@@ -35,8 +35,8 @@ Track `plugin/`, `config/`, `tools/esp-gen/`, `papyrus/`, `mcm/`, `ui/` and
 script have been built; normally `build-prototype.ps1` runs it automatically.
 Dependencies use the pinned vcpkg baseline in `plugin/vcpkg.json`.
 CommonLibSSE-NG is a pinned submodule; its original license remains there.
-PrismaUI_API.h is copied from the framework's 1.5.1 tag. No project license
-has been selected (Q-TECH-2).
+PrismaUI_API.h is copied from the framework's 1.5.1 tag. Project license:
+GPL-3.0-or-later with the modding exception (design-v2 §14); file not added yet.
 
 MCM public SDK tag v1.6.2: `9df6b69348dea57b3247b9f812711384f1113bab`.
 PrismaUI API tag 1.5.1: `aaef0713a6b4c775a654c427871f0fe53b75fcb6`.

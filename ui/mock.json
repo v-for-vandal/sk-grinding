@@ -1,6 +1,5 @@
 {
   "activeHours": 0.0,
-  "debugMode": true,
   "debug": {
     "fixed_xp": false,
     "fixed_xp_value": 100,
@@ -10,7 +9,1250 @@
     "write_main_skills": true,
     "xp_mult": 1
   },
+  "debugMode": true,
   "equipped": [],
+  "requirements": [
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "oneOf(shield-parry) >= 20",
+        "threshold": 20.0,
+        "values": {
+          "heavy-shield": 70.0,
+          "light-shield": 70.0,
+          "parry": 70.0
+        }
+      },
+      "formula": "oneOf(shield-parry) >= 20",
+      "global": "SPO_Req_BLK03",
+      "handle": "BLK-03",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "bash >= 25",
+        "threshold": 25.0,
+        "values": {
+          "bash": 70.0
+        }
+      },
+      "formula": "bash >= 25",
+      "global": "SPO_Req_BLK04",
+      "handle": "BLK-04",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "oneOf(shield) >= 50",
+        "threshold": 50.0,
+        "values": {
+          "heavy-shield": 70.0,
+          "light-shield": 70.0
+        }
+      },
+      "formula": "oneOf(shield) >= 50",
+      "global": "SPO_Req_BLK05",
+      "handle": "BLK-05",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "bash >= 50",
+        "threshold": 50.0,
+        "values": {
+          "bash": 70.0
+        }
+      },
+      "formula": "bash >= 50",
+      "global": "SPO_Req_BLK06",
+      "handle": "BLK-06",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "oneOf(shield) >= 75",
+        "threshold": 75.0,
+        "values": {
+          "heavy-shield": 70.0,
+          "light-shield": 70.0
+        }
+      },
+      "formula": "oneOf(shield) >= 75",
+      "global": "SPO_Req_BLK07",
+      "handle": "BLK-07",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "bash >= 75",
+        "threshold": 75.0,
+        "values": {
+          "bash": 70.0
+        }
+      },
+      "formula": "bash >= 75",
+      "global": "SPO_Req_BLK08",
+      "handle": "BLK-08",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield-parry) >= 10",
+            "threshold": 10.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0,
+              "parry": 70.0
+            }
+          },
+          {
+            "met": true,
+            "op": "or",
+            "terms": [
+              {
+                "count": 3,
+                "met": true,
+                "text": "threeOf(1h-weapons) >= 10",
+                "threshold": 10.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 2,
+                "met": true,
+                "text": "twoOf(1h-weapons) >= 20",
+                "threshold": 20.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 1,
+                "met": true,
+                "text": "oneOf(1h-weapons) >= 30",
+                "threshold": 30.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "formula": "oneOf(shield-parry) >= 10 AND (threeOf(1h-weapons) >= 10 OR twoOf(1h-weapons) >= 20 OR oneOf(1h-weapons) >= 30)",
+      "global": "SPO_Req_BLK10",
+      "handle": "BLK-10",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "bash >= 35",
+            "threshold": 35.0,
+            "values": {
+              "bash": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield) >= 25",
+            "threshold": 25.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "bash >= 35 AND oneOf(shield) >= 25",
+      "global": "SPO_Req_BLK11",
+      "handle": "BLK-11",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "bash >= 25",
+        "threshold": 25.0,
+        "values": {
+          "bash": 70.0
+        }
+      },
+      "formula": "bash >= 25",
+      "global": "SPO_Req_BLK12",
+      "handle": "BLK-12",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield-parry) >= 30",
+            "threshold": 30.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0,
+              "parry": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": true,
+            "text": "1h-short-sword >= 30",
+            "threshold": 30.0,
+            "values": {
+              "1h-short-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(shield-parry) >= 30 AND 1h-short-sword >= 30",
+      "global": "SPO_Req_BLK13",
+      "handle": "BLK-13",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield-parry) >= 30",
+            "threshold": 30.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0,
+              "parry": 70.0
+            }
+          },
+          {
+            "met": true,
+            "op": "or",
+            "terms": [
+              {
+                "count": 3,
+                "met": true,
+                "text": "threeOf(1h-weapons) >= 30",
+                "threshold": 30.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 2,
+                "met": true,
+                "text": "twoOf(1h-weapons) >= 40",
+                "threshold": 40.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 1,
+                "met": true,
+                "text": "oneOf(1h-weapons) >= 50",
+                "threshold": 50.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "formula": "oneOf(shield-parry) >= 30 AND (threeOf(1h-weapons) >= 30 OR twoOf(1h-weapons) >= 40 OR oneOf(1h-weapons) >= 50)",
+      "global": "SPO_Req_BLK14",
+      "handle": "BLK-14",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield-parry) >= 40",
+            "threshold": 40.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0,
+              "parry": 70.0
+            }
+          },
+          {
+            "met": true,
+            "op": "or",
+            "terms": [
+              {
+                "count": 3,
+                "met": true,
+                "text": "threeOf(1h-weapons) >= 40",
+                "threshold": 40.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 2,
+                "met": true,
+                "text": "twoOf(1h-weapons) >= 50",
+                "threshold": 50.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              },
+              {
+                "count": 1,
+                "met": true,
+                "text": "oneOf(1h-weapons) >= 60",
+                "threshold": 60.0,
+                "values": {
+                  "1h-dagger": 70.0,
+                  "1h-mace": 70.0,
+                  "1h-other": 70.0,
+                  "1h-scythe": 70.0,
+                  "1h-short-sword": 70.0,
+                  "1h-spear": 70.0,
+                  "1h-sword": 70.0,
+                  "1h-unarmed": 70.0,
+                  "1h-war-axe": 70.0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "formula": "oneOf(shield-parry) >= 40 AND (threeOf(1h-weapons) >= 40 OR twoOf(1h-weapons) >= 50 OR oneOf(1h-weapons) >= 60)",
+      "global": "SPO_Req_BLK15",
+      "handle": "BLK-15",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "and",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(shield) >= 50",
+            "threshold": 50.0,
+            "values": {
+              "heavy-shield": 70.0,
+              "light-shield": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": true,
+            "text": "bash >= 50",
+            "threshold": 50.0,
+            "values": {
+              "bash": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(shield) >= 50 AND bash >= 50",
+      "global": "SPO_Req_BLK16",
+      "handle": "BLK-16",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 3,
+            "met": true,
+            "text": "threeOf(1h-weapons) >= 50",
+            "threshold": 50.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(1h-weapons) >= 60",
+            "threshold": 60.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(1h-weapons) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "threeOf(1h-weapons) >= 50 OR twoOf(1h-weapons) >= 60 OR oneOf(1h-weapons) >= 70",
+      "global": "SPO_Req_BLK17",
+      "handle": "BLK-17",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 3,
+            "met": true,
+            "text": "threeOf(1h-weapons) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(1h-weapons) >= 80",
+            "threshold": 80.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(1h-weapons) >= 90",
+            "threshold": 90.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "threeOf(1h-weapons) >= 70 OR twoOf(1h-weapons) >= 80 OR oneOf(1h-weapons) >= 90",
+      "global": "SPO_Req_BLK18",
+      "handle": "BLK-18",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": false,
+        "op": "or",
+        "terms": [
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(1h-weapons) >= 90",
+            "threshold": 90.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(1h-weapons) >= 100",
+            "threshold": 100.0,
+            "values": {
+              "1h-dagger": 70.0,
+              "1h-mace": 70.0,
+              "1h-other": 70.0,
+              "1h-scythe": 70.0,
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0,
+              "1h-unarmed": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "twoOf(1h-weapons) >= 90 OR oneOf(1h-weapons) >= 100",
+      "global": "SPO_Req_BLK19",
+      "handle": "BLK-19",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-mace >= 45",
+        "threshold": 45.0,
+        "values": {
+          "1h-mace": 70.0
+        }
+      },
+      "formula": "1h-mace >= 45",
+      "global": "SPO_Req_1H05",
+      "handle": "1H-05",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(sword-line) >= 45",
+            "threshold": 45.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(sword-line) >= 35",
+            "threshold": 35.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 3,
+            "met": true,
+            "text": "threeOf(sword-line) >= 25",
+            "threshold": 25.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(sword-line) >= 45 OR twoOf(sword-line) >= 35 OR threeOf(sword-line) >= 25",
+      "global": "SPO_Req_1H07",
+      "handle": "1H-07",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(axe-line) >= 45",
+            "threshold": 45.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(axe-line) >= 35",
+            "threshold": 35.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(axe-line) >= 45 OR twoOf(axe-line) >= 35",
+      "global": "SPO_Req_1H08",
+      "handle": "1H-08",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-mace >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-mace": 70.0
+        }
+      },
+      "formula": "1h-mace >= 70",
+      "global": "SPO_Req_1H10",
+      "handle": "1H-10",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(sword-line) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(sword-line) >= 60",
+            "threshold": 60.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 3,
+            "met": true,
+            "text": "threeOf(sword-line) >= 50",
+            "threshold": 50.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50",
+      "global": "SPO_Req_1H13",
+      "handle": "1H-13",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(axe-line) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(axe-line) >= 60",
+            "threshold": 60.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60",
+      "global": "SPO_Req_1H14",
+      "handle": "1H-14",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "1h-mace >= 95",
+        "threshold": 95.0,
+        "values": {
+          "1h-mace": 70.0
+        }
+      },
+      "formula": "1h-mace >= 95",
+      "global": "SPO_Req_1H15",
+      "handle": "1H-15",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": false,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(sword-line) >= 95",
+            "threshold": 95.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(sword-line) >= 85",
+            "threshold": 85.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 3,
+            "met": false,
+            "text": "threeOf(sword-line) >= 75",
+            "threshold": 75.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(sword-line) >= 95 OR twoOf(sword-line) >= 85 OR threeOf(sword-line) >= 75",
+      "global": "SPO_Req_1H16",
+      "handle": "1H-16",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": false,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(axe-line) >= 95",
+            "threshold": 95.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(axe-line) >= 85",
+            "threshold": 85.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(axe-line) >= 95 OR twoOf(axe-line) >= 85",
+      "global": "SPO_Req_1H17",
+      "handle": "1H-17",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-unarmed >= 45",
+        "threshold": 45.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 45",
+      "global": "SPO_Req_1H20",
+      "handle": "1H-20",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-dagger >= 45",
+        "threshold": 45.0,
+        "values": {
+          "1h-dagger": 70.0
+        }
+      },
+      "formula": "1h-dagger >= 45",
+      "global": "SPO_Req_1H21",
+      "handle": "1H-21",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-unarmed >= 45",
+        "threshold": 45.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 45",
+      "global": "SPO_Req_1H22",
+      "handle": "1H-22",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(axe-line) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(axe-line) >= 60",
+            "threshold": 60.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(axe-line) >= 70 OR twoOf(axe-line) >= 60",
+      "global": "SPO_Req_1H24",
+      "handle": "1H-24",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": true,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": true,
+            "text": "oneOf(sword-line) >= 70",
+            "threshold": 70.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": true,
+            "text": "twoOf(sword-line) >= 60",
+            "threshold": 60.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 3,
+            "met": true,
+            "text": "threeOf(sword-line) >= 50",
+            "threshold": 50.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(sword-line) >= 70 OR twoOf(sword-line) >= 60 OR threeOf(sword-line) >= 50",
+      "global": "SPO_Req_1H26",
+      "handle": "1H-26",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-dagger >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-dagger": 70.0
+        }
+      },
+      "formula": "1h-dagger >= 70",
+      "global": "SPO_Req_1H27",
+      "handle": "1H-27",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-dagger >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-dagger": 70.0
+        }
+      },
+      "formula": "1h-dagger >= 70",
+      "global": "SPO_Req_1H28",
+      "handle": "1H-28",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-mace >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-mace": 70.0
+        }
+      },
+      "formula": "1h-mace >= 70",
+      "global": "SPO_Req_1H29",
+      "handle": "1H-29",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-unarmed >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 70",
+      "global": "SPO_Req_1H30",
+      "handle": "1H-30",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-unarmed >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 70",
+      "global": "SPO_Req_1H31",
+      "handle": "1H-31",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "1h-dagger >= 95",
+        "threshold": 95.0,
+        "values": {
+          "1h-dagger": 70.0
+        }
+      },
+      "formula": "1h-dagger >= 95",
+      "global": "SPO_Req_1H32",
+      "handle": "1H-32",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "1h-dagger >= 100",
+        "threshold": 100.0,
+        "values": {
+          "1h-dagger": 70.0
+        }
+      },
+      "formula": "1h-dagger >= 100",
+      "global": "SPO_Req_1H33",
+      "handle": "1H-33",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": false,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(sword-line) >= 100",
+            "threshold": 100.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(sword-line) >= 90",
+            "threshold": 90.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          },
+          {
+            "count": 3,
+            "met": false,
+            "text": "threeOf(sword-line) >= 80",
+            "threshold": 80.0,
+            "values": {
+              "1h-short-sword": 70.0,
+              "1h-spear": 70.0,
+              "1h-sword": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(sword-line) >= 100 OR twoOf(sword-line) >= 90 OR threeOf(sword-line) >= 80",
+      "global": "SPO_Req_1H34",
+      "handle": "1H-34",
+      "met": false
+    },
+    {
+      "explain": {
+        "met": false,
+        "op": "or",
+        "terms": [
+          {
+            "count": 1,
+            "met": false,
+            "text": "oneOf(axe-line) >= 100",
+            "threshold": 100.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          },
+          {
+            "count": 2,
+            "met": false,
+            "text": "twoOf(axe-line) >= 90",
+            "threshold": 90.0,
+            "values": {
+              "1h-scythe": 70.0,
+              "1h-war-axe": 70.0
+            }
+          }
+        ]
+      },
+      "formula": "oneOf(axe-line) >= 100 OR twoOf(axe-line) >= 90",
+      "global": "SPO_Req_1H35",
+      "handle": "1H-35",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "1h-mace >= 100",
+        "threshold": 100.0,
+        "values": {
+          "1h-mace": 70.0
+        }
+      },
+      "formula": "1h-mace >= 100",
+      "global": "SPO_Req_1H36",
+      "handle": "1H-36",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": true,
+        "text": "1h-unarmed >= 70",
+        "threshold": 70.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 70",
+      "global": "SPO_Req_ORDLA05",
+      "handle": "ORD-LA-05",
+      "met": false
+    },
+    {
+      "explain": {
+        "count": 1,
+        "met": false,
+        "text": "1h-unarmed >= 90",
+        "threshold": 90.0,
+        "values": {
+          "1h-unarmed": 70.0
+        }
+      },
+      "formula": "1h-unarmed >= 90",
+      "global": "SPO_Req_ORDLA08",
+      "handle": "ORD-LA-08",
+      "met": false
+    }
+  ],
   "skills": [
     {
       "F": 50.0,
@@ -29,10 +1271,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "heavy-shield",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -42,10 +1300,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "light-shield",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -55,10 +1329,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "parry",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -68,15 +1358,32 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Bash damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "bash",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -96,140 +1403,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
-          "id": "destruction/missile",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/explosion",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/beam",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/flame",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/rune",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/wall",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/cloak",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/direct",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/self",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/touch",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/fire",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -239,10 +1419,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/frost",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -252,10 +1435,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/shock",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -265,10 +1451,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/arcane",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -278,10 +1467,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/blood",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -291,10 +1483,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/entropic",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -304,28 +1499,19 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "destruction/other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/standard",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -345,10 +1531,100 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [
+            {
+              "description": "Placeholder perk, shows how automatic perks appear in the panel. Does nothing.",
+              "id": "placeholder-sword-50",
+              "level": 50.0,
+              "name": "Placeholder: Sword Rhythm",
+              "owned": true,
+              "requires": [
+                {
+                  "keep": 48.0,
+                  "level": 50.0,
+                  "sub": "1h-sword"
+                }
+              ]
+            },
+            {
+              "description": "Placeholder perk, shows how automatic perks appear in the panel. Does nothing.",
+              "id": "placeholder-sword-100",
+              "level": 100.0,
+              "name": "Placeholder: Sword Mastery",
+              "owned": false,
+              "requires": [
+                {
+                  "keep": 98.0,
+                  "level": 100.0,
+                  "sub": "1h-sword"
+                }
+              ]
+            }
+          ],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -358,10 +1634,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-short-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -371,10 +1708,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-dagger",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -384,10 +1782,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-mace",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -397,10 +1856,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-war-axe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -410,10 +1930,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-spear",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -423,10 +2004,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-scythe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -436,10 +2078,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-unarmed",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -449,10 +2152,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "1h-other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -462,10 +2226,13 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "dual-wield",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
@@ -475,10 +2242,13 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "with-shield",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
@@ -488,15 +2258,19 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "with-magic",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -516,140 +2290,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
-          "id": "restoration/missile",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/explosion",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/beam",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/flame",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/rune",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/wall",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/cloak",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/direct",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/self",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/touch",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Magnitude",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "restoration/help",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -659,10 +2319,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Ward strength",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "restoration/wards",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -672,10 +2348,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "restoration/sun",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -685,10 +2377,26 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "restoration/poison",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -698,28 +2406,19 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "restoration/other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/standard",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -739,10 +2438,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "jewelry",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -752,10 +2454,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "one-handed-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -765,10 +2470,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "two-handed-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -778,10 +2486,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "heavy-armor-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -791,10 +2502,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "light-armor-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -804,10 +2518,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "clothing-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -817,10 +2534,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "bow-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -830,10 +2550,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "crossbow-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -843,10 +2566,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "iron",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -856,10 +2582,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "steel",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -869,10 +2598,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "leather",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -882,10 +2614,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "elven",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -895,10 +2630,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "orcish",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -908,10 +2646,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "dwarven",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -921,10 +2662,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "glass",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -934,10 +2678,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "ebony",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -947,10 +2694,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "daedric",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -960,10 +2710,13 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "dragon",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -973,15 +2726,19 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
           "id": "other-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -1001,10 +2758,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1014,10 +2832,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-battleaxe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1027,10 +2906,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-warhammer",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1040,10 +2980,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-polearm",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1053,10 +3054,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-quarterstaff",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1066,10 +3128,71 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-scythe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1079,16 +3202,282 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Light attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 40.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": true,
+              "kind": "curve",
+              "name": "Power attack stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            },
+            {
+              "M": 20.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 150.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Attack speed",
+              "p": 1.0,
+              "pen": 15.0,
+              "unit": "%"
+            }
+          ],
+          "floorFrom": "own",
           "id": "2h-other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
+    },
+    {
+      "av": "magic",
+      "name": "Magic",
+      "pending": false,
+      "pseudo": true,
+      "subs": [
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [
+            {
+              "applied": true,
+              "at0": 6.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Launch noise σ",
+              "unit": "°",
+              "zeroAt": 75.0
+            }
+          ],
+          "floorFrom": "own",
+          "id": "form/missile",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/explosion",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [
+            {
+              "applied": true,
+              "at0": 4.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Aim sway",
+              "unit": "°",
+              "zeroAt": 75.0
+            }
+          ],
+          "floorFrom": "own",
+          "id": "form/beam",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/flame",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/rune",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/wall",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/cloak",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/direct",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/self",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "form/touch",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 0.0,
+          "decayPerDay": 0.0,
+          "effFloor": 0.0,
+          "effects": [],
+          "floorFrom": "own",
+          "id": "archetype/standard",
+          "lastXP": 0.0,
+          "ownFloor": 0.0,
+          "peak": 0.0,
+          "perks": [],
+          "potential": 0.0,
+          "worth": 0.0,
+          "zone": 1.0
+        }
+      ]
     }
   ],
   "state": "running"

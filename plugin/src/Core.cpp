@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <set>
 #include <stdexcept>
 namespace sp {
 double Curve::cost(int l) const {
@@ -134,7 +135,7 @@ void Model::initialize(Skill& sk, double b) {
   sk.initialized = true;
   double f = std::clamp(settings.get("init", "floor_per_level") *
                             (b - settings.get("init", "floor_zero_at")),
-                        0., settings.get("xp", "floor_cap"));
+                        0., settings.get("xp", "hard_cap"));
   for (auto& s : sk.subs) {
     s.initial = (s.fixed && s.k == 0) ? 0 : f;
     s.current.set(s.initial, s.curve, int(settings.get("xp", "hard_cap")));
@@ -142,11 +143,39 @@ void Model::initialize(Skill& sk, double b) {
     s.idle = s.lastXP = 0;
   }
 }
+double Model::startLevel(double base) const {
+  return std::clamp(settings.get("init", "floor_per_level") *
+                        (base - settings.get("init", "floor_zero_at")),
+                    0., settings.get("xp", "hard_cap"));
+}
+void Model::initializeShared(double best) {
+  shared.base = shared.written = shared.rust = shared.idle = 0;
+  shared.initialized = true;
+  double f = startLevel(best);
+  for (auto& s : shared.subs) {
+    s.initial = s.group == "form" ? f : 0;
+    s.current.set(s.initial, s.curve, int(settings.get("xp", "hard_cap")));
+    s.floor = s.potential = s.peak = s.current;
+    s.idle = s.lastXP = 0;
+  }
+}
+std::vector<Skill*> Model::all() {
+  std::vector<Skill*> out;
+  for (auto& sk : skills) out.push_back(&sk);
+  if (!shared.subs.empty()) out.push_back(&shared);
+  return out;
+}
+std::vector<const Skill*> Model::all() const {
+  std::vector<const Skill*> out;
+  for (auto& sk : skills) out.push_back(&sk);
+  if (!shared.subs.empty()) out.push_back(&shared);
+  return out;
+}
 Sub* Model::find(const std::string& id, Skill** parent) {
-  for (auto& sk : skills)
-    for (auto& s : sk.subs)
+  for (auto sk : all())
+    for (auto& s : sk->subs)
       if (s.id == id) {
-        if (parent) *parent = &sk;
+        if (parent) *parent = sk;
         return &s;
       }
   return nullptr;
@@ -157,15 +186,19 @@ void Model::award(const std::string& id, double raw, bool recover) {
   Sub* s = find(id, &sk);
   if (!s || !sk->initialized) return;
   int cap = int(settings.get("xp", "hard_cap"));
-  double left = raw, oldFloor = s->floor.value(s->curve);
-  while (left > 1e-10 && s->current.level < cap) {
-    double cur = s->current.value(s->curve), f = s->floor.value(s->curve),
+  double left = raw, oldFloor = s->floor.value(s->curve),
+         f = effectiveFloor(*s);  // the own floor moves below, effective floors do not
+  // An effective floor (c × another floor) is not exactly representable as LevelXP:
+  // setting current to it can land a hair below. Compare with a tolerance and bound the
+  // number of zone steps so the loop always ends.
+  for (int step = 0; left > 1e-10 && s->current.level < cap && step < 8; ++step) {
+    double cur = s->current.value(s->curve),
            p = s->potential.value(s->curve), boundary = cap;
     double z = settings.get("xp", "zone_new");
-    if (cur < f) {
+    if (cur < f - 1e-6) {
       boundary = f;
       z = settings.get("xp", "zone_catch_up");
-    } else if (cur < p) {
+    } else if (cur < p - 1e-6) {
       boundary = p;
       z = settings.get("xp", "zone_recall");
     }
@@ -180,9 +213,9 @@ void Model::award(const std::string& id, double raw, bool recover) {
     left -= part;
   }
   s->floor.add(raw * settings.get("xp", "floor_rate"), s->curve, cap);
-  s->floor.set(std::max(oldFloor, std::min({s->floor.value(s->curve),
-                                            settings.get("xp", "floor_cap"),
-                                            s->current.value(s->curve)})),
+  // No floor cap (design-v2 §5.4): the own floor only stays <= current.
+  s->floor.set(std::max(oldFloor, std::min(s->floor.value(s->curve),
+                                           s->current.value(s->curve))),
                s->curve, cap);
   if (s->current.value(s->curve) > s->potential.value(s->curve))
     s->potential = s->current;
@@ -196,7 +229,7 @@ void Model::award(const std::string& id, double raw, bool recover) {
 // Rust and U_main fall once per vanilla award, by its raw XP, however many
 // sub-skills that award feeds (a spell feeds three, a craft two).
 void Model::recover(Skill& sk, double raw) {
-  if (!std::isfinite(raw) || raw <= 0 || !sk.initialized) return;
+  if (!std::isfinite(raw) || raw <= 0 || !sk.initialized || sk.pseudo) return;
   double q = settings.get("decay", "q");
   sk.idle = std::max(0., sk.idle - raw / (q * sk.paceSkill));
   sk.rust = std::max(0., sk.rust - sk.rustRate / 24 * raw / (q * sk.paceSkill));
@@ -208,17 +241,20 @@ void Model::tick(double hours) {
          max = settings.get("decay", "idle_max_hours");
   if (settings.flag("debug", "no_grace")) g = e = 0;
   activeHours += hours;
-  for (auto& sk : skills)
-    if (sk.initialized) {
+  for (auto skp : all())
+    if (auto& sk = *skp; sk.initialized) {
       double cap = 0;
       for (auto& s : sk.subs) {
         double amount = s.decay / 24 * rampIntegral(s.idle, dt, g, e);
-        s.current.subtract(amount, s.curve, s.floor);
+        LevelXP stop;
+        stop.set(effectiveFloor(s), s.curve, int(settings.get("xp", "hard_cap")));
+        s.current.subtract(amount, s.curve, stop);
         s.idle = std::min(max, s.idle + dt);
         cap = std::max(cap, s.peak.value(s.curve) - s.floor.value(s.curve));
       }
-      sk.rust = std::min(
-          cap, sk.rust + sk.rustRate / 24 * rampIntegral(sk.idle, dt, g, e));
+      if (!sk.pseudo)
+        sk.rust = std::min(
+            cap, sk.rust + sk.rustRate / 24 * rampIntegral(sk.idle, dt, g, e));
       sk.idle = std::min(max, sk.idle + dt);
     }
 }
@@ -230,8 +266,11 @@ json Model::save() const {
               {"activeHours", activeHours},
               {"lastHours", lastHours},
               {"pendingInit", pendingInit},
-              {"raceClosed", raceClosed}};
-  for (auto& sk : skills) {
+              {"raceClosed", raceClosed},
+              {"requirements", json::object()}};
+  for (auto& r : requirements) out["requirements"][r.handle] = r.met;
+  for (auto skp : all()) {
+    auto& sk = *skp;
     json initials =
         unknownMains.contains(sk.av)
             ? unknownMains.at(sk.av).value("initial", json::object())
@@ -265,7 +304,31 @@ void Model::restore(const json& j) {
   lastHours = j.at("lastHours");
   pendingInit = j.at("pendingInit");
   raceClosed = j.at("raceClosed");
-  for (auto& sk : skills) {
+  // Hysteresis state of perk requirements (absent in saves before prototype 2).
+  auto met = j.value("requirements", json::object());
+  for (auto& r : requirements) r.met = met.value(r.handle, false);
+  // Forms and archetypes were per school before 2026-11-14 (`destruction/missile`,
+  // `restoration/standard`); they are shared now (`form/missile`, `archetype/standard`).
+  // Prototype saves only: drop the old records instead of carrying them as unknown.
+  dropped.clear();
+  std::set<std::string> sharedNames;
+  for (auto& s : shared.subs) sharedNames.insert(s.id.substr(s.id.find('/') + 1));
+  for (auto it = unknownSubs.begin(); it != unknownSubs.end();) {
+    auto id = it.key();
+    auto slash = id.find('/');
+    bool old = slash != std::string::npos && !find(id) &&
+               sharedNames.contains(id.substr(slash + 1)) &&
+               id.substr(0, slash) != "form" && id.substr(0, slash) != "archetype";
+    if (old) {
+      dropped.push_back(id);
+      for (auto& [av, main] : unknownMains.items())
+        if (main.contains("initial")) main["initial"].erase(id);
+      it = unknownSubs.erase(it);
+    } else
+      ++it;
+  }
+  for (auto skp : all()) {
+    auto& sk = *skp;
     sk.initialized = false;
     if (unknownMains.contains(sk.av)) {
       auto v = unknownMains[sk.av];
@@ -282,7 +345,7 @@ void Model::restore(const json& j) {
                   : std::clamp(
                         settings.get("init", "floor_per_level") *
                             (sk.base - settings.get("init", "floor_zero_at")),
-                        0., settings.get("xp", "floor_cap"));
+                        0., settings.get("xp", "hard_cap"));
           s.initial = f;
           s.current.set(f, s.curve, int(settings.get("xp", "hard_cap")));
           s.floor = s.potential = s.peak = s.current;
@@ -309,19 +372,64 @@ void Model::restore(const json& j) {
     }
   }
 }
+// Effect definitions for the panel tooltip (impl/status-ui.md *Effects and automatic perks*):
+// the config's [[effect]] rows plus the aim effects of Aim.cpp, which the game applies.
+json Model::effects(const Sub& s) const {
+  json out = s.effects;
+  auto aim = [&](const char* name, const char* at0, const char* zero,
+                 const char* on) {
+    out.push_back({{"name", name},
+                   {"unit", "°"},
+                   {"invert", false},
+                   {"applied", settings.flag("aim", on)},
+                   {"kind", "linear"},
+                   {"at0", settings.get("aim", at0)},
+                   {"zeroAt", settings.get("aim", zero)}});
+  };
+  if (s.group == "form" && s.id.ends_with("/missile"))
+    aim("Launch noise σ", "missile_sigma_max_deg", "missile_L0",
+        "missile_enabled");
+  if (s.group == "form" && s.id.ends_with("/beam"))
+    aim("Aim sway", "beam_amp_max_deg", "beam_L0", "beam_enabled");
+  return out;
+}
+// Automatic perks with their state. Prototype: owned = current >= level (no perk is granted
+// yet); with granting, owned = the player has the perk (hysteresis of design-v2 §5.6).
+json Model::perks(const Sub& s, double current) const {
+  json out = json::array();
+  double keep = settings.get("perks", "hysteresis");
+  for (auto p : s.perks) {
+    double level = p.at("level");
+    p["owned"] = current >= level;
+    p["requires"] = json::array(
+        {{{"sub", s.id}, {"level", level}, {"keep", std::max(0., level - keep)}}});
+    out.push_back(p);
+  }
+  return out;
+}
 json Model::snapshot() const {
-  json out = {{"state", pendingInit ? "pending" : "running"},
+  json out ={{"state", pendingInit ? "pending" : "running"},
               {"activeHours", activeHours},
               {"debug", settings.values["debug"]},
               {"skills", json::array()},
-              {"equipped", json::array()}};
+              {"equipped", json::array()},
+              {"requirements", requirementSnapshot()}};
   out["debug"]["write_main_skills"] =
       settings.flag("main", "write_main_skills");
   out["debugMode"] = settings.flag("ui", "debug_mode");
   double g = settings.get("decay", "grace_hours"),
          e = settings.get("decay", "ramp_end_hours");
   if (settings.flag("debug", "no_grace")) g = e = 0;
-  for (auto& sk : skills) {
+  for (auto skp : all()) {
+    auto& sk = *skp;
+    if (sk.pseudo) {
+      // Pseudo-skill "magic": no level, no next-level bar, no main-skill line.
+      json a = {{"av", "magic"}, {"name", sk.name}, {"pseudo", true},
+                {"pending", !sk.initialized}, {"subs", json::array()}};
+      for (auto& s : sk.subs) a["subs"].push_back(subSnapshot(sk, s, g, e));
+      out["skills"].push_back(a);
+      continue;
+    }
     double F = sk.computed(settings.get("main", "min_level"),
                           settings.get("main", "max_level")),
            up = settings.get("main", "hysteresis_up");
@@ -344,13 +452,19 @@ json Model::snapshot() const {
               {"external", sk.external},
               {"pending", !sk.initialized},
               {"subs", json::array()}};
-    for (auto& s : sk.subs) {
-      double c = s.current.value(s.curve), f = s.floor.value(s.curve),
-             p = s.potential.value(s.curve);
-      a["subs"].push_back(
-          {{"id", s.id},
-           {"ownFloor", f},
+    for (auto& s : sk.subs) a["subs"].push_back(subSnapshot(sk, s, g, e));
+    out["skills"].push_back(a);
+  }
+  return out;
+}
+json Model::subSnapshot(const Skill& sk, const Sub& s, double g, double e) const {
+  std::string source;
+  double c = s.current.value(s.curve), own = s.floor.value(s.curve),
+         f = effectiveFloor(s, &source), p = s.potential.value(s.curve);
+  return    {{"id", s.id},
+           {"ownFloor", own},
            {"effFloor", f},
+           {"floorFrom", source},
            {"current", c},
            {"potential", p},
            {"peak", s.peak.value(s.curve)},
@@ -361,10 +475,74 @@ json Model::snapshot() const {
                                                : "zone_new")},
            {"worth", s.worth(std::max(c, s.peak.value(s.curve) - sk.rust)) -
                          s.worth(s.initial)},
-           {"lastXP", s.lastXP}});
+           {"lastXP", s.lastXP},
+           {"effects", effects(s)},
+           {"perks", perks(s, c)}};
+}
+const Sub& Model::at(const LinkIn& l) const {
+  return l.skill < int(skills.size()) ? skills[l.skill].subs[l.sub] : shared.subs[l.sub];
+}
+double Model::mainLevel(const std::string& av) const {
+  for (auto& sk : skills)
+    if (sk.av == av) return sk.written;
+  auto it = externalLevels.find(av);
+  return it == externalLevels.end() ? 0 : it->second;
+}
+double Model::effectiveFloor(const Sub& s, std::string* source) const {
+  double f = s.floor.value(s.curve);
+  if (source) *source = "own";
+  // Non-transitive (design-v2 §6.1): only own floors of the linked sub-skills count, and
+  // only the largest term applies.
+  for (auto& l : s.links) {
+    auto& a = at(l);
+    double v = l.c * a.floor.value(a.curve);
+    if (v > f) {
+      f = v;
+      if (source) *source = a.id;
     }
-    out["skills"].push_back(a);
   }
+  if (s.magic && alteration.enabled) {
+    double v = alteration.c * alteration.scale * mainLevel("Alteration");
+    if (v > f) {
+      f = v;
+      if (source) *source = "Alteration";
+    }
+  }
+  return std::min(f, settings.get("xp", "hard_cap"));
+}
+Values Model::values() const {
+  return {[this](const std::string& id) {
+            for (auto sk : all())
+              for (auto& s : sk->subs)
+                if (s.id == id) return s.current.value(s.curve);
+            return 0.;
+          },
+          [this](const std::string& av) { return mainLevel(av); }};
+}
+std::vector<size_t> Model::updateRequirements() {
+  std::vector<size_t> changed;
+  auto v = values();
+  double keep = settings.get("perk_requirements", "hysteresis");
+  for (size_t i = 0; i < requirements.size(); ++i) {
+    auto& r = requirements[i];
+    bool now = evaluate(r.expr, v, r.met ? keep : 0);
+    if (now != r.met) {
+      r.met = now;
+      changed.push_back(i);
+    }
+  }
+  return changed;
+}
+json Model::requirementSnapshot() const {
+  json out = json::array();
+  auto v = values();
+  double keep = settings.get("perk_requirements", "hysteresis");
+  for (auto& r : requirements)
+    out.push_back({{"handle", r.handle},
+                   {"global", r.global},
+                   {"formula", r.formula},
+                   {"met", r.met},
+                   {"explain", explain(r.expr, v, r.met ? keep : 0)}});
   return out;
 }
 }  // namespace sp

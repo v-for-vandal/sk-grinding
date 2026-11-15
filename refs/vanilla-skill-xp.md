@@ -165,3 +165,25 @@ and, to compare runtime with the plugins: `getgs fSkillUsageSneakPerSecond`,
   LoreRim - Spells and Magic Effects, same tree); Speech: Requiem - Special Feats; Conjuration,
   Illusion: Requiem - Magic Redone; Destruction, Restoration: Big Tweaks; Sneak: LoreRim - Spells
   and Magic Effects.
+
+## 7. Requiem armor and damage scale (web research 2026-11-14)
+
+Why LoreRim gives far more damage-based use points than vanilla (design-v2 §4.2.1). Sources:
+the Requiem changelog (`ProbablyManuel/requiem`, `components/documentation/src/Changelog.md`),
+<https://www.lorerim.com/read-me>, the Reqtificator wiki page; UESP and Nexus pages were not
+readable (403), so items marked *(unconfirmed)* come from search snippets.
+
+- LoreRim's gameplay overhaul is **Requiem** (plus Requiem - Magic Redone, Noxcrab's Tweaks).
+  Which Requiem version LoreRim 5.x ships is not stated (6.0.x likely, unconfirmed).
+- Armor: 0.1% damage reduction per AR point (since 4.0), cap 80% at **800 AR** (vanilla: 80%
+  at ≈ 567). Since 5.1.0 heavy armor AR is a multiple of 100, light a multiple of 50; set split
+  50/20/15/15% (cuirass/helmet/gauntlets/boots), shield 30% of the set. So AR per piece is
+  roughly 10× vanilla. The Reqtificator rescales armor below per-slot thresholds.
+- Damage: no single factor found. Requiem sets the difficulty damage multipliers in its plugin
+  and has per-NPC power-attack multipliers (e.g. trolls 1.5); values not read *(xEdit on
+  Requiem.esp)*. The Requiem MCM has damage dealt / received sliders *(unconfirmed)*.
+- Vanilla points by damage: Block 1 per raw damage blocked, Heavy Armor 1 per raw damage
+  received; weapon skills by base weapon damage *(unconfirmed: base damage or damage dealt)*;
+  Light Armor presumably like Heavy Armor *(unconfirmed)*.
+- No Requiem changelog entry changes AVIF use mults or `fSkillUseCurve` (not every entry read).
+  Requiem 2.0 had a "skill rate" MCM slider; whether it still exists in 6.x is unconfirmed.
