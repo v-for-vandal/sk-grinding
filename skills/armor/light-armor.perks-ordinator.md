@@ -49,8 +49,8 @@ LA-06 Wind Walker ........................... LightArmor 75
     └── ORD-LA-11 Survival Instinct ......... LightArmor 80, light-armor 80
 One-Handed tree:
 1H-30 Takedown .............................. OneHanded 50
-└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 50 only
-    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 70 only
+└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 70 only
+    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 90 only
 ```
 
 ### ORD-LA-01 · Light Armor Mastery
@@ -121,7 +121,7 @@ One-Handed tree:
   purchasable with a One-Handed perk point, parent **1H-30 Takedown** (Ordinator: Sweeping Wind,
   not restored). Meant for a pure unarmed fighter: the only requirement is the unarmed sub-skill.
   No effects of its own: the script that grants the stacking buff must be checked (R-29).
-- **Sub-skill requirements:** `1h-unarmed >= 50`; the perk's own `LightArmor ≥ 50` is dropped;
+- **Sub-skill requirements:** `1h-unarmed >= 70` (the level of its parent Takedown); the perk's own `LightArmor ≥ 50` is dropped;
   `has perk Sweeping Wind (ORD-LA-04)` → `has perk Takedown (1H-30)`.
 
 ### ORD-LA-06 · Into the Maelstrom
@@ -163,7 +163,7 @@ One-Handed tree:
 - **Proposal (auto):** unarmed (Q-WPN-3), destruction/fire, destruction/frost, destruction/shock
 - **Resolution:** restored to the **One-Handed** tree after its Ordinator parent ORD-LA-05
   Rushing Tide (see *Restored to the LoreRim tree*), purchasable with a One-Handed perk point.
-- **Sub-skill requirements:** `1h-unarmed >= 70`; the perk's own `LightArmor ≥ 70` is dropped.
+- **Sub-skill requirements:** `1h-unarmed >= 90`; the perk's own `LightArmor ≥ 70` is dropped.
 
 ### ORD-LA-09 · Wardancer
 

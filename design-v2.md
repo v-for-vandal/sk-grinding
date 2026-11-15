@@ -1093,6 +1093,8 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-32 | **New:** spell projectiles: dump PROJ (type, speed, range, flags) for all player spells; check Requiem's Sunbeam and other "beam-looking" spells whose projectile is a flamethrower type ([`impl/spell-classifier.md`](impl/spell-classifier.md)) |
 | R-33 | Partial (web): Requiem's armor weight penalty (*Mass Effect*, script `REQ_MassEffectArmor`, reduction AVs `HeavyArmorMod` / `LightArmorMod`), levers for armor effects (movement speed); open: LoreRim's Requiem version and patches, xEdit checks. Details: [`research/R-33-requiem-mass-effect.md`](research/R-33-requiem-mass-effect.md) |
 | R-34 | Partial (web): Requiem's passive armor training (`REQ_PassiveArmorTraining`, replaced by our script for the movement sub-skills) and stamina damage on hit (`REQ_PlayerImpactEffects`); open: esp numbers, script conflicts. Details: [`research/R-34-requiem-armor-movement-and-hits.md`](research/R-34-requiem-armor-movement-and-hits.md) |
+| R-35 | **New:** re-export ARMO with armor rating and weight (missing from the 2026-11-11 dump); input of the material tier worksheet. Details: [`research/R-35-armor-rating-export.md`](research/R-35-armor-rating-export.md) |
+| R-36 | **New:** perk entry point *Mod Armor Rating*: live AV multiplier, per-item conditions, clothing pieces (the rejected flat clothing variant), generated AVs. Details: [`research/R-36-mod-armor-rating.md`](research/R-36-mod-armor-rating.md) |
 
 Original task list:
 

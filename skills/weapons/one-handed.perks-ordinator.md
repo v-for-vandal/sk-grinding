@@ -55,8 +55,8 @@ requirements: [`../armor/light-armor.perks-ordinator.md`](../armor/light-armor.p
 
 ```
 1H-30 Takedown .............................. OneHanded 50
-└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 50 only
-    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 70 only
+└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 70 only
+    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 90 only
 ```
 
 ### ORD-1H-01 · One-Handed Mastery

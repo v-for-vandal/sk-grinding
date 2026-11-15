@@ -65,9 +65,8 @@ Heavy Armor) and `light-armor-casting` (parent Light Armor), `k = 0` (nothing to
 - **Effects (context penalty, §5.7), like `with-magic`; no bonus:** after the checkpoint the
   sub-skill only unlocks perks. Factor `0.75` at level 0, linearly to `1.0` at `C = 45`.
   - **Armor side:** while a spell is equipped in either hand, the effective level of the worn
-    armor's type sub-skill (`heavy-armor` / `light-armor`) = `current ×
-    factor(heavy/light-armor-casting)`: armor rating and stamina lost on hit (*Continuous
-    effects* below; materials have no effects).
+    armor's type and material sub-skills = `current × factor(heavy/light-armor-casting)`: armor
+    rating and stamina lost on hit (*Continuous effects* below).
   - **Magic side:** a spell cast while wearing a heavy / light cuirass: the effective level of
     the spell's magic sub-skills (form, school sub-direction, archetype) = `current ×
     factor(...)`. With a weapon in the other hand `with-magic` also applies; the factors multiply
@@ -123,8 +122,26 @@ sub-skill scale, checkpoint `P = 50`, `p = 1`; values fitted to the requested po
 | Movement speed | `heavy-armor-movement`, `light-armor-movement` | `pen 50, P 50, M 37.5, h 75` | **−50 %** | −25 % | 0 | +9.4 % | **+15 %** | +21.4 % | **+25 %** | +37.5 % |
 
 - **Driven by the type sub-skill** (decided, former Q-ARM-8): a heavy piece uses `heavy-armor`, a
-  light piece `light-armor`. Material sub-skills and `clothing` have no continuous effects: they
-  count towards the main skill and serve perk requirements (e.g. Unarmored: `clothing`).
+  light piece `light-armor`.
+- **Material sub-skills: armor rating** (decided 2026-11-15): per worn piece of that material,
+  a second factor `rating × (1 + effect_mat(L_material))`, the shared curve with `−30 %` at 0,
+  `0` at the checkpoint 50, `+F1(tier) %` at 100 and `+F2(tier) %` at 200 (`M`, `h` fitted per
+  tier as above). `F1` / `F2` are small tables by **material tier**; materials are mapped to
+  tiers in a worksheet ([`refs/lorerim/armor-material-tiers.md`](../../refs/lorerim/armor-material-tiers.md)).
+  Tables and tiers: to be filled by the user. The casting penalty applies to this level too.
+- **`clothing`: flat armor rating, no penalty** (decided 2026-11-15, former Q-ARM-9). Points,
+  not a percentage, so it does not depend on the clothing records' own rating (0 in vanilla;
+  works without LoreRim). The shared curve with `pen = 0, P = 50, M = 200, h = 150`, in armor
+  rating points for a full clothing set:
+
+  | L | 0–50 | 75 | 100 | 150 | 200 | limit |
+  |---|---|---|---|---|---|---|
+  | bonus, points | 0 | +28.6 | **+50** | +80 | **+100** | +200 |
+
+  Applied as `Σ_slots slotWeight × bonus(L_clothing)` over **worn clothing pieces only**;
+  empty slots do not count (a naked character gets nothing). Not stamina on hit (below).
+  Alternative kept in research: a *Mod Armor Rating* "add value" entry on clothing items
+  ([R-36](../../research/R-36-mod-armor-rating.md)).
 - **Armor rating:** per worn heavy / light piece, `rating × (1 + effect(L_type))`, on top of
   vanilla and Requiem (the vanilla skill scaling of armor rating still reads the main skill).
 - **Stamina on hit:** Requiem's own stamina damage of an unblocked hit (spells `StaminaDamage[*]`,
@@ -137,8 +154,8 @@ sub-skill scale, checkpoint `P = 50`, `p = 1`; values fitted to the requested po
   and empty slots → 0). A full heavy set at level 0 is −50 %, a cuirass alone −35 %. It adds to
   Requiem's armor weight penalty (R-33: e.g. −30 for 60 weight without perks); the sum must be
   checked in playtesting.
-- Effective level as usual: the casting penalty (*Casting in armor*) lowers the type levels while
-  a spell is equipped (armor rating, stamina on hit), not the movement ones.
+- Effective level as usual: the casting penalty (*Casting in armor*) lowers the type and material
+  levels while a spell is equipped (armor rating, stamina on hit), not the movement ones.
 - How: [`impl/armor-effects.md`](../../impl/armor-effects.md).
 
 **Questions:**
