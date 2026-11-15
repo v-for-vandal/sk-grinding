@@ -238,7 +238,7 @@ Keyword list: wiki "Keyword Reference".
   maintained fork.
   - One DLL supports SE, AE and VR. Needs C++23 and VS2022 or clang-cl. Works with CMake or xmake.
   - The README calls the colorglass vcpkg port old and unmaintained.
-  - **License: GPL-3.0-or-later with a modding exception** (see its `EXCEPTIONS.md`). → Q-TECH-2.
+  - **License: GPL-3.0-or-later with a modding exception** (see its `EXCEPTIONS.md`). Our mod uses the same license (design-v2 §14).
 - **CharmedBaryon/CommonLibSSE-NG**: the original NG. Last version mentioned is 3.5.2. Available as
   the vcpkg port `commonlibsse-ng` from the colorglass registry.
 - **Third-party vcpkg ports** (Monitor221hz/modding-vcpkg-ports): `commonlibsse-ng-fork`, which
@@ -316,3 +316,31 @@ HTTP 403; facts from it come from search snippets. Used by
 - Custom Skills Framework API (deferred).
 - Precision, TDM and Parrying RPG APIs (integration points in design §14).
 - SPID, FLM, po3 Tweaks and po3 Papyrus Extender details.
+
+## 8. Grid Inventory: an ImGui menu without a framework (web research 2026-11-14)
+
+<https://github.com/skypia0147-dev/grid-inventory> (Nexus 188733), main branch read on
+2026-11-14. Background for design-v2 Q-UI-2 (plan B for the status panel).
+
+- **Rendering:** Dear ImGui (vcpkg `imgui[dx11-binding,win32-binding]`) inside a custom
+  `RE::IMenu` with no SWF movie: flag `kCustomRendering`, ImGui drawn in `PostDisplay()`,
+  `AdvanceMovie()` ticks it. Device / context from
+  `RE::BSGraphics::Renderer::GetRendererDataSingleton()` (`forwarder`, `context`), HWND from the
+  swap chain description. No Present hook found in the parts read *(unconfirmed for the rest)*.
+  The bootstrap and render loop are ported from **Modex** (patchulidev/ModExplorerMenu).
+- **Input:** `ProcessMessage` turns `kScaleformEvent` into ImGui mouse / key events and returns
+  `kHandled`; typed characters through a chained WndProc (`SetWindowLongPtrA`), with a
+  `GetAsyncKeyState` fallback (no IME there); gamepad mapped through `ControlMap`.
+  `inputContext = kInventory`.
+- **Cursor:** `kUsesCursor | kUpdateUsesCursor` opens CursorMenu, whose movie it hides every
+  frame; it draws its own pointer at `MenuCursor` coordinates.
+- **Pause:** `kPausesGame | kDisablePauseMenu | kUsesMenuContext | kAllowSaving`, depth 11;
+  conflicts with Skyrim Souls RE (README). The flag is per menu, so a panel could leave it out.
+- **Versions / deps:** SE / AE 1.5–1.6 (README; later also 1.7.99) through Address Library;
+  needs only SKSE and Address Library. Builds with CMake + vcpkg against alandtse's
+  CommonLibVR (NG line).
+- **License:** GPL-3.0 with the Modex modding and linking exceptions: copying code is fine for
+  a GPL-3.0 mod (ours, design-v2 §14).
+- **For us:** shows a full working pattern for a framework-free panel; the UI code is large
+  (`UIRoot.cpp` ≈ 280k characters), so a minimal skeleton (or Modex) is the better start.
+

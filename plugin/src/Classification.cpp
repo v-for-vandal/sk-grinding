@@ -384,13 +384,14 @@ void route(RE::ActorValue value, float points, RE::TESForm* source,
         spdlog::warn("[ctx] unresolved spell school mismatch");
         return;
       }
-      if (!c.form.empty()) give(prefix + "/" + c.form);
+      // Forms and archetypes are shared by all schools (impl/spell-classifier.md *Ids*).
+      if (!c.form.empty()) give("form/" + c.form);
       give(c.direction);
-      give(prefix + "/standard");
+      give("archetype/standard");
     } else {
       spdlog::warn("[ctx] unresolved spell av={}", int(value));
       give(prefix + "/other");
-      give(prefix + "/standard");
+      give("archetype/standard");
     }
   }
   recoverOnce.run();

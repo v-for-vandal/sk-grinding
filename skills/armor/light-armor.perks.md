@@ -407,7 +407,7 @@ LA-01 Agility ................................. —
 - **In game:** You learned how to avoid the limitations light armors bestow upon somatic spell components. [No spell cost penalty for casting spells in light armor]
 - **Records:** skill XP +25% — when not global value AND e p magic_ is advance skill AND not wears ArmorHeavy
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `light-armor-casting >= 25`; LightArmor ≥ 25 stays (25 is the lower bound; decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 #### Alternatives
 
@@ -443,7 +443,9 @@ LA-01 Agility ................................. —
   - ability *Unarmored*: Unarmored : Armor Penetration (DualValueModifier OneHandedModifier 10); Unarmored : Armor Penetration (PeakValueModifier MarksmanModifier 10); Unarmored : Speed (ValueModifier SpeedMult 5)
   - damage taken ×0 — when random < 20% AND not wears ArmorLight AND not wears ArmorHeavy
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** kept; for an unarmored (clothing) character, so the main-skill level is
+  replaced by the clothing sub-skill.
+- **Sub-skill requirements:** `clothing >= 30` replaces LightArmor ≥ 25.
 
 #### Alternatives
 
@@ -506,7 +508,7 @@ LA-01 Agility ................................. —
   - spell magnitude +10% — when wears ≥ 3 pieces of ArmorLight; item/spell: Illusion spell OR Conjuration spell OR Destruction spell OR Restoration spell OR Alteration spell AND not spell REQ_NoMagnitudeScaling
   - spell duration +10% — when wears ≥ 3 pieces of ArmorLight; item/spell: Illusion spell OR Conjuration spell OR Destruction spell OR Restoration spell OR Alteration spell AND not spell REQ_NoDurationScaling
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `light-armor-casting >= 50`; LightArmor ≥ 50 becomes LightArmor ≥ 30 (decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 ### LA-14 · Athletics
 
@@ -527,7 +529,9 @@ LA-01 Agility ................................. —
   - weapon damage +10% — when not wears ArmorLight AND not wears ArmorHeavy
   - spell duration +10% — when not wears ArmorLight AND not wears ArmorHeavy; item/spell: Illusion spell OR Conjuration spell OR Destruction spell OR Restoration spell OR Alteration spell AND not spell REQ_NoDurationScaling
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `clothing >= 60` replaces LightArmor ≥ 50 (as rank 1, LA-10).
+- **REsolution:**
+      Replace LightArmor >= 50 with clothing >= 60
 
 ### LA-16 · Vexing Flanker
 

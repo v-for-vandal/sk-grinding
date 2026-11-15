@@ -25,15 +25,19 @@
   current is **never below floor** — the "large crafting XP below floor" rule never triggers.
   Did you mean "below potential"? Or should crafting XP be large when the sub-skill is low in
   absolute terms (e.g. below 50)?
-  - **A:**
+  - **A:** 1. One - add cross-links, 1/2. However, this was not an original
+    error. My original intention was that character should learn alchemy mostly
+    via trainers and thus it has higher coefficient for below potential, and
+    lower coefficient when at-potential. However, lets disregard all this now
+    entirely - we use same formulae as everywhere else.
 - **Q-ALC-2.** Drinking a potion when it has no use (Restore Health at full health) — still XP?
   Proposal: for restore-type effects, scale by the amount actually restored.
-  - **A:**
+  - **A:** if possible to implement - yes
 - **Q-ALC-3.** "Strength" for multi-effect potions: sum over effects, or primary effect only? And
   for instant effects (duration 0), use magnitude only?
   - **A:**
 - **Q-ALC-4.** Confirm: drinking foreign (bought/looted) potions gives no XP?
-  - **A:**
+  - **A:** Confirm, yes.
 - **Q-ALC-5.** Perk changes (Alchemy): describe all perks of this skill that must change
   compared to the base (Lorerim/Requiem) perk trees, plus any new ones. For each perk, state:
   (1) whether it has requirements on sub-skill levels (which sub-skill, which value — see

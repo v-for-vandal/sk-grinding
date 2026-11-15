@@ -1,6 +1,5 @@
 {
   "activeHours": 0.0,
-  "debugMode": true,
   "debug": {
     "fixed_xp": false,
     "fixed_xp_value": 100,
@@ -10,6 +9,7 @@
     "write_main_skills": true,
     "xp_mult": 1
   },
+  "debugMode": true,
   "equipped": [],
   "skills": [
     {
@@ -29,10 +29,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
           "id": "heavy-shield",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -42,10 +57,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
           "id": "light-shield",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -55,10 +85,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 30.0,
+              "P": 45.0,
+              "applied": false,
+              "h": 27.5,
+              "invert": true,
+              "kind": "curve",
+              "name": "Block stamina cost",
+              "p": 1.0,
+              "pen": 50.0,
+              "unit": "%"
+            }
+          ],
           "id": "parry",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -68,15 +113,31 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Bash damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
           "id": "bash",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -96,140 +157,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
-          "id": "destruction/missile",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/explosion",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/beam",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/flame",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/rune",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/wall",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/cloak",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/direct",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/self",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/touch",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/fire",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -239,10 +172,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/frost",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -252,10 +187,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/shock",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -265,10 +202,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/arcane",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -278,10 +217,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/blood",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -291,10 +232,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/entropic",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -304,28 +247,18 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "destruction/other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "destruction/standard",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -345,10 +278,63 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [
+            {
+              "description": "Placeholder perk, shows how automatic perks appear in the panel. Does nothing.",
+              "id": "placeholder-sword-50",
+              "level": 50.0,
+              "name": "Placeholder: Sword Rhythm",
+              "owned": true,
+              "requires": [
+                {
+                  "keep": 48.0,
+                  "level": 50.0,
+                  "sub": "1h-sword"
+                }
+              ]
+            },
+            {
+              "description": "Placeholder perk, shows how automatic perks appear in the panel. Does nothing.",
+              "id": "placeholder-sword-100",
+              "level": 100.0,
+              "name": "Placeholder: Sword Mastery",
+              "owned": false,
+              "requires": [
+                {
+                  "keep": 98.0,
+                  "level": 100.0,
+                  "sub": "1h-sword"
+                }
+              ]
+            }
+          ],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -358,10 +344,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-short-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -371,10 +381,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-dagger",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -384,10 +418,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-mace",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -397,10 +455,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-war-axe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -410,10 +492,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-spear",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -423,10 +529,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-scythe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -436,10 +566,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-unarmed",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -449,10 +603,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "1h-other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -462,10 +640,12 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
           "id": "dual-wield",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
@@ -475,10 +655,12 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
           "id": "with-shield",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
@@ -488,15 +670,18 @@
           "current": 0.0,
           "decayPerDay": 0.0,
           "effFloor": 0.0,
+          "effects": [],
           "id": "with-magic",
           "lastXP": 0.0,
           "ownFloor": 0.0,
           "peak": 0.0,
+          "perks": [],
           "potential": 0.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -516,140 +701,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
-          "id": "restoration/missile",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/explosion",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/beam",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/flame",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/rune",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/wall",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/cloak",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/direct",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/self",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/touch",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Magnitude",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
           "id": "restoration/help",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -659,10 +729,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Ward strength",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
           "id": "restoration/wards",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -672,10 +757,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
           "id": "restoration/sun",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -685,10 +785,25 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            }
+          ],
           "id": "restoration/poison",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -698,28 +813,18 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "restoration/other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
-          "potential": 70.0,
-          "worth": 0.0,
-          "zone": 1.0
-        },
-        {
-          "U": 0.0,
-          "current": 70.0,
-          "decayPerDay": 0.0,
-          "effFloor": 70.0,
-          "id": "restoration/standard",
-          "lastXP": 0.0,
-          "ownFloor": 70.0,
-          "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -739,10 +844,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "jewelry",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -752,10 +859,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "one-handed-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -765,10 +874,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "two-handed-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -778,10 +889,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "heavy-armor-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -791,10 +904,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "light-armor-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -804,10 +919,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "clothing-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -817,10 +934,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "bow-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -830,10 +949,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "crossbow-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -843,10 +964,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "iron",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -856,10 +979,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "steel",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -869,10 +994,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "leather",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -882,10 +1009,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "elven",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -895,10 +1024,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "orcish",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -908,10 +1039,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "dwarven",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -921,10 +1054,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "glass",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -934,10 +1069,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "ebony",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -947,10 +1084,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "daedric",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -960,10 +1099,12 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "dragon",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -973,15 +1114,18 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [],
           "id": "other-smithing",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
     },
     {
@@ -1001,10 +1145,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-sword",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1014,10 +1182,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-battleaxe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1027,10 +1219,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-warhammer",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1040,10 +1256,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-polearm",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1053,10 +1293,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-quarterstaff",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1066,10 +1330,34 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-scythe",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
@@ -1079,16 +1367,234 @@
           "current": 70.0,
           "decayPerDay": 0.0,
           "effFloor": 70.0,
+          "effects": [
+            {
+              "M": 45.0,
+              "P": 50.0,
+              "applied": false,
+              "h": 40.0,
+              "invert": false,
+              "kind": "curve",
+              "name": "Weapon damage",
+              "p": 1.0,
+              "pen": 20.0,
+              "unit": "%"
+            },
+            {
+              "applied": false,
+              "at0": 30.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Glancing hit chance",
+              "unit": "%",
+              "zeroAt": 50.0
+            }
+          ],
           "id": "2h-other",
           "lastXP": 0.0,
           "ownFloor": 70.0,
           "peak": 70.0,
+          "perks": [],
           "potential": 70.0,
           "worth": 0.0,
           "zone": 1.0
         }
       ],
+      "toNext": 0.0,
       "written": 50.0
+    },
+    {
+      "av": "magic",
+      "name": "Magic",
+      "pending": false,
+      "pseudo": true,
+      "subs": [
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [
+            {
+              "applied": true,
+              "at0": 6.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Launch noise σ",
+              "unit": "°",
+              "zeroAt": 75.0
+            }
+          ],
+          "id": "form/missile",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/explosion",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [
+            {
+              "applied": true,
+              "at0": 4.0,
+              "invert": false,
+              "kind": "linear",
+              "name": "Aim sway",
+              "unit": "°",
+              "zeroAt": 75.0
+            }
+          ],
+          "id": "form/beam",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/flame",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/rune",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/wall",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/cloak",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/direct",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/self",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 70.0,
+          "decayPerDay": 0.0,
+          "effFloor": 70.0,
+          "effects": [],
+          "id": "form/touch",
+          "lastXP": 0.0,
+          "ownFloor": 70.0,
+          "peak": 70.0,
+          "perks": [],
+          "potential": 70.0,
+          "worth": 0.0,
+          "zone": 1.0
+        },
+        {
+          "U": 0.0,
+          "current": 0.0,
+          "decayPerDay": 0.0,
+          "effFloor": 0.0,
+          "effects": [],
+          "id": "archetype/standard",
+          "lastXP": 0.0,
+          "ownFloor": 0.0,
+          "peak": 0.0,
+          "perks": [],
+          "potential": 0.0,
+          "worth": 0.0,
+          "zone": 1.0
+        }
+      ]
     }
   ],
   "state": "running"

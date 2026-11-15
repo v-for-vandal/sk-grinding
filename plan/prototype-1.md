@@ -74,8 +74,8 @@ wins for the prototype (its *Prototype* notes are deliberate simplifications); t
 
 | Topic | Prototype choice | Open in design |
 |---|---|---|
-| Form sub-skills | per school: `destruction/missile`, `restoration/self`, … | Q-CAT-1 |
-| Archetype | only `<school>/standard` | R-7 |
+| Form sub-skills | per school: `destruction/missile`, `restoration/self`, … (shared `form/*` since 2026-11-14, [`impl/spell-classifier.md`](../impl/spell-classifier.md)) | Q-CAT-1 |
+| Archetype | only `<school>/standard` (shared `archetype/standard` since 2026-11-14) | R-7 |
 | Destruction sub-directions | the proposal list | Q-DES-1 |
 | Raw XP | engine use points × `base_mult` (= vanilla `UseMult`) | Q-XP-9 |
 | Decay units | levels per active day | Q-DYN-4 |

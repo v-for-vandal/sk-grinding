@@ -117,8 +117,11 @@ main ≤ start_level → all 0, base = main;  leftover after saturation → base
   the levels given.
 - Shared sub-skills (not in `S`): forms `current = ownFloor = potential = peak =
   max(0, 2 × (m − 15))`, `m` = highest base level among the magic schools (all five, managed or
-  not); archetypes 0. Initialized with the first school that is initialized; *Re-initialize
-  all* redoes them.
+  not); archetypes 0. **Implemented 2026-11-14** (`Model::initializeShared`, `bestSchool()`):
+  initialized at the first award to a shared sub-skill (the first managed spell cast, the same
+  event that initializes its school); *Initialize now* / *Re-initialize all* redo them. It uses
+  the current mapping keys (`floor_per_level`, `floor_zero_at`), so until the floor cap goes it
+  is also clamped by `floor_cap`. Before init, spell aim uses the same value.
 - Existing co-saves keep their `base` / `L0_i` (the formula handles any `L0`); only a new init or
   *Re-initialize all* uses the split.
 - Unit test: for every skill file and main ∈ {15, 20, 25, 40, 60, 100}, init then `F = main`.

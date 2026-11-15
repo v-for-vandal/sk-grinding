@@ -1,8 +1,8 @@
 # MCM and configuration
 
 - **Status:** done (Settings page with debug-mode group built; in-game MCM registration/controls pending).
-- **Design:** design-v2 §12.2 (MCM Helper + config file), §13 (Debug page), Q-UI-4 (format: TOML
-  for the plugin's own files, prototype choice; JSON only where MCM Helper needs it).
+- **Design:** design-v2 §12.2 (MCM Helper + config file), §13 (Debug page), format: TOML for the
+  plugin's own files (decided), JSON only where MCM Helper needs it.
 - **Depends on:** [`plugin-foundation.md`](plugin-foundation.md) (ESL quest, Papyrus build).
 - **Research:** none.
 
@@ -66,6 +66,10 @@ not only in debug mode (a second page `XP`, or a group above *Debug*):
 |---|---|---|---|
 | Mod-list preset | enum | `[XP] iPreset` | Vanilla / Requiem (default) → `xp.preset` |
 | XP rate: <Skill> (one per managed main skill) | slider 0.1–5, step 0.05, default 1 | `[XP] f<ActorValue>` | `xp.user.<ActorValue>` |
+
+**Design change (2026-11-14, not implemented): panel hotkey** (design-v2 §12.1): a keymap
+control *Status panel key* (`[UI] iToggleKey`, MCM Helper `keymap`, DX scan code, default F7 =
+`0x41`) → `ui.toggle_key`, shown always. The TOML value stays the fallback.
 
 Preset factors live in `config/xp-presets.toml` (`[vanilla]`, `[requiem]`, one key per actor
 value, missing = 1), not in MCM. Log the active preset and factors at load and on change.

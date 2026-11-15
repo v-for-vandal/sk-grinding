@@ -54,7 +54,7 @@ described; check during research.
 | G-V23 | Pickpocket | Steal from a follower and put it back, repeat. | No | TW-like (exclude followers/teammates) + DR per NPC/item |
 | G-V24 | Sneak | Crouch near a sleeping or unaware NPC for hours. | No | XP only when a hostile/detecting NPC is near and actively searching; PB per NPC |
 | G-V25 | Sneak | Repeated sneak attacks on sleeping/helpless NPCs. | No | TW |
-| G-V26 | (Trainers) | Pay a trainer, then pickpocket the gold back. LoreRim keeps 5 trainings per level (Simply Smart Training carries unused ones over), so this is bounded per level. | Partial — trainers no longer raise main skill; but see G-N9 | cap trainer-granted potential (Q-BT-4) |
+| G-V26 | (Trainers) | Pay a trainer, then pickpocket the gold back. LoreRim keeps 5 trainings per level (Simply Smart Training carries unused ones over), so this is bounded per level. | Partial — trainers no longer raise main skill; but see G-N9 | solved by diminishing trainer potential (design §10.2) |
 
 ## 2. New grinding methods specific to this design
 
@@ -68,9 +68,9 @@ described; check during research.
 | G-N6 | Decay | **Token use:** one hit per day with each weapon resets every decay timer, so nothing ever decays — defeats the "no omnipotence" principle. | Solved — idle meter reduced by `c_dec × rawXP`, not reset by a single use (design §5.5) | — |
 | G-N7 | Window rule `dual-wield` | Weak off-hand taps to make main-hand hits qualify. | Partial — needs real attacks, but they can be token ones | off-hand attack must land on a valid target (TW) |
 | G-N8 | Window rule `with-shield` | Tap block near an enemy without blocking anything to get the ×1.0 instead of ×0.5. | No | "block" = a hit actually blocked |
-| G-N9 | Trainers + potential | Many trainings (5 per level, carried over) with stacking potential → buy potential up to 200 for gold, then enjoy the ×1.5 recall zone all the way. | No | cap trainer potential (Q-BT-4) |
+| G-N9 | Trainers + potential | Many trainings (5 per level, carried over) with stacking potential → buy potential up to 200 for gold, then enjoy the ×1.5 recall zone all the way. | Solved — trainer potential falls off with `potential − current` (half above 10, none above 15; design §10.2) | — |
 | G-N10 | Trainers + bonus | Stack training bonuses indefinitely. | Solved — capped at +30% | — |
-| G-N11 | Books + potential | Read the same book many times / multiple copies. | Solved if "once per book" (Q-BT-1); vanilla flag is per base book | — |
+| G-N11 | Books + potential | Read the same book many times / multiple copies. | Solved: "once per book" (design §10.1); vanilla flag is per base book | — |
 | G-N12 | Speech-trading | With strong Speech perks, every purchase and sale "saves" gold relative to the Speech-15 reference, so a buy/sell loop of an expensive item yields XP both ways. | Partial — same as G-V18 | net loops; DR |
 | G-N13 | Speech-trading | **Splitting transactions:** with a per-transaction `log(1 + saved)` (proposal in skills/speech/design.md), selling 2000 items saving 1 gold each gives far more XP than one sale saving 2000 (log is concave). | Open — Q-SPE-4 | apply the formula to cumulative saved gold per merchant per day, not per transaction |
 | G-N14 | Alchemy consumption | Brew cheap long-duration potions (resists, waterbreathing): `magnitude × duration` is high for them, so drinking cheap potions gives big XP. | No | normalize strength per effect type, or use potion value |
@@ -106,7 +106,7 @@ described; check during research.
   (G-V12, G-V13, G-V14, G-V17) and **repetition** (G-V10, G-V16, G-V18, G-V20, G-V22). Hence the
   proposal of a generic toolkit (TW/PB/ME/DR) instead of per-skill rules.
 - **New methods:** the most dangerous ones are structural and decided by single answers:
-  G-N3 (Q-XP-1, decided: (a) for all skills), G-N9 (Q-BT-4), G-N13 (Q-SPE-4).
+  G-N3 (Q-XP-1, decided: (a) for all skills), G-N9 (design §10.2, diminishing trainer potential), G-N13 (Q-SPE-4).
   G-N2/G-N26 are solved by the level model (design §4.4), G-N6 by the decay idle meter (design §5.5).
 - Window rules (G-N5, G-N7, G-N8) are cheap to fix: require the complementary event to be
   "real" (landed hit / blocked hit / hostile spell affecting an enemy).

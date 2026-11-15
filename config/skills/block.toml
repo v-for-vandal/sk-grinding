@@ -61,3 +61,18 @@ name = "bash"
 group = "block"
 T = 90
 w = 15
+
+# ---- continuous effects (shown in the panel; not applied yet) ---------------------------------
+# impl/status-ui.md *Effects and automatic perks*; skills/block/design.md.
+[[effect]]
+name      = "Block stamina cost"
+subskills = ["heavy-shield", "light-shield", "parry"]
+curve     = { pen = 50, P = 45, M = 30, h = 27.5 }
+invert    = true        # the penalty part makes a block more expensive
+unit      = "%"
+
+[[effect]]
+name      = "Bash damage"
+subskills = ["bash"]
+curve     = { pen = 20, P = 50, M = 45, h = 40 }
+unit      = "%"

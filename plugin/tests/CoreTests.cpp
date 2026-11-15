@@ -83,6 +83,7 @@ int main(int argc, char** argv) try {
         "compiled defaults match repository TOML");
   if (argc == 3) {
     for (auto& sk : m.skills) m.initialize(sk, 50);
+    m.initializeShared(50);
     m.pendingInit = false;
     std::ofstream(argv[2]) << m.snapshot().dump(2) << '\n';
     return 0;
@@ -299,9 +300,46 @@ int main(int argc, char** argv) try {
   near(split.find("1h-sword")->current.value(sword->curve),
        whole.find("1h-sword")->current.value(sword->curve), 1e-5);
   near(split.skills[2].rust, whole.skills[2].rust, 1e-5);
+  {
+    // Shared magic sub-skills: pseudo-skill "magic", forms start from the best school,
+    // archetypes at 0, no rust, old per-school records are dropped at restore.
+    Model magic;
+    magic.loadConfig(argv[1]);
+    check(magic.shared.pseudo && magic.shared.subs.size() == 11, "shared sub-skills");
+    check(!magic.find("destruction/missile"), "no per-school forms");
+    sp::Skill* parent = nullptr;
+    auto missile = magic.find("form/missile", &parent);
+    check(missile && parent == &magic.shared && missile->k == 0, "form/missile is shared");
+    for (auto& sk : magic.skills) magic.initialize(sk, 40);
+    magic.initializeShared(50);
+    near(missile->current.value(missile->curve), 70);
+    near(magic.find("archetype/standard")->current.value(missile->curve), 0);
+    magic.award("form/missile", 5000);
+    check(missile->current.value(missile->curve) > 70, "shared sub-skill gains XP");
+    near(magic.shared.rust, 0);
+    magic.settings.values["debug"]["no_grace"] = true;
+    magic.tick(48);
+    near(magic.shared.rust, 0);
+    auto snap = magic.snapshot();
+    check(snap["skills"].back()["av"] == "magic" && snap["skills"].back()["pseudo"] == true &&
+              !snap["skills"].back().contains("F"),
+          "pseudo-skill in the snapshot");
+    auto old = magic.save();
+    check(old["mains"].contains("magic"), "shared state saved");
+    old["subs"]["destruction/missile"] = old["subs"]["form/missile"];
+    old["mains"]["Destruction"]["initial"]["destruction/missile"] = 70;
+    Model reloaded;
+    reloaded.loadConfig(argv[1]);
+    reloaded.restore(old);
+    check(reloaded.dropped == std::vector<std::string>{"destruction/missile"},
+          "old per-school form dropped");
+    check(!reloaded.save()["subs"].contains("destruction/missile"), "dropped from save");
+    near(reloaded.find("form/missile")->current.value(missile->curve),
+         missile->current.value(missile->curve));
+  }
   std::cout
       << "Core tests passed: six normalization paths, fractional curves, cap, "
-         "zones, floors, decay integral, initialization, persistence.\n";
+         "zones, floors, decay integral, initialization, persistence, shared magic sub-skills.\n";
   return 0;
 } catch (const std::exception& e) {
   std::cerr << e.what() << '\n';

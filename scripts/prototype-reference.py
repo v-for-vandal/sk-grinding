@@ -10,6 +10,8 @@ root = Path(__file__).resolve().parent.parent
 result = {}
 for path in sorted((root / "config/skills").glob("*.toml")):
     cfg = tomllib.loads(path.read_text(encoding="utf-8"))
+    if "main" not in cfg:  # shared.toml: shared sub-skills, k = 0, no normalization
+        continue
     main = cfg["main"]
     curve = load_curve(main)
     default = load_curve(cfg["sub_curve"])

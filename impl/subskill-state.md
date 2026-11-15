@@ -18,9 +18,9 @@ everything to the SKSE co-save. Player only.
   [`config/skills/`](../config/skills/)). One file = one managed main skill (`[main] actor_value`).
   Every `[[subskill]]` entry is one sub-skill: string id `name`, parent = the file's main skill,
   group, `T`, `w`, optional `T1`, optional fixed `k`, optional `curve`, optional `decay_rate`.
-- Ids are global and unique (`1h-sword`, `heavy-shield`, `destruction/missile`, `iron`). A
+- Ids are global and unique (`1h-sword`, `heavy-shield`, `form/missile`, `iron`). A
   duplicate id is a load error (logged, the second one is ignored).
-- Concept sub-skills = entries with `k = 0` (`dual-wield`, `with-shield`, `with-magic`).
+- Concept sub-skills = entries with `k = 0` (`dual-wield`, `with-shield`, `with-magic`; later `heavy-armor-casting`, `light-armor-casting`).
 - The registry also keeps, per main skill: the main XP curve (`[main]`), `[dynamics]`, and the
   solved `k` and `M_i` tables ([`main-skill-level.md`](main-skill-level.md)).
 - Cross-links (§6.2) are **not** in prototype 1: effective floor = own floor.

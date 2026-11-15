@@ -29,7 +29,7 @@ write_main_skills = true     # write the computed level to the actor value base
 hysteresis_up     = 1.0      # written n becomes n+1 when F >= n + 1 (Q-ML-6 placeholder)
 hysteresis_down   = 0.2      # written n becomes n-1 when F < n - 0.2
 min_level         = 0
-max_level         = 300      # clamp of the written value (Q-DYN-8 open)
+max_level         = 300      # technical clamp of the written value only; main skills are uncapped (design-v2 §5.1)
 
 [init]                       # impl/main-skill-level.md, start conversion (§4.4.4, Q-ML-9)
 floor_per_level = 2.0        # floor = clamp(floor_per_level × (main − floor_zero_at), 0, floor_cap)
@@ -49,6 +49,9 @@ beam_pitch_secondary_frequency = 1.73 # frequency ratios to beam_noise_hz
 beam_yaw_primary_frequency = 0.83
 beam_yaw_secondary_frequency = 1.31
 debug_missile_yaw_deg = 0.0 # R-26 check 1 only: set to 10 for a fixed offset; 0 uses normal noise
+
+[perks]                      # design-v2 §5.6 (sub-skill perks)
+hysteresis = 2.0             # an automatic perk is lost below its level minus this
 
 [ui]                         # impl/status-ui.md (PrismaUI)
 toggle_key = 0x41            # DX scan code of the panel hotkey (0x41 = F7)

@@ -33,6 +33,26 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 ```
 <!-- DIAGRAM_END -->
 
+## Restored to the LoreRim tree (decided)
+
+Purchasable perks brought back (type A). How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md);
+checks before building: [R-29](../../research/R-29-restored-ordinator-perks.md) (Light Armor).
+Sub-skills: [`design.md`](design.md).
+
+```
+LA-04 Dexterity ............................. LightArmor 50
+└── ORD-LA-06 Into the Maelstrom ............ LightArmor 60
+LA-06 Wind Walker ........................... LightArmor 75
+├── ORD-LA-09 Wardancer ..................... LightArmor 75, light-armor 80
+│   └── ORD-LA-10 Spelldancer ............... LightArmor 75, light-armor 90
+└── ORD-LA-07 Fight or Flight ............... LightArmor 75   (changed: Stamina 5 % → 2 %/s)
+    └── ORD-LA-11 Survival Instinct ......... LightArmor 80, light-armor 80
+One-Handed tree:
+1H-30 Takedown .............................. OneHanded 50
+└── ORD-LA-05 Rushing Tide .................. 1h-unarmed 50 only
+    └── ORD-LA-08 Hissing Dragon ............ 1h-unarmed 70 only
+```
+
 ### ORD-LA-01 · Light Armor Mastery
 
 - **ID:** `007AB0:Ordinator - Perks of Skyrim.esp` · `ORD_Lia00_LightArmorMastery_Perk_00` · type: A (Ordinator's own record)
@@ -97,7 +117,12 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** Unarmed attacks grant 10% increased Stamina regeneration and 5% movement speed for 8 seconds. This effect stacks. Requires two free hands.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** unarmed (Q-WPN-3)
-- **Sub-skill requirements:**
+- **Resolution:** restored to the **One-Handed** tree (see *Restored to the LoreRim tree*),
+  purchasable with a One-Handed perk point, parent **1H-30 Takedown** (Ordinator: Sweeping Wind,
+  not restored). Meant for a pure unarmed fighter: the only requirement is the unarmed sub-skill.
+  No effects of its own: the script that grants the stacking buff must be checked (R-29).
+- **Sub-skill requirements:** `1h-unarmed >= 50`; the perk's own `LightArmor ≥ 50` is dropped;
+  `has perk Sweeping Wind (ORD-LA-04)` → `has perk Takedown (1H-30)`.
 
 ### ORD-LA-06 · Into the Maelstrom
 
@@ -107,7 +132,9 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** You take 10% less attack damage when fighting more than one enemy if wearing all Light Armor.
 - **Records:** damage taken −10% — when not wears ArmorHeavy AND wears ArmorBoots AND wears ArmorCuirass AND wears ArmorGauntlets AND wears ArmorHelmet; item/spell: not is last hostile actor
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent LA-04 Dexterity (as in
+  Ordinator: Unhindered is the LA-04 slot).
+- **Sub-skill requirements:** none; LightArmor ≥ 60 as in Ordinator.
 
 ### ORD-LA-07 · Fight or Flight
 
@@ -117,7 +144,14 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** When you get struck by an unblocked attack or hostile spell in combat, an adrenaline rush regenerates 5% of your maximum Stamina per second for 6 seconds if wearing all Light Armor.
 - **Records:** ability *Fight or Flight*: Fight or Flight (ValueModifier StaminaRate 5); Fight or Flight - Survival Instinct (ValueModifier SpeedMult 10)
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent
+  **LA-06 Wind Walker** (Ordinator: Initiative, not restored); restored so that Survival Instinct
+  works (its speed effect is the second effect of this ability). Changed effect
+  ([`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md) *Changed effects*, `magnitudes`):
+  *Fight or Flight* `StaminaRate` 5 → **2** (2 % of max Stamina per second for the 6 s of the
+  proc); the description changes to match.
+- **Sub-skill requirements:** none; LightArmor ≥ 75 (Ordinator 70; the parent's level);
+  `has perk Initiative (ORD-LA-02)` → `has perk Wind Walker (LA-06)`.
 
 ### ORD-LA-08 · Hissing Dragon
 
@@ -127,7 +161,9 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** You may choose a damage type (fire, frost, shock, poison, disease or sun). Unarmed attacks unleash a shockwave that deals the chosen damage type to all targets in front of you. Requires two free hands. Does not activate while sneaking.
 - **Records:** ability *Hissing Dragon*: Naruto Level Shit
 - **Proposal (auto):** unarmed (Q-WPN-3), destruction/fire, destruction/frost, destruction/shock
-- **Sub-skill requirements:**
+- **Resolution:** restored to the **One-Handed** tree after its Ordinator parent ORD-LA-05
+  Rushing Tide (see *Restored to the LoreRim tree*), purchasable with a One-Handed perk point.
+- **Sub-skill requirements:** `1h-unarmed >= 70`; the perk's own `LightArmor ≥ 70` is dropped.
 
 ### ORD-LA-09 · Wardancer
 
@@ -139,7 +175,10 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
   - weapon damage +20% — when not global value AND not wears ArmorHeavy AND wears ArmorBoots AND wears ArmorCuirass AND wears ArmorGauntlets AND wears ArmorHelmet
   - critical hit damage +20% — when not global value AND not wears ArmorHeavy AND wears ArmorBoots AND wears ArmorCuirass AND wears ArmorGauntlets AND wears ArmorHelmet
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent LA-06 Wind Walker (as in
+  Ordinator: Windrunner is the LA-06 slot).
+- **Sub-skill requirements:** `light-armor >= 80`; LightArmor ≥ 75 (Ordinator 70; the parent's
+  level).
 
 ### ORD-LA-10 · Spelldancer
 
@@ -149,7 +188,10 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** Wardancer also improves elemental (fire, frost and shock) spells and effects by the same amount.
 - **Records:** spell magnitude +20% — when not global value AND not wears ArmorHeavy AND wears ArmorBoots AND wears ArmorCuirass AND wears ArmorGauntlets AND wears ArmorHelmet; item/spell: MagicDamageFire OR MagicDamageFrost OR MagicDamageShock
 - **Proposal (auto):** destruction/fire, destruction/frost, destruction/shock
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent ORD-LA-09 Wardancer (as in
+  Ordinator).
+- **Sub-skill requirements:** `light-armor >= 90`; LightArmor ≥ 75 (Ordinator 80; the parent
+  LA-06's level).
 
 ### ORD-LA-11 · Survival Instinct
 
@@ -159,7 +201,11 @@ ORD-LA-01 Light Armor Mastery ................. —  (rank 2: LightArmor 20)
 - **In game:** When you get struck by an unblocked attack or hostile spell in combat, gain 10% movement speed for 6 seconds if wearing all Light Armor.
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Resolution:** restored to the tree (see *Restored to the LoreRim tree*), purchasable, parent ORD-LA-07 Fight or Flight
+  (as in Ordinator, restored for this). The perk has no effects of its own: its +10 % speed is the
+  second effect of the *Fight or Flight* ability, which needs Fight or Flight.
+- **Sub-skill requirements:** `light-armor >= 80`; LightArmor ≥ 80 and `has perk Fight or Flight
+  (ORD-LA-07)` as in Ordinator.
 
 ### ORD-LA-12 · Breaking Waves
 

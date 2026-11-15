@@ -30,6 +30,9 @@ struct Sub {
   std::vector<double> integral;
   LevelXP current, floor, potential, peak;
   double idle = 0, lastXP = 0;
+  // Shown in the panel only (impl/status-ui.md *Effects and automatic perks*):
+  // continuous effects (from [[effect]] and [aim]) and automatic perks.
+  json effects = json::array(), perks = json::array();
   double shape(double level) const;
   void prepare(int cap);
   double worth(double level) const;
@@ -43,6 +46,10 @@ struct Skill {
   std::map<std::string, double> budgets;
   std::vector<Sub> subs;
   bool initialized = false;
+  // The shared magic sub-skills (config/skills/shared.toml): no main skill, k = 0, no rust;
+  // shown as the pseudo-skill "magic" (impl/status-ui.md).
+  bool pseudo = false;
+  std::string name;
   double base = 15, rust = 0, idle = 0, written = 15;
   unsigned external = 0;
   void solve(int cap);
@@ -57,11 +64,20 @@ struct Settings {
 struct Model {
   Settings settings;
   std::vector<Skill> skills;
+  Skill shared;  // pseudo-skill "magic"; empty subs when shared.toml is absent
+  std::vector<std::string> dropped;  // old per-school form records dropped at the last restore
   double activeHours = 0, lastHours = 0;
   bool pendingInit = true, raceClosed = false;
   json unknownSubs = json::object(), unknownMains = json::object();
   void loadConfig(const std::string& root, bool builtIn = false);
   void initialize(Skill&, double base);
+  // Shared sub-skills: forms start like a school's sub-skills at the best school level,
+  // archetypes at 0 (impl/main-skill-level.md).
+  void initializeShared(double bestSchool);
+  // Start level of a sub-skill (and of a form, from the best school): the init mapping.
+  double startLevel(double base) const;
+  std::vector<Skill*> all();  // skills, then shared when it has sub-skills
+  std::vector<const Skill*> all() const;
   Sub* find(const std::string& id, Skill** parent = nullptr);
   // recover = false: the caller lowers rust once per vanilla event (recover()).
   void award(const std::string& id, double raw, bool recover = true);
@@ -70,6 +86,9 @@ struct Model {
   json save() const;
   void restore(const json&);
   json snapshot() const;
+  json subSnapshot(const Skill&, const Sub&, double grace, double rampEnd) const;
+  json effects(const Sub&) const;
+  json perks(const Sub&, double current) const;
 };
 double ramp(double idle, double grace, double end);
 // Written integer level n after hysteresis (impl/main-skill-level.md).

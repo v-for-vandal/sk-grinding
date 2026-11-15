@@ -103,6 +103,7 @@ How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md); checks before b
 - **Records:**
   - spell magnitude +20% — when item/spell: master spell OR master spell OR master spell OR master spell OR master spell; target: not is Player AND is hostile to actor AND ActorTypeUndead OR is undead
   - weapon damage +20% — when target: not is Player AND is hostile to actor AND ActorTypeUndead OR is undead
+- **Note to self**: Logically superseeded by Mystic Turning
 
 #### Rank 2 · Hallowed Burial · `02D091:Ordinator - Perks of Skyrim.esp`
 
@@ -113,6 +114,7 @@ How: [`impl/perk-tree-nodes.md`](../../impl/perk-tree-nodes.md); checks before b
   - weapon damage +30% — when target: not is Player AND is hostile to actor AND ActorTypeUndead OR is undead
 - **Proposal (auto):** —
 - **Sub-skill requirements:**
+- **Note to self**: Logically superseeded by Mystic Turning
 
 ### ORD-RES-04 · Spirit Tutors
 

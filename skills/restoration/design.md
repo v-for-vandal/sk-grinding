@@ -42,7 +42,7 @@ feeds them too.
   - per-target budget (§11.2, item 2; [`refs/per-target-budget.md`](../../refs/per-target-budget.md)):
     key (healed actor, `support-heal`), budget `kHeal × target max health` per refill period.
 - Wards and offensive spells (`sun`, `poison`) go through the general budgets (`defense-magic`,
-  `offense-magic`, Q-AG-3): a weak hostile mage hitting your ward gives little.
+  `offense-magic`, design §11.2): a weak hostile mage hitting your ward gives little.
 
 **Continuous effects** (decided, Q-RES-3: the standard effect with the shared curve of §5.7).
 Form sub-skills: accuracy ([magic](../magic/design.md)). School sub-directions, the player's

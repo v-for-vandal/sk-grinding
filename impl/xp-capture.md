@@ -111,18 +111,22 @@ the fallback of the skill below and log `[ctx] unresolved` at warn level.
   `a_skill`.
 - Source is a scroll or a staff (enchantment) → no XP (Q-MAG-1: scrolls ignored; staves are
   Enchanting).
-- Three sub-skills get `raw` each ([`spell-classifier.md`](spell-classifier.md)):
-  `<school>/<form>`, `<school>/<direction>`, `<school>/standard`, where `<school>` is `a_skill`.
+- Three sub-skills get `raw` each ([`spell-classifier.md`](spell-classifier.md) *Ids*):
+  `form/<form>` and `archetype/standard` (shared by all schools) and `<school>/<direction>`,
+  where `<school>` is `a_skill`.
 - The healing rules of [`heal-xp.md`](heal-xp.md) (combat multipliers, damage pool, budget) are
   **not** in prototype 1: Restoration gets the vanilla points.
-- Fallback: `<school>/other` and `<school>/standard` (no form).
-- **Design change (2026-11-14, not implemented):** forms and archetypes are shared
-  (`form/<form>`, `archetype/standard`, [`spell-classifier.md`](spell-classifier.md) *Ids*).
-  Rust and `U_main` of the school are still reduced once per award; the shared sub-skills have
-  no main skill, so they touch no `R`.
+- Fallback: `<school>/other` and `archetype/standard` (no form).
+- Rust and `U_main` of the school are reduced once per award; the shared sub-skills belong to the
+  pseudo-skill `magic`, which has no `R` (`Model::recover` skips it).
+- The shared sub-skills are initialized at their first award (*ready*), like a school: forms at
+  the start level of the best of the five schools (`bestSchool()`), archetypes at 0
+  ([`main-skill-level.md`](main-skill-level.md)).
 
 **Concept sub-skills** (`dual-wield`, `with-shield`, `with-magic`): window rules of
-[weapons](../skills/weapons/design.md) (*Window rules*), milestone 7 of the plan (optional). Until
+[weapons](../skills/weapons/design.md) (*Window rules*); `heavy-armor-casting` /
+`light-armor-casting` (hit taken ↔ spell cast, by the cuirass type) when armor is managed
+([armor](../skills/armor/design.md) *Casting in armor*); milestone 7 of the plan (optional). Until
 then they stay at their start value.
 
 ## Debug: fixed XP per action
@@ -190,7 +194,7 @@ of the prototype can then be tested in the same game session.
   ward absorb writes one `[use]` line and one or more `[xp]` lines naming the right sub-skills.
 - An unarmed punch → `1h-unarmed`; a greatsword → `2h-sword`; a shield block → `heavy-shield` or
   `light-shield`; a dagger parry → `parry`; a shield bash → `bash` + half to the shield.
-- Ice Spike hit → `destruction/missile`, `destruction/frost`, `destruction/standard`; healing
-  self → `restoration/self`, `restoration/help`, `restoration/standard`.
+- Ice Spike hit → `form/missile`, `destruction/frost`, `archetype/standard`; healing
+  self → `form/self`, `restoration/help`, `archetype/standard`.
 - An Alteration spell (not managed) → original called, no `[xp]` line.
 - No `[ctx] unresolved` warnings in a normal session; if there are, they show what to fix.

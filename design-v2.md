@@ -76,6 +76,11 @@ of skills.
    `grinding-analysis.md`.
 3. **No omnipotence.** A character cannot stay at peak in everything at once: unused
    proficiencies fade (but never below what has been "drilled in").
+4. **Say when practice teaches nothing.** When an action earns no or little XP because of an
+   anti-grind rule (§11), the player is told so in a short, non-distracting in-game way, in the
+   voice of the character: e.g. Smithing past the bucket or repetition limit: *"It seems too
+   easy to make this now… you learn nothing new."* At most once per rule and source in a while,
+   not on every action.
 
 ## 3. Glossary (canonical terms)
 
@@ -93,10 +98,10 @@ of skills.
 | **Idle meter** | `U`, active hours of "not practising", reduced in proportion to raw XP. Drives the grace period of sub-skill decay (§5.5) and of rust. |
 | **Cross-link** | A rule that one sub-skill's own floor raises another sub-skill's effective floor. |
 | **Use event** | Any event that grants XP to a sub-skill; reduces its idle meter in proportion to the raw XP (§5.5). |
-| **Window rule** | A rule that grants XP depending on whether a complementary event happened within the last N seconds (dual-wield, with-shield, with-magic). |
+| **Window rule** | A rule that grants XP depending on whether a complementary event happened within the last N seconds (dual-wield, with-shield, with-magic, heavy/light-armor-casting). |
 | **Effect curve** | Shared shape of continuous effects: penalty to 0 at a checkpoint, then a bonus saturating towards a limit (§5.7). |
-| **Effective level** | Level used by a sub-skill's continuous effects: `current × factor`, lowered by context penalties (`with-shield`, `dual-wield`, `with-magic`). Does not affect `current`, perks or the main skill (§5.7). |
-| **Concept sub-skill** | A sub-skill about a way of fighting or casting, not an item (`dual-wield`, `with-shield`, `with-magic`). `k = 0`: no main-skill contribution. |
+| **Effective level** | Level used by a sub-skill's continuous effects: `current × factor`, lowered by context penalties (`with-shield`, `dual-wield`, `with-magic`, `heavy-armor-casting`, `light-armor-casting`). Does not affect `current`, perks or the main skill (§5.7). |
+| **Concept sub-skill** | A sub-skill about a way of fighting or casting, not an item (`dual-wield`, `with-shield`, `with-magic`; `heavy-armor-casting`, `light-armor-casting` of [armor](skills/armor/design.md)). `k = 0`: no main-skill contribution. |
 | **Shared sub-skill** | A sub-skill with no parent main skill, fed by several main skills: the magic forms and archetypes, fed by every school (decided, §16). Like a concept sub-skill it gives nothing to any main skill; it exists for effects and perks. |
 | **Zone multiplier** | XP multiplier that depends on where current is relative to floor and potential (§5.3). |
 
@@ -171,7 +176,8 @@ calibrated on the vanilla scale, so raw XP is brought back to it **first**:
   Requiem (e.g. a blocked hit of a bandit of the same level). Placeholder until then: 0.1 for
   Block, Heavy Armor, Light Armor; 1 for weapons (whether weapon points follow base damage or
   damage dealt is unconfirmed) and everything else. A per-source factor (blocked damage vs bash)
-  only if one per skill is not enough.
+  only if one per skill is not enough. Waits for
+  [`playtesting/requiem-xp-scale.md`](playtesting/requiem-xp-scale.md).
   - **A:**
 
 ### 4.3 Open questions
@@ -233,7 +239,8 @@ main        = level_from_xp(base, Σ_i (M_i(L_i^main) − M_i(L_i^0)))  // base,
   - `k`, `T`, `w` are per sub-skill (config). Usually `k` is shared by a group of sub-skills (e.g.
     all Smithing materials), and `T` varies with how hard the sub-skill is.
   - **`k = 0`** means the sub-skill gives nothing to the main skill. Concept sub-skills
-    (`dual-wield`, `with-shield`, `with-magic`, [weapons](skills/weapons/design.md)) use it; there is no separate mechanism.
+    (`dual-wield`, `with-shield`, `with-magic`, [weapons](skills/weapons/design.md);
+    `heavy-armor-casting`, `light-armor-casting`, [armor](skills/armor/design.md)) use it; there is no separate mechanism.
     Normalization (§4.4.5) keeps such `k` fixed at 0.
   - The peak of `gn` is ≈ 1 only when `T` is well above `T1` (`T ≥ T1 + 3w`). For lower `T` the
     peak is lower (Q-ML-10).
@@ -405,7 +412,8 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
     - (2) our own debug log in playtests: the raw use points hook (Q-XP-9, R-17) logs raw XP
       per active hour even though `UseMult = 0`.
 
-    Proposal: (1) for first numbers, (2) to calibrate.
+    Proposal: (1) for first numbers, (2) to calibrate:
+    [`playtesting/practice-pace.md`](playtesting/practice-pace.md).
   - **A:**
 - **Q-ML-8.** Values of `r_skill` and the grace period per main skill, in levels per active
   game day (decided: crafting slow, weapons and armor faster; active time only).
@@ -433,9 +441,9 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
   `cost(L) = improveMult × L^1.95 + improveOffset`, with `improveMult`, `improveOffset`
   configurable per sub-skill (exponent configurable globally). Levels for current, own floor,
   potential and peak are derived from their XP using the same curve.
-- **Optional soft cap above 200** (config, off by default):
-  `cost(L) × e^((L − 200)/softCapScale)` for `L > 200`. With `softCapScale ≈ 10` each level
-  above 200 is ~10% dearer than the previous one, so the practical ceiling is ≈ 220–230.
+- **No soft cap above 200** (decided, former Q-DYN-14): the curve stays as is above 200. A
+  rejected option was `cost(L) × e^((L − 200)/softCapScale)` for `L > 200` (with
+  `softCapScale ≈ 10` the practical ceiling would be ≈ 220–230); it is not implemented.
 - **Storage (float32, no double).** Each value (current, own floor, potential, peak) is stored as
   `uint16 level` + `float progress` (XP inside the level, `0 ≤ progress < cost(level)`), **not**
   as a total XP float.
@@ -456,15 +464,13 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
   not allowed. Perk thresholds are ≤ 200 by convention.
 - **External potential is capped separately.** Without a cap, books, trainers and external
   increments could raise potential without limit. Then ×1.5 would apply at every level (G-N9).
-  See Q-BT-4.
-- **Q-DYN-8.** Main skill range: 0–100 as in vanilla, or 0–200, or uncapped (main skills are
-  float AVs and can go above 100)? Constraints: some vanilla/Requiem formulas may clamp at 100 or
-  misbehave above it (R-14). The vanilla skill menu is designed for 0–100. With the Smithing
-  placeholders, training all sub-skills to 75 already gives main ≈ 150 ([smithing](skills/smithing/design.md)).
-  - **A:**
-- **Q-DYN-14.** Enable the optional soft cap above 200 by default? If yes, which
-  `softCapScale`?
-  - **A:**
+  See §10.2 (diminishing trainer potential).
+- **Main skill range: uncapped** (decided, former Q-DYN-8). LoreRim already allows skills above
+  100. The main level has no cap of its own; it is bounded only by the saturating worths of its
+  sub-skills (§4.4.1) and a technical clamp of the written value (`[main] max_level`, config).
+  With the Smithing placeholders, training all sub-skills to 75 gives main ≈ 150
+  ([smithing](skills/smithing/design.md)). Vanilla / Requiem formulas that clamp at 100 or
+  misbehave above it are still checked in R-14; the vanilla skill menu is drawn for 0–100.
 
 ### 5.2 Initial values
 
@@ -575,7 +581,8 @@ One-Handed. So the main skill has its **own** decay, driven by the activity of t
   used, from playtests or the pacing baseline §15.1): `c_dec = 1 / (q × P_sub)`, where `q < 1`
   is the fraction of the normal pace that is enough to stop `U` from growing (e.g. 0.3). Same
   approach as `c` for the main-skill rust (experiment Q-ML-7). Add to the normalization
-  script once `P_sub` is known.
+  script once `P_sub` is known. Measured in
+  [`playtesting/practice-pace.md`](playtesting/practice-pace.md).
   - **A:**
 
 ### 5.6 Sub-skill perks
@@ -657,7 +664,7 @@ effect(L) =  M · x^p / (x^p + h^p),  x = L − P     for L ≥ P      // bonus,
 
 **Penalties and bonuses (decided, general rule).**
 
-- Only **concept sub-skills** (`with-shield`, `dual-wield`, `with-magic`, …) penalize other
+- Only **concept sub-skills** (`with-shield`, `dual-wield`, `with-magic`, `heavy-armor-casting`, `light-armor-casting`, …) penalize other
   sub-skills (for now). Such a context penalty never changes a game value directly. It lowers the **effective level** of the
   affected sub-skill:
   ```
@@ -694,15 +701,12 @@ effect(L) =  M · x^p / (x^p + h^p),  x = L − P     for L ≥ P      // bonus,
 | Group | Links |
 |---|---|
 | Weapons | same hand class (1H↔1H, 2H↔2H): ×1/2; across 1H↔2H: ×1/4 |
-| Concept sub-skills (`dual-wield`, `with-shield`, `with-magic`) | none (decided, Q-CL-3) |
+| Archery | bow ↔ crossbow sub-skills: ×1/2; none to melee (decided, was Q-CL-2) |
+| Concept sub-skills (`dual-wield`, `with-shield`, `with-magic`, `heavy-armor-casting`, `light-armor-casting`) | none (decided, Q-CL-3) |
 | Armor | `light-armor ↔ clothing`: ×1/2; `light-armor ↔ heavy-armor`: none; between material sub-skills: none (decided, Q-CL-4) |
 | Smithing | none |
 | Magic | none between sub-skills; **exception:** main Alteration level raises effective floor of all magic sub-skills ([alteration](skills/alteration/design.md)) |
 | Others | none |
-
-- **Q-CL-2.** Archery: do bow/crossbow sub-skills link to each other (×1/2 like a hand class?) and
-  to melee (×1/4 or none)?
-  - **A:**
 
 ## 7–9. Skills (moved to `skills/`)
 
@@ -738,33 +742,31 @@ first pass is done by Artem for:
 ### 10.1 Skill books
 
 - Reading a skill book does **not** raise the main skill (vanilla increment suppressed). Instead
-  it raises **potential** of **all sub-skills** of the book's main skill by `bookPotential`.
-- **Q-BT-1.** Value of `bookPotential` (proposal: +10 on the 0–200 scale)? Once per book (as in
-  vanilla)?
-  - **A:**
+  it raises **potential** of **all sub-skills** of the book's main skill by `bookPotential = +2`
+  (decided, was Q-BT-1), **once per book** (the vanilla per-base-book flag).
+- **Book bonuses stay compatible** (decided 2026-11-14; LoreRim trait *Skilled* from Biggie
+  Traits: +1 point per book, i.e. 2 instead of 1; Wintersun Xarxes +2; Scholar's Insight +1).
+  Hook `TESObjectBOOK::Read` ([R-30](research/R-30-book-trait.md)), take the engine's points
+  `n` from the perk entry point *Adjust Book Skill Points* (vanilla 1), skip the vanilla grant
+  and give `bookPotential × n`. Perk-based bonuses work without knowing them; script-based ones
+  arrive as external increments (§4.1) and must not be counted twice. Check:
+  [`playtesting/skill-books.md`](playtesting/skill-books.md).
 
 ### 10.2 Trainers
 
-- Training does **not** raise the main skill. Instead each lesson:
-  - raises potential of all sub-skills of the trained main skill by `trainerPotential`
-    (less than `bookPotential`); potential gains **stack**;
-  - grants a **training bonus**: +`trainerBonusPct` to XP of all sub-skills of that main skill for
-    24 game hours. Bonus percent **stacks** across lessons, capped at **+30%**; duration does
-    **not** stack.
-- **Q-BT-2.** Values: `trainerPotential` (proposal +4), `trainerBonusPct` (proposal +10% per
-  lesson).
-  - **A:**
-- **Q-BT-3.** "Duration does not stack": does each new lesson reset the timer to 24 h from now
-  (refresh), or does the bonus expire 24 h after the first lesson?
-  - **A:**
-- **Q-BT-4.** With many trainings (5 per level in LoreRim, unused lessons carry over) and stacking potential, a rich player can buy
-  potential up to 200. Cap trainer-granted potential (e.g. not above `current + X`, or not above
-  the trainer's own skill level × 2)? See grinding-analysis G-N9. Decided: external potential
-  (books, trainers, external increments) is capped separately, because sub-skills have no
-  practical upper limit (§5.1). The question is where that cap sits (e.g. ≤ 200).
-  - **A:**
-- **Q-BT-5.** Training price: keep vanilla (based on main skill level)?
-  - **A:**
+- Training does **not** raise the main skill. Instead each lesson (values decided, was
+  Q-BT-2…Q-BT-5):
+  - raises potential of all sub-skills of the trained main skill by `trainerPotential = +1`;
+    potential gains **stack**;
+  - grants a **training bonus**: +`trainerBonusPct = 5%` to XP of all sub-skills of that main
+    skill for 24 game hours. **Each lesson has its own timer**: the bonus is 5% × the number of
+    lessons of the last 24 h, capped at **+30%** (a short list of expiry times per main skill;
+    fallback if that proves awkward: a new lesson resets one shared 24 h timer).
+- **Diminishing returns on trainer potential** (decided, was Q-BT-4; closes G-N9): per
+  sub-skill, by the gap `d = potential − current` before the lesson: `d ≤ 10` full
+  `trainerPotential`, `10 < d ≤ 15` half, `d > 15` nothing. When a lesson is reduced, the player
+  gets a message (§2, principle 4): *"Your head is full of training, you need some practice."*
+- Training price: as in LoreRim (unchanged).
 
 ## 11. Anti-grinding
 
@@ -773,8 +775,8 @@ Full list of grinding methods (vanilla and new ones introduced by this design), 
 
 ### 11.1 Mechanisms decided so far
 
-- Armor: cut-off by incoming damage vs sub-skill level (from the original draft): hits with
-  damage `< X` grant XP only while the sub-skill is `≤ Y`.
+- Armor: the target-worth rule of the toolkit (§11.2, item 1), which replaces the original
+  "damage `< X` gives XP only while the sub-skill is `≤ Y`" cut-off (decided, was Q-AG-2).
 - Poison XP on hit, not on application.
 - Potion XP scaled by strength.
 - Trading XP proportional (log) to saved gold relative to a reference price.
@@ -793,13 +795,15 @@ Full list of grinding methods (vanilla and new ones introduced by this design), 
   a breakdown mod is installed.
 - **Smithing improving** gives XP only when quality actually increases (G-S5).
 
-### 11.2 Proposal: generic anti-grind toolkit
+### 11.2 Generic anti-grind toolkit (decided, was Q-AG-1)
 
-A small set of reusable modifiers, enabled per XP source in config:
+A small set of reusable modifiers, enabled per XP source in config. Every one of them tells the
+player when it cuts XP (§2, principle 4).
 
 1. **Target worth** — combat XP only from hostile targets in combat (not teammates, summons,
-   paralyzed/ragdolled, or essential-and-non-hostile), multiplied by
-   `f(targetLevel / subSkillLevel)` (generalizes the armor rule above).
+   essential-and-non-hostile actors, or mannequins), multiplied by
+   `f(targetLevel / subSkillLevel)` (generalizes the armor rule above). **Paralyzed** enemies
+   are valid targets: paralysis is the player's own spell.
 2. **Per-target budget** — each target gives full XP only up to a budget, then XP falls off
    smoothly, and the budget refills over game time. Details in
    [`refs/per-target-budget.md`](refs/per-target-budget.md). Decided:
@@ -816,58 +820,73 @@ A small set of reusable modifiers, enabled per XP source in config:
    same item traded back and forth, same spell cast out of combat) yields decreasing XP within
    a time window.
 
-- **Q-AG-1.** Accept the toolkit as the general approach (with per-source tuning), or prefer
-  individual rules per skill?
-  - **A:**
-- **Q-AG-2.** For armor, replace the "damage < X while level ≤ Y" rule with the more general
-  target-worth rule, or keep both?
-  - **A:**
+Per-target budget (details: [`refs/per-target-budget.md`](refs/per-target-budget.md)). Decided:
 
-Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-budget.md)):
-
-- **Q-AG-3.** Category list. Proposal: `offense-melee`, `offense-ranged`, `offense-magic`,
+- **Categories** (was Q-AG-3): `offense-melee`, `offense-ranged`, `offense-magic`,
   `offense-poison`, `offense-summon`, `defense-physical` (armor + block + parry),
-  `defense-magic` (wards, resistances), `support-heal` (healing others, decided in
-  [restoration](skills/restoration/design.md)), `pickpocket`, `speech`. Merge or split any? For example,
-  should armor and block share one defense budget, or have separate ones?
-  - **A:**
-- **Q-AG-4.** Offense damage budget `kOff`. Proposal: 1.75 × target max health, per category.
-  Count only effective damage, clamped to remaining health so overkill does not count?
-  Proposal: yes.
-  - **A:**
-- **Q-AG-5.** Defense budget: what measures the attacker's "strength" `S(attacker)`? Options:
-  (a) attacker max health; (b) attacker level × const; (c) the attacker's expected damage
-  output over N seconds. Proposal: (a), combined with the target-worth level ratio.
-  - **A:**
-- **Q-AG-6.** Falloff curve after the budget is used up:
-  `m = max(mMin, 1 / (1 + (x − 1)^p))` with `p = 2`. Should `mMin` be 0 (XP stops completely) or
-  a small value like 0.05?
-  - **A:**
-- **Q-AG-7.** Refill time `refillHours`. Proposal: 24 game hours for all categories. Should some
-  categories refill more slowly (e.g. pickpocket per NPC: 72 h)?
-  - **A:**
+  `defense-magic` (wards, resistances), `support-heal` (healing others,
+  [restoration](skills/restoration/design.md)), `pickpocket`, `speech`; more only when needed.
+- **Offense budget** (was Q-AG-4): `kOff = 1.75 × target max health` per category; only effective
+  damage counts, clamped to the remaining health (no overkill).
+- **Falloff** (was Q-AG-6): `m = max(mMin, 1 / (1 + (x − 1)^p))`, `p = 2`, `mMin = 0.05`.
+- **Refill** (was Q-AG-7): 24 game hours for all categories to start with; tune per category later.
+- **Damage over time** (poisons, burning, cloaks, summons) counts into the victim's budget of the
+  matching category (was Q-AG-9).
+
+Crafting (decided, was Q-AG-13): Smithing and **Enchanting** (enchant, disenchant) each get a
+crafting bucket and diminishing repetition by base item. **Alchemy** gets the bucket too, but no
+per-item key: crafted potions have no stable base item, so it has **two buckets**, potions and
+poisons (its main XP still comes from using what was crafted, [alchemy](skills/alchemy/design.md)).
+
+**Active game time** (was Q-AG-11): sleep, wait, fast travel (carriages included) and jail do
+not count; menus and dialogue mostly pass no game time anyway.
+- **Rest allowance** (decided): sleep and wait are free only up to a bucket of **24 game hours**.
+  Resting spends it; once it is empty, sleep and wait count as active time (decay, rust and
+  crafting-bucket refill run). The allowance refills with active game time, fully in **10
+  active hours**. So a normal night's sleep never costs anything, but sleeping a month away
+  does not freeze every sub-skill.
+
+Open:
+
+- **Defense strength** (decided, was Q-AG-5): `S(attacker)` = attacker max health, combined with
+  the target-worth level ratio. Option (c), the attacker's expected damage output, cannot be
+  computed reliably: there is no engine value for it; it would be rebuilt from weapon base
+  damage, perks (applied by the engine only during a real hit), attack speed, Requiem's per-NPC
+  power-attack multipliers, race unarmed damage, spells and difficulty multipliers, all
+  estimates. The damage actually dealt is reliable, but the budget itself measures it.
 - **Q-AG-8.** Non-combat XP budgets: which sources use them, and what is the base?
   Proposal: `pickpocket` (per NPC) and `speech` (per merchant, which also covers G-N13 if
   Q-SPE-4 goes that way). Lockpicking, crafting and enchanting use diminishing repetition instead,
   since they have no target.
+  - Asked about **Wayfarer**. Found in the LoreRim dump: *Wayfarer - Survival Perks.esp*
+    renames **Lockpicking** to Wayfarer and replaces its tree
+    ([`skills/lockpicking/perks.md`](skills/lockpicking/perks.md)). The tree mixes lockpicking
+    (Cheap Tricks, Advanced / Masterly Lockpicking, Lockdown / Hotwire on automatons), animal
+    taming from *Fury - Animal Taming of Skyrim* (Animal Taming, Beastmaster, Animal Riding,
+    Pacification), hunting (Hunter) and group / solo fighting (Leader, Captain, Commander, Lone
+    Wolf, Solo, Maverick, Legion). Proposal: Wayfarer gets sub-skills (at least `lockpicking`
+    and `taming`), and `taming` uses a non-combat per-target budget keyed by the animal
+    (category `taming`). How Wayfarer earns XP today (vanilla lockpicking only, or also scripted
+    awards for taming) is R-31.
   - **A:**
 - **Q-AG-10.** Crafting bucket parameters: size (raw XP per active game day), refill period,
   falloff (`p`, `mMin`). Placeholder in `config/skills/smithing.toml`: 4000 raw XP per active day.
   - **A:**
-- **Q-AG-11.** "Active game time": exclude sleep, wait, fast travel and jail. Anything else?
-  Carriage rides are fast travel. Should time spent in dialogue or in menus count? Game time
-  mostly does not pass in menus anyway.
-  - **A:**
 - **Q-AG-12.** Diminishing repetition for crafting: key (base item FormID), window (proposal:
   24 active game hours), curve (proposal: `XP × 1/(1 + n/n0)` for the n-th repeat, `n0 = 5`).
+  - Asked: can we keep that many entries, for a player who crafts a lot? **Yes, easily.** One
+    entry is (FormID, count, last time): 12–16 bytes. Entries older than the window are dropped
+    (on each craft or once per active hour), so only items crafted in the last 24 active hours
+    are kept: even 1000 different items are ≈ 16 KB in memory and in the co-save, and a lookup
+    is one hash-map access per craft. The per-target budgets work the same way (an entry is
+    dropped once fully refilled).
   - **A:**
-- **Q-AG-13.** Apply the same crafting bucket + DR to Enchanting (enchant/disenchant) and to
-  alchemy crafting? Proposal: yes, with their own buckets.
-  - **A:**
-- **Q-AG-9.** Damage over time (poisons, burning, cloaks, summons): count it into the player's
-  budget for the victim in the matching category (`offense-poison`, `offense-magic`,
-  `offense-summon`)? Proposal: yes.
-  - **A:**
+
+### 11.3 Playtesting
+
+Balance checks of these rules are scenarios in [`playtesting/`](playtesting/README.md); first:
+[`dragon-fight.md`](playtesting/dragon-fight.md) (budgets and target worth in a LoreRim dragon
+fight).
 
 ## 12. User interface
 
@@ -878,20 +897,26 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   perks.
 - Custom Skills Framework is **not** used for this (it models one value per skill and a perk tree;
   three values and ~150 sub-skills do not fit well).
-- **Q-UI-1.** How is the panel opened: hotkey, from the vanilla skills menu, a lesser power?
-  - **A:**
+- **Opening** (decided, was Q-UI-1): a hotkey, default F7, changeable in MCM.
 - **Decided:** PrismaUI is **added** to the modlist (it is not in LoreRim, R-3). MCM Helper 1.6.2
   and SKSE Menu Framework are already there.
-- **Q-UI-2.** Fallback if PrismaUI turns out problematic in Lorerim (input focus, HUD, other
-  DLLs): SKSE Menu Framework (ImGui, already installed) as plan B — ok?
-  - **A:**
+- **Fallbacks** (decided 2026-11-14, was Q-UI-2): PrismaUI stays while it works. **Plan B:**
+  SKSE Menu Framework (ImGui hosted by a mod already in LoreRim; the panel becomes a section or
+  window of its menu, little code). **Plan C:** our own Dear ImGui in a custom `RE::IMenu`, as
+  in grid-inventory / Modex ([`refs/frameworks.md`](refs/frameworks.md) §8): no dependency and
+  full control (own key, pause, look), but our own rendering and input code to maintain.
 - **Decided:** the panel pauses the game while it is open and shows a snapshot taken when it
   opens and after each of its own actions; there is no live refresh. Simpler and cheaper
   (Ultralight renders on the CPU); nothing else changes the values while the game is paused.
   Details: [`impl/status-ui.md`](impl/status-ui.md) *Data flow*.
-- **Q-UI-3.** Notifications: show a message when a sub-skill perk activates/deactivates, when a
-  sub-skill starts decaying, when it reaches a new level?
-  - **A:**
+- **Effects and automatic perks on the bars** (decided 2026-11-14): the tooltip of a sub-skill
+  bar lists its continuous effects (§5.7) at the level under the mouse; each automatic perk
+  (§5.6) is a diamond on the bar at its level, hollow until owned, filled while owned, with its
+  description and requirement in a tooltip. Details: [`impl/status-ui.md`](impl/status-ui.md)
+  *Effects and automatic perks*.
+- **No notifications** for sub-skill perks (de)activating, sub-skills starting to decay or
+  reaching a new level (decided, was Q-UI-3). Main-skill level changes keep theirs (§4.4.4);
+  anti-grind messages follow §2, principle 4.
 
 ### 12.2 Configuration — MCM Helper + config file
 
@@ -902,8 +927,8 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   `MCM_ConfigBase`) that forwards to native functions or a ModEvent.
 - MCM buttons for debug actions call native (DLL-registered) Papyrus functions.
 - **Not** suitable for per-sub-skill tables (~150 sub-skills × several parameters: conversion,
-  decay rate, floor rate, curve). Those live in a **config file** (JSON or TOML) next to the DLL,
-  with a "reload config" button in MCM.
+  decay rate, floor rate, curve). Those live in **TOML** config files next to the DLL (decided,
+  was Q-UI-4), with a "reload config" button.
 
 **MCM pages (proposal):**
 1. General — toggles for optional mechanics (summon upkeep, control loss), global multipliers,
@@ -914,9 +939,6 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
    coefficients, trainer bonus cap, etc.
 4. Debug — see §13.
 
-- **Q-UI-4.** Config file format: JSON or TOML (TOML is easier to edit by hand, JSON is easier
-  to share with PrismaUI)?
-  - **A:**
 
 ## 13. Debugging
 
@@ -933,8 +955,9 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   budgets (crosshair target or all). See
   [`refs/per-target-budget.md`](refs/per-target-budget.md) §9.
 - Proposal: also console commands (via a console command hook) for the same operations.
-- **Q-DBG-1.** Accept this list? Anything to add?
-  - **A:**
+- The list is accepted (was Q-DBG-1), plus a **debug mode** toggle in MCM that enables the
+  debug views of the status panel (done in prototype 1: [`impl/status-ui.md`](impl/status-ui.md),
+  [`impl/mcm-config.md`](impl/mcm-config.md)).
 
 ## 14. Technical notes (preliminary, for the plan)
 
@@ -982,21 +1005,23 @@ Per-target budget questions (see [`refs/per-target-budget.md`](refs/per-target-b
   CMake + vcpkg template; choose in the plan. Optional: CLibUtil (header-only). Details:
   [`refs/frameworks.md`](refs/frameworks.md) §5.
 
-- **Q-TECH-1.** Is a mod-added ESP acceptable, or must the mod be DLL-only (perks created at
-  runtime)? ESP is simpler and more conventional.
-  - **A:**
-- **Q-TECH-2.** License. The maintained CommonLibSSE-NG (alandtse) is now
-  GPL-3.0-or-later with a modding exception (it was MIT). A plugin that links it statically must
-  use a compatible license. Options: (a) GPL-3.0 for our mod; (b) another license allowed by the
-  modding exception (read `EXCEPTIONS.md`); (c) pin an older MIT-licensed CommonLib (loses
-  fixes). **Proposal:** (a), or (b) after reading the exception.
-  - **A:**
-- **Q-TECH-3.** Dependencies. KID and OCF are already in LoreRim and would become hard
-  requirements for weapon classification; AVG would become one if Q-DYN-9 option (4) is
-  chosen. Is that acceptable, or should the mod also work without them (fallback to the
-  built-in TOML classifier, globals and DLL hooks)? **Proposal:** KID + OCF required; AVG
-  optional, only if R-18 passes.
-  - **A:**
+- **ESP** (decided, was Q-TECH-1): one small plugin flagged **ESL** (light), so it takes no
+  full load-order slot.
+- **License** (decided, was Q-TECH-2): **GPL-3.0-or-later with the modding exception**, the same
+  as CommonLibSSE-NG.
+- **Dependencies** (decided, was Q-TECH-3): KID and OCF are required; AVG becomes required if we
+  use it.
+  - Asked: would AVG help the current code? **Not the prototype code:** XP capture, decay,
+    rust, the main-level formula, the panel and the spell aim all read sub-skills inside the
+    DLL, and the main skill is written as a normal actor value. AVG pays off where **game
+    records** must read a sub-skill:
+    - perk conditions on sub-skill levels ([`impl/perk-requirements.md`](impl/perk-requirements.md)):
+      a functional AV per sub-skill instead of one `GlobalVariable` per requirement, kept in sync
+      by the DLL, and readable in any condition (perks, magic effects, dialogue);
+    - continuous effects through entry points (`Multiply 1 + Actor Value Mult`, Q-DYN-9 option
+      (4)): no hook on entry-point evaluation needed;
+    - other mods and console checks (`GetActorValue`) could read sub-skills.
+    Decide with R-18 (AVG 2.2.9.4 on AE 1.6.1170), before *perk-requirements* is implemented.
 
 ## 15. Research and tooling
 
@@ -1063,6 +1088,11 @@ derived from it: perk worksheets in [`skills/`](skills/README.md),
 | R-27 | **New:** when to run the start conversion on a new game in LoreRim (Alternate Perspective, Norden Starting Skills, SSL). Details: [`research/R-27-new-game-init.md`](research/R-27-new-game-init.md) |
 | R-28 | **New:** how Ordinator Mage Ward and engine wards work (WardPower, MagicWard keyword, ward XP). Details: [`research/R-28-mage-ward.md`](research/R-28-mage-ward.md) |
 | R-29 | **New:** Ordinator perks restored to LoreRim trees: records and scripts in LoreRim's Ordinator esp, runtime tree nodes, Smithing / Restoration / Alteration checks. Details: [`research/R-29-restored-ordinator-perks.md`](research/R-29-restored-ordinator-perks.md) |
+| R-30 | Partial (web): trait *Skilled* (Biggie Traits), entry point *Adjust Book Skill Points*, hook site in `TESObjectBOOK::Read`; open: in-game value, xEdit checks. Details: [`research/R-30-book-trait.md`](research/R-30-book-trait.md) |
+| R-31 | **New:** Wayfarer (Lockpicking renamed by *Wayfarer - Survival Perks.esp*): how it earns XP (lockpicking only, or scripted awards for taming / hunting), for its sub-skills and the `taming` budget (Q-AG-8) |
+| R-32 | **New:** spell projectiles: dump PROJ (type, speed, range, flags) for all player spells; check Requiem's Sunbeam and other "beam-looking" spells whose projectile is a flamethrower type ([`impl/spell-classifier.md`](impl/spell-classifier.md)) |
+| R-33 | Partial (web): Requiem's armor weight penalty (*Mass Effect*, script `REQ_MassEffectArmor`, reduction AVs `HeavyArmorMod` / `LightArmorMod`), levers for armor effects (movement speed); open: LoreRim's Requiem version and patches, xEdit checks. Details: [`research/R-33-requiem-mass-effect.md`](research/R-33-requiem-mass-effect.md) |
+| R-34 | Partial (web): Requiem's passive armor training (`REQ_PassiveArmorTraining`, replaced by our script for the movement sub-skills) and stamina damage on hit (`REQ_PlayerImpactEffects`); open: esp numbers, script conflicts. Details: [`research/R-34-requiem-armor-movement-and-hits.md`](research/R-34-requiem-armor-movement-and-hits.md) |
 
 Original task list:
 
@@ -1110,8 +1140,8 @@ Researching Lorerim content does not require the game to run, only its **data fi
 | Two-Handed | greatsword, battleaxe, warhammer, (+modded) | 3+ |
 | Archery | light-bow, heavy-bow, light-crossbow, heavy-crossbow | 4 |
 | Block | heavy-shield, light-shield, parry, bash | 4 |
-| Heavy Armor | heavy-armor, materials, heavy-other | ~10 |
-| Light Armor | light-armor, clothing, materials, light-other | ~10 |
+| Heavy Armor | heavy-armor, materials, heavy-other, heavy-armor-casting, heavy-armor-movement | ~12 |
+| Light Armor | light-armor, clothing, materials, light-other, light-armor-casting, light-armor-movement | ~12 |
 | Smithing | materials, 6–7 categories incl. jewelry | ~20 |
 | Destruction, Restoration, Alteration, Illusion, Conjuration | sub-directions (~4–6 per school), conjuration specials | ~30 |
 | (shared, no parent) | magic forms (10), magic archetypes (R-7) | ~15 |

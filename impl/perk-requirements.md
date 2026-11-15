@@ -36,6 +36,9 @@ oneOf(1h-*) >= 30`, combined with AND / OR) gets **one** `GlobalVariable` in our
 `SPO_Req_BLK07`, value 1 when met and 0 otherwise. The DLL computes the formula:
 
 - the value read is the sub-skill's `current` (Q-DYN-10);
+- a formula may also name a **main skill** (`HeavyArmor >= 80 OR (HeavyArmor >= 75 AND
+  speech-intimidation >= 60)`, Heavy Armor Rise Above): read as the written base level. Such a
+  formula replaces the perk's own main-skill condition ("drop"), so the OR works;
 - hysteresis: once 1, the global goes back to 0 only below `threshold − hysteresis` (§5.6);
 - when: on every change of a referenced sub-skill, on game load and when the perks menu opens
   (decay is applied lazily).

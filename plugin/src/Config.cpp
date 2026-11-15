@@ -62,6 +62,62 @@ void requireRows(const json& file, const char* table, const char* list,
       throw std::runtime_error(std::string(name) + ": bad " + list);
   }
 }
+// [[effect]] and [[auto_perk]] of a skill file: shown in the panel only
+// (impl/status-ui.md *Effects and automatic perks*); the DLL applies none of them yet.
+void readDisplay(const json& file, Skill& sk, const std::string& name) {
+  auto bad = [&](const std::string& what) {
+    throw std::runtime_error(name + ": " + what);
+  };
+  auto find = [&](const std::string& id) -> Sub& {
+    for (auto& s : sk.subs)
+      if (s.id == id) return s;
+    bad("unknown subskill " + id);
+    throw std::logic_error("unreachable");
+  };
+  for (auto& e : file.value("effect", json::array())) {
+    if (!e.contains("name") || !e.at("name").is_string()) bad("effect without name");
+    json out = {{"name", e.at("name")},
+                {"unit", e.value("unit", "%")},
+                {"invert", e.value("invert", false)},
+                {"applied", false}};
+    if (e.contains("curve")) {
+      auto& c = e.at("curve");
+      out["kind"] = "curve";
+      for (auto key : {"pen", "P", "M", "h"}) out[key] = c.at(key).get<double>();
+      out["p"] = c.value("p", 1.);
+      if (out["P"] <= 0 || out["h"] <= 0 || out["p"] <= 0) bad("bad effect curve");
+    } else if (e.contains("linear")) {
+      auto& c = e.at("linear");
+      out["kind"] = "linear";
+      out["at0"] = c.at("at0").get<double>();
+      out["zeroAt"] = c.at("zero_at").get<double>();
+      if (out["zeroAt"] <= 0) bad("bad effect line");
+    } else
+      bad("effect without curve or linear");
+    std::vector<std::string> targets;
+    if (e.contains("subskills"))
+      targets = e.at("subskills").get<std::vector<std::string>>();
+    else if (e.contains("group")) {
+      for (auto& s : sk.subs)
+        if (s.group == e.at("group").get<std::string>()) targets.push_back(s.id);
+    } else
+      bad("effect without group or subskills");
+    if (targets.empty()) bad("effect without targets");
+    for (auto& id : targets) find(id).effects.push_back(out);
+  }
+  for (auto& p : file.value("auto_perk", json::array())) {
+    for (auto key : {"id", "name", "subskill", "description"})
+      if (!p.contains(key) || !p.at(key).is_string())
+        bad(std::string("auto_perk without ") + key);
+    double level = p.at("level");
+    if (level < 0) bad("auto_perk level");
+    find(p.at("subskill")).perks.push_back(
+        {{"id", p.at("id")},
+         {"name", p.at("name")},
+         {"level", level},
+         {"description", p.at("description")}});
+  }
+}
 }  // namespace
 void Model::loadConfig(const std::string& root, bool builtIn) {
   Model next;
@@ -114,6 +170,41 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
   std::sort(files.begin(), files.end());
   for (auto& path : files) {
     auto j = parse(path.generic_string());
+    if (!j.contains("main")) {
+      // shared.toml: the shared magic sub-skills, pseudo-skill "magic" (k = 0, no rust).
+      if (!j.contains("shared") || !next.shared.subs.empty())
+        throw std::runtime_error(path.generic_string() +
+                                 ": no [main] and not the one shared file");
+      auto& sh = next.shared;
+      sh.pseudo = true;
+      sh.av = "magic";
+      sh.name = j.at("shared").value("name", "Magic");
+      auto d = j.value("dynamics", json::object());
+      sh.decay = d.value("decay_rate", 2.);
+      sh.paceSub = d.value("pace_sub", 1500.);
+      sh.rustRate = 0;
+      if (sh.decay < 0 || sh.paceSub <= 0)
+        throw std::runtime_error("invalid shared dynamics");
+      for (auto& v : j.at("subskill")) {
+        Sub s;
+        s.id = v.at("name");
+        if (!ids.insert(s.id).second)
+          throw std::runtime_error("duplicate subskill " + s.id);
+        s.group = v.at("group");
+        s.T = v.value("T", 90.);
+        s.w = v.value("w", 15.);
+        s.fixed = true;
+        s.k = 0;
+        s.decay = v.value("decay_rate", sh.decay);
+        s.curve = curve(v.value("curve", json::object()),
+                        curve(j.value("sub_curve", json::object())));
+        if (s.w <= 0 || s.decay < 0) throw std::runtime_error("invalid subskill");
+        s.prepare(cap);
+        sh.subs.push_back(s);
+      }
+      readDisplay(j, sh, path.generic_string());
+      continue;
+    }
     Skill sk;
     auto m = j.at("main"), d = j.at("dynamics");
     sk.av = m.at("actor_value");
@@ -177,6 +268,7 @@ void Model::loadConfig(const std::string& root, bool builtIn) {
       if (std::none_of(sk.subs.begin(), sk.subs.end(),
                        [&](auto& s) { return s.id == id; }))
         throw std::runtime_error("unknown path member " + id);
+    readDisplay(j, sk, path.generic_string());
     sk.solve(cap);
     next.skills.push_back(sk);
   }

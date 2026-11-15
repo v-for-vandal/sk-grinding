@@ -77,3 +77,18 @@ name = "2h-other"
 group = "weapon"
 T = 100
 w = 20
+
+# ---- continuous effects and automatic perks (shown in the panel; not applied yet) -------------
+# impl/status-ui.md *Effects and automatic perks*. curve = design-v2 §5.7 (p defaults to 1);
+# linear = at0 at level 0, falling to 0 at zero_at. invert: the stat moves against effect(L).
+[[effect]]
+name   = "Weapon damage"
+group  = "weapon"
+curve  = { pen = 20, P = 50, M = 45, h = 40 }   # skills/weapons/design.md
+unit   = "%"
+
+[[effect]]
+name   = "Glancing hit chance"
+group  = "weapon"
+linear = { at0 = 30, zero_at = 50 }              # Q-WPN-8 placeholder
+unit   = "%"

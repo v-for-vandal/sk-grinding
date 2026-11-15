@@ -47,7 +47,7 @@
 - With the placeholder values in [`config/skills/smithing.toml`](../../config/skills/smithing.toml) (vanilla-like
   curve): N(15→100) ≈ 91.6k main XP; `jewelry` ≈ 9.5% of N; the rest is split 50/50 between
   categories and materials (Q-SMI-6). Reaching 200 in every path sub-skill gives Smithing ≈ 117.
-  Training all sub-skills to 75 gives ≈ 150 (the main-skill cap is Q-DYN-8).
+  Training all sub-skills to 75 gives ≈ 150 (main skills are uncapped, design-v2 §5.1).
 
 **Anti-grind (decided, details in §11):** daily Smithing XP bucket that refills only in active
 game time (G-S1); diminishing repetition by item type (G-S3); improving gives XP only when

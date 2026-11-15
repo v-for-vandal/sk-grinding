@@ -15,18 +15,21 @@ archetype. Cached per spell.
 
 ## Ids
 
-Prototype 1 (implemented): one set of forms and one archetype per school: `<school>/<form>`,
-`<school>/<direction>`, `<school>/standard`, `<school>` = `destruction` / `restoration` (the
-skill of the award).
+Forms and archetypes are shared by all schools ([magic](../skills/magic/design.md); implemented
+2026-11-14): `form/<form>`, `<school>/<direction>`, `archetype/<archetype>`
+(`archetype/standard`), `<school>` = `destruction` / `restoration` (the skill of the award). The
+classifier itself returns the form name; the router builds the ids.
 
-**Design change (2026-11-14, not implemented):** forms and archetypes are shared by all schools
-([magic](../skills/magic/design.md)): `form/<form>`, `<school>/<direction>`,
-`archetype/<archetype>` (`archetype/standard`). The classifier itself does not change, only the
-ids it returns. The shared sub-skills move out of `config/skills/destruction.toml` /
-`restoration.toml` into one file of shared sub-skills (`config/skills/shared.toml`: curve,
-decay, no `[main]`, no budget, `k = 0`); the `form` / `archetype` budgets of the school files are
-dropped and the reference paths use sub-directions only. Co-save: old per-school form records
-are dropped at load (prototype saves only; log `[state] dropped`).
+- Shared sub-skills are in [`config/skills/shared.toml`](../config/skills/shared.toml) (curve,
+  decay, no `[main]`, no budget, `k = 0`), loaded as the pseudo-skill `magic` (`Model::shared`,
+  `pseudo = true`): no main level, no rust, not written to any actor value; the panel shows it
+  as *Magic* ([`status-ui.md`](status-ui.md)). The school files keep only the `direction` budget
+  and reference paths of sub-directions. Decided (2026-11-15): **three** sub-directions per
+  school path (Destruction `fire`, `frost`, `shock`; Restoration `help`, `wards`, `sun`, each to
+  75). With only two, one sub-direction alone took the school to ≈ 79 at 75 and the main level
+  rose faster than the sub-direction (`g` up to 1.33); with three: ≈ 69 at 75, `g` ≤ 0.89.
+- Co-save: old per-school records (`destruction/missile`, `restoration/standard`, …) are dropped
+  at load (prototype saves only; log `[state] dropped old per-school record`).
 
 ## Form (costliest effect `spell->GetCostliestEffectItem()->baseEffect`)
 
@@ -47,6 +50,20 @@ Check in this order; the first rule that applies wins:
 | 11 | aimed, `kMissile`, `kGrenade`, `kArrow` | `missile` |
 | 12 | anything else | none (log `[spell] no form`) |
 
+- **Sunbeam classified as `flame` (first playtest, 2026-11-14).** The rules look only at the
+  projectile **type** of the costliest effect. Sunbeam (`REQ_Restoration1_Sun_ConcAimed`,
+  Requiem - Magic Redone; Concentration, Aimed) has as its main effect
+  `REQ_Effect_Restoration1_Sun_ConcAimed` with projectile `REQ_Projectile_Restoration1_Sunbeam`
+  (`Requiem - Magic Redone.esp|0x005C6B`); its other effects are cheap scripts / tapers without
+  a projectile, so they cannot be the costliest one. Rule 7 (`beam`) is checked before rule 8,
+  so `flame` means the PROJ record's type is **Flamethrower** (or Cone), not Beam: the mod
+  draws a beam with a flame-type projectile (a stream of short-lived projectiles with beam
+  art). The Mutagen dump has no PROJ table, so this is still to confirm: the *Debug* tab shows
+  `projectile=` for the equipped spell (expected `flamethrower`;
+  [`playtesting/spell-forms.md`](../playtesting/spell-forms.md)), and R-32 dumps all PROJ.
+  - Fix (proposed, skills/magic Q-MAG-9): a config override list `[[form_override]]` in
+    `magic-directions.toml` (by spell, effect or projectile FormKey → form), checked before the
+    rules; plus, if R-32 finds more cases, a rule "flamethrower type with range ≥ X → `beam`".
 - Rules 5 / 6 are a heuristic (vanilla runes are fire-and-forget at a location, walls are
   concentration); the dump will show if LoreRim breaks it.
 - Summon archetype (`kSummonCreature`) in these schools: no form (Q-MAG-1; the Conjuration part is
@@ -63,7 +80,7 @@ Alteration is not in prototype 1; its rules are in the file already.
 
 ## Archetype
 
-Always `<school>/standard` in prototype 1 (R-7: archetype lists not made yet).
+Always `archetype/standard` in prototype 1 (R-7: archetype lists not made yet).
 
 Results are cached per spell FormID (main thread), cleared on every config reload.
 

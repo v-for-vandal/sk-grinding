@@ -35,7 +35,7 @@ For every spell cast that grants XP, the spell feeds three kinds of sub-skills:
   (`f_s`, stored per form and school): school `s` gets `f_s × M(L)`. It keeps the form budget in
   the main level and stays level-based (no rotation exploit), but costs per-school shares in the
   save, a per-school rust term for one sub-skill, and a less obvious main level. Proposal: `k = 0`.
-  - **A:**
+  - **A:** Agree with k=0
 
 No cross-links between magic sub-skills, except the Alteration rule ([alteration](../alteration/design.md)).
 
@@ -83,6 +83,14 @@ Not forms:
   noise as `missile`, driven by the `explosion` level.
   - **A:**
 
+- **Q-MAG-9.** Some mods draw a beam with a **flamethrower**-type projectile (Requiem's
+  Sunbeam), so the engine type says `flame` while the player sees a beam
+  ([`impl/spell-classifier.md`](../../impl/spell-classifier.md)). The form is the *gameplay*
+  shape, so such spells should count as `beam` (beam sway included). Proposal: an override list
+  in config (spell / effect / projectile → form), filled from the PROJ dump (R-32), and a range
+  rule if there are many. Waits for
+  [`playtesting/spell-forms.md`](../../playtesting/spell-forms.md).
+  - **A:**
 - **Q-MAG-2.** Spells with several effects from different sub-directions (e.g. fire + frost):
   proposal — classify by the costliest (primary) effect only.
   - **A:**

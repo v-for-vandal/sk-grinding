@@ -136,7 +136,7 @@ HA-10 Mounted Combat .......................... —
 - **In game:** You are able to keep concentrated enough in heavy armor. [No spell cost penalty for casting Novice and Apprentice spells in heavy armor]
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `heavy-armor-casting >= 25`; HeavyArmor ≥ 25 stays (25 is the lower bound; decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 #### Alternatives
 
@@ -197,7 +197,7 @@ HA-10 Mounted Combat .......................... —
 - **In game:** Your heavy armor distracts you even less. [No spell cost penalty for casting Adept spells in heavy armor]
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `heavy-armor-casting >= 50`; HeavyArmor ≥ 50 becomes HeavyArmor ≥ 30 (decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 #### Alternatives
 
@@ -251,7 +251,7 @@ HA-10 Mounted Combat .......................... —
 - **In game:** You're accustomed to your heavy armor so much that you can now cast even sophisticated spells with relative ease. [No spell cost penalty for casting Expert spells in heavy armor]
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `heavy-armor-casting >= 75`; HeavyArmor ≥ 75 becomes HeavyArmor ≥ 55 (decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 #### Alternatives
 
@@ -279,7 +279,7 @@ HA-10 Mounted Combat .......................... —
 
 ### HA-08 · Power of the Combatant
 
-- **ID:** `107832:Skyrim.esm` · `REQ_HeavyArmor_PowerOfTheCombatant` · winner: Requiem_-_Modern_Combat_Rework.esp · origin: base game
+- **ID:** `107832:Skyrim.esm` · `REQ_HeavyArmor_PowerOfTheCombatant` · winner: `Requiem_-_Modern_Combat_Rework.esp` · origin: base game
 - **Requires:** has perk Fortitude (HA-06) AND HeavyArmor ≥ 75
 - **In game:** Taking hits gives you a rush of adrenaline. [Restore 15 stamina over 6 seconds after taking a hit, -10% armor weight penalty]
 - **Records:**
@@ -507,7 +507,7 @@ HA-10 Mounted Combat .......................... —
   - spell magnitude +10% — when wears ≥ 3 pieces of ArmorHeavy; item/spell: Illusion spell OR Conjuration spell OR Destruction spell OR Restoration spell OR Alteration spell AND not spell REQ_NoMagnitudeScaling
   - spell duration +10% — when wears ≥ 3 pieces of ArmorHeavy; item/spell: Illusion spell OR Conjuration spell OR Destruction spell OR Restoration spell OR Alteration spell AND not spell REQ_NoDurationScaling
 - **Proposal (auto):** —
-- **Sub-skill requirements:**
+- **Sub-skill requirements:** `heavy-armor-casting >= 100`; HeavyArmor ≥ 100 becomes HeavyArmor ≥ 80 (decided 2026-11-14, [design](design.md) *Casting in armor*: main requirement `max(25, X − 20)`, the sub-skill at the old `X`).
 
 #### Alternatives
 

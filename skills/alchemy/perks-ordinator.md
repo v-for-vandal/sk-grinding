@@ -51,6 +51,8 @@ Generated from the *Requires* lines of this file (winning version): parent perks
   - ability *Sneak Detector*: Sneak Detector
 - **Proposal (auto):** alchemy/potion
 - **Sub-skill requirements:**
+- **Resolution:** Rebind it to ALC-07, new requires: Alchemy >= 85,
+    increase price to 15000 gold
 
 ### ORD-ALC-03 · Crimson Haze
 
@@ -124,6 +126,9 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **Records:** ability *Amplify Lethality*: Point at a victim to silently reduce their poison resistance by 250% for 10 seconds.
 - **Proposal (auto):** alchemy/poison
 - **Sub-skill requirements:**
+- **Resolution:**
+     Purchasable perk, rebind to ALC-17
+     Requirements: Alchemy >= 70, alchemy/poison >= 75
 
 ### ORD-ALC-10 · Witchmaster
 
@@ -134,6 +139,8 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **Records:** no effects on the perk itself — other records (spells, scripts, recipes, conditions elsewhere) check for this perk
 - **Proposal (auto):** alchemy/potion
 - **Sub-skill requirements:**
+- **Resolution:**
+    Research required: what are those  40 side effects
 
 ### ORD-ALC-11 · Chymical Wedding
 
@@ -164,3 +171,8 @@ Generated from the *Requires* lines of this file (winning version): parent perks
 - **Records:** ability *That Which Does Not Kill You...*: That Which Does Not Kill You... (magnitude 150)
 - **Proposal (auto):** alchemy/poison, alchemy/potion
 - **Sub-skill requirements:**
+- **Resolution:**
+     Rebind to ALC-07
+     Purchasable perk. New requirements:
+       Alchemy >= 100
+       alchemy/poison and alchemy/potion both >= 100

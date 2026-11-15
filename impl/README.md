@@ -43,21 +43,23 @@ blocks into a deliverable are in [`plan/`](../plan/) (first: [`prototype-1.md`](
 | [`weapon-class.md`](weapon-class.md): `SPO_WeapClass_*` keywords (KID) → weapon sub-skill | done (prototype; runtime pending) | *plugin-foundation* | R-19, R-20 |
 | [`spell-classifier.md`](spell-classifier.md): spell form, school sub-direction, archetype | done (prototype; runtime pending) | *plugin-foundation* | — |
 | [`status-ui.md`](status-ui.md): status and debug panel (PrismaUI) | done (prototype; runtime pending) | *subskill-state*, *main-skill-level*, *decay* | [frameworks §6](../refs/frameworks.md) |
+| [`armor-effects.md`](armor-effects.md): armor continuous effects (armor rating, stamina lost on hit, movement speed) | proposed | *subskill-state*, *effect-curve*, *plugin-foundation* | [R-33](../research/R-33-requiem-mass-effect.md), [R-34](../research/R-34-requiem-armor-movement-and-hits.md) |
+| [`armor-movement-xp.md`](armor-movement-xp.md): Requiem's passive armor training → `heavy-armor-movement` / `light-armor-movement` (our version of the script file) | chosen | *plugin-foundation*, *subskill-state*, *xp-capture* | [R-34](../research/R-34-requiem-armor-movement-and-hits.md) |
 | [`mcm-config.md`](mcm-config.md): config files, MCM page (debug mode) | done (prototype; runtime pending) | *plugin-foundation* | — |
 
 ## Design changes not implemented yet (2026-11-14)
 
+(Done since: shared magic forms and archetypes, pseudo-skill `magic` in the panel.)
+
 Decided in the design after the first playtest; each affected block has a *Design change* note.
 
-- Shared magic forms and archetypes (`form/*`, `archetype/*`, `k = 0`; start: forms by
-  `2 × (best school − 15)`, archetypes 0; UI pseudo-skill `magic`):
-  [`spell-classifier.md`](spell-classifier.md), [`xp-capture.md`](xp-capture.md),
-  [`main-skill-level.md`](main-skill-level.md), [`status-ui.md`](status-ui.md).
 - No own-floor cap: [`subskill-state.md`](subskill-state.md).
 - Start init by splitting the main XP, `start_split = false`:
   [`main-skill-level.md`](main-skill-level.md).
 - Mod-list XP preset and per-skill factors: [`xp-capture.md`](xp-capture.md),
   [`mcm-config.md`](mcm-config.md).
+- (2026-11-15) Our replacement of Requiem's `REQ_PassiveArmorTraining.pex` in the package:
+  [`plugin-foundation.md`](plugin-foundation.md), block [`armor-movement-xp.md`](armor-movement-xp.md).
 
 ## Planned blocks (not written yet)
 

@@ -7,7 +7,11 @@
     ([`skills/smithing/perks-ordinator.md`](../skills/smithing/perks-ordinator.md));
   - Restoration: ORD-RES-04 ([`skills/restoration/perks-ordinator.md`](../skills/restoration/perks-ordinator.md));
   - Alteration: ORD-ALT-06, -13, -17, -20, -21
-    ([`skills/alteration/perks-ordinator.md`](../skills/alteration/perks-ordinator.md)).
+    ([`skills/alteration/perks-ordinator.md`](../skills/alteration/perks-ordinator.md));
+  - Heavy Armor: ORD-HA-03, -04, -05, -09, -12, -13, -14
+    ([`skills/armor/heavy-armor.perks-ordinator.md`](../skills/armor/heavy-armor.perks-ordinator.md));
+  - Light Armor: ORD-LA-06, -07, -09, -10, -11, and ORD-LA-05, -08 moved to the One-Handed tree
+    ([`skills/armor/light-armor.perks-ordinator.md`](../skills/armor/light-armor.perks-ordinator.md)).
 - **Why:** the worksheets come from the **original** Ordinator esp; LoreRim loads a rebuilt one
   ([`skills/perks-guide.md`](../skills/perks-guide.md), *Bringing back Ordinator's own perks*).
   A type A perk works only if its records and scripts are still there and unchanged.
@@ -44,3 +48,7 @@
 | A4 | Rend Resistances: what triggers the proc ("whenever you attack with a weapon": swing or hit)? | script source | description only |
 | A5 | Arcane Thesis: the power is given by an ability script; the mastered spell is kept in a FormList; does it survive save / load? | script source; in game | that it works |
 | A6 | Ritualist: what lets ritual spells be cast while moving (an entry point or flag of the perk not shown in the worksheet, or a script)? Which FormList is "is in list", and does it hold the LoreRim ritual spells (Magic Redone, Apocalypse, Triumvirate)? | xEdit on the PERK record and the FormList | whether the perk works for LoreRim's ritual spells or the list must be extended |
+| H1 | Heavy Armor perks with no effects of their own (Revel in Battle, Bedrock, Face of the Mountain) and Sovereign's `ORD_Hea_Sovereign_Effect_Proc`: which records / scripts grant them, and do they run in LoreRim? Revel in Battle is already an effect of LoreRim's Defiance (HA-12) on-swing spell. | xEdit: references to each PERK; scripts that test `HasPerk`; in game: buy each, check the effect | whether each restored HA perk works as is |
+| H2 | Rallying Standard, Rise Above, Primal Fear abilities: do the scripts still exist and work without their Ordinator parents (Heavy Armor Fit, Break Upon Me, Rise Above)? | xEdit + script check for `HasPerk` of the old parents | whether the rebinding needs a script change |
+| L1 | Light Armor: Rushing Tide (no effects of its own), Into the Maelstrom, Wardancer / Spelldancer: records and scripts present in LoreRim's esp; Rushing Tide works without Sweeping Wind? | xEdit, in game | whether each restored LA perk works as is |
+| L2 | Fight or Flight / Survival Instinct: does the ability's script read the magnitude from the record (so `StaminaRate` 5 → 2 takes effect), and does Survival Instinct's speed effect work with the ability given by Fight or Flight under its new parent? | xEdit: the ability and its script; in game: get struck in full light armor, log StaminaRate / SpeedMult | whether the magnitude change works without a script change |
